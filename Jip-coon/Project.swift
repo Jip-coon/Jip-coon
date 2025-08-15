@@ -10,14 +10,16 @@ let project = Project(
             bundleId: "dev.tuist.Jip-coon",
             infoPlist: .extendingDefault(
                 with: [
-                    "UILaunchStoryboardName": "LaunchScreen.storyboard",
+                    "UILaunchStoryboardName": "Launch Screen.storyboard",
                     "UIApplicationSceneManifest": [
                         "UIApplicationSupportsMultipleScenes": false,
                         "UISceneConfigurations": [
                             "UIWindowSceneSessionRoleApplication": [
-                                "UISceneConfigurationName": "Default Configuration",
-                                "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
-                            ],
+                                [
+                                    "UISceneConfigurationName": "Default Configuration",
+                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
+                                ],
+                            ]
                         ]
                     ],
                 ]
