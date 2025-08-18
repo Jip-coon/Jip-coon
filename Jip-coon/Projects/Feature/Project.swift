@@ -17,7 +17,10 @@ let project = Project(
       bundleId: "com.jipcoon.Feature",
       infoPlist: .default,
       sources: "Scenes/**",
-      dependencies: []
+      dependencies: [
+        .project(target: "Core", path: .relativeToRoot("Projects/Core")),
+        .project(target: "UI", path: .relativeToRoot("Projects/UI"))
+      ]
     ),
     .target(
         name: "FeatureTests",

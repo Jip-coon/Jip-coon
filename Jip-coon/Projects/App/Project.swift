@@ -33,7 +33,9 @@ let project = Project(
             ),
             sources: ["Sources/**"],
             resources: ["Resources/**"],
-            dependencies: []
+            dependencies: [
+              .project(target: "Feature", path: .relativeToRoot("Projects/Feature"))
+            ]
         ),
         .target(
             name: "Jip-coonTests",
