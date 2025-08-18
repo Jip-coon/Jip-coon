@@ -11,6 +11,8 @@ let workspace = Workspace(
   name: "Jip-coon",
   projects: [
     "Projects/App",
-    "Projects/Feature"
+    "Projects/Feature",
+    "Projects/Core",
+    "Projects/UI"
   ]
 )

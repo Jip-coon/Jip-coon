@@ -1,6 +1,6 @@
 //
 //  Project.swift
-//  Config
+//  AppManifests
 //
 //  Created by 예슬 on 8/18/25.
 //
@@ -8,24 +8,24 @@
 import ProjectDescription
 
 let project = Project(
-  name: "Feature",
+  name: "Core",
   targets: [
     .target(
-      name: "Feature",
+      name: "Core",
       destinations: .iOS,
       product: .staticFramework,
-      bundleId: "com.jipcoon.Feature",
+      bundleId: "com.jipcoon.Core",
       infoPlist: .default,
-      sources: "Scenes/**",
+      sources: "Sources/**",
       dependencies: []
     ),
     .target(
-        name: "FeatureTests",
+        name: "CoreTests",
         destinations: .iOS,
         product: .unitTests,
-        bundleId: "com.jipcoon.featureTests",
+        bundleId: "com.jipcoon.coreTests",
         infoPlist: .default,
-        dependencies: [.target(name: "Feature")]
+        dependencies: [.target(name: "Core")]
     )
   ]
 )
