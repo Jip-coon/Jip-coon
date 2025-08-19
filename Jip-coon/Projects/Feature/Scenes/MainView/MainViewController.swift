@@ -7,14 +7,29 @@
 
 import UIKit
 
-class MainViewController: UIViewController {
+public class MainViewController: UIViewController {
 
-    override func viewDidLoad() {
+
+    let textLabel: UILabel = {
+        let label = UILabel()
+        label.text = "MainView"
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        return label
+    }()
+
+    public override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        view.backgroundColor = .white
+        setupView()
     }
-    
+
+    func setupView() {
+        view.addSubview(textLabel)
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        textLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+    }
+
 
     /*
     // MARK: - Navigation
@@ -26,4 +41,8 @@ class MainViewController: UIViewController {
     }
     */
 
+}
+
+#Preview {
+    MainViewController()
 }
