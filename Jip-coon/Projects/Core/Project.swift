@@ -17,7 +17,9 @@ let project = Project(
       bundleId: "com.jipcoon.Core",
       infoPlist: .default,
       sources: "Sources/**",
-      dependencies: []
+      dependencies: [
+        .external(name: "FirebaseFirestore")
+      ]
     ),
     .target(
         name: "CoreTests",
