@@ -27,6 +27,6 @@ public extension UIColor {
                   alpha: alpha)
     }
 
-    static let mainColor = UIColor(hexCode: "#FB8E49") // color like orange...?
-    static let secondaryColor = UIColor(hexCode: "#FF7747") // color like more orange
+    static let mainOrange = UIColor(hexCode: "#FB8E49") // color like orange...?
+    static let secondaryOrange = UIColor(hexCode: "#FF7747") // color like more orange
 }

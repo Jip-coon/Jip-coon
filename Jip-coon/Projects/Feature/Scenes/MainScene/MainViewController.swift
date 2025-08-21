@@ -22,7 +22,7 @@ public class MainViewController: UIViewController {
     // UIColor 테스트용 View
     let square: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.mainColor
+        view.backgroundColor = UIColor.mainOrange
         return view
     }()
 
