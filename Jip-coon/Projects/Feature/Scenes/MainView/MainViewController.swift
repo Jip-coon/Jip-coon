@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseFirestore
+import UI
 
 public class MainViewController: UIViewController {
   let db = Firestore.firestore()
@@ -16,6 +17,13 @@ public class MainViewController: UIViewController {
         label.text = "MainView"
         label.font = .systemFont(ofSize: 20, weight: .bold)
         return label
+    }()
+
+    // UIColor 테스트용 View
+    let square: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.mainColor
+        return view
     }()
 
     public override func viewDidLoad() {
@@ -34,8 +42,22 @@ public class MainViewController: UIViewController {
     func setupView() {
         view.addSubview(textLabel)
         textLabel.translatesAutoresizingMaskIntoConstraints = false
-        textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        textLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+
+        // UIColor 테스트
+        view.addSubview(square)
+        square.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            textLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+
+            // UIColor 테스트
+            square.topAnchor.constraint(equalTo: textLabel.bottomAnchor),
+            square.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            square.widthAnchor.constraint(equalToConstant: 100),
+            square.heightAnchor.constraint(equalToConstant: 100)
+
+        ])
     }
     
     func addData() async {
