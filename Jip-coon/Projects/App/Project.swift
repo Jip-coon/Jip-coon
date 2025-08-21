@@ -34,7 +34,8 @@ let project = Project(
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [
-                .project(target: "Feature", path: .relativeToRoot("Projects/Feature"))
+                .project(target: "Feature", path: .relativeToRoot("Projects/Feature")),
+                .external(name: "FirebaseCore")
             ]
         ),
         .target(

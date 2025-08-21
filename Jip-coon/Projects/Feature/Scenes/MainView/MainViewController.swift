@@ -6,9 +6,10 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 public class MainViewController: UIViewController {
-
+  let db = Firestore.firestore()
 
     let textLabel: UILabel = {
         let label = UILabel()
@@ -22,6 +23,13 @@ public class MainViewController: UIViewController {
         view.backgroundColor = .white
         setupView()
     }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        Task {
+            await addData()
+            await readData()
+        }
+    }
 
     func setupView() {
         view.addSubview(textLabel)
@@ -29,7 +37,31 @@ public class MainViewController: UIViewController {
         textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         textLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
     }
-
+    
+    func addData() async {
+        // Add a new document with a generated ID
+        do {
+          let ref = try await db.collection("users").addDocument(data: [
+            "first": "Ada",
+            "last": "Lovelace",
+            "born": 1815
+          ])
+          print("Document added with ID: \(ref.documentID)")
+        } catch {
+          print("Error adding document: \(error)")
+        }
+    }
+    
+    func readData() async {
+        do {
+          let snapshot = try await db.collection("users").getDocuments()
+          for document in snapshot.documents {
+            print("\(document.documentID) => \(document.data())")
+          }
+        } catch {
+          print("Error getting documents: \(error)")
+        }
+    }
 
     /*
     // MARK: - Navigation
