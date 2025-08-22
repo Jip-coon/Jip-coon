@@ -48,6 +48,20 @@ public class LoginViewController: UIViewController {
         return label
     }()
     
+    private let signUpButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        config.title = "회원가입"
+        config.baseForegroundColor = .secondaryOrange
+        config.contentInsets = .zero
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = .systemFont(ofSize: 16, weight: .bold)
+            return outgoing
+        }
+        let button = UIButton(configuration: config)
+        return button
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -75,6 +89,7 @@ public class LoginViewController: UIViewController {
          findPasswordButton,
          loginButton,
          noAccountLabel,
+         signUpButton,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -88,6 +103,7 @@ public class LoginViewController: UIViewController {
          findPasswordButton,
          loginButton,
          noAccountLabel,
+         signUpButton,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -132,6 +148,9 @@ public class LoginViewController: UIViewController {
             noAccountLabel.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 17),
             noAccountLabel.leadingAnchor.constraint(equalTo: findIdButton.leadingAnchor, constant: -10),
             
+            signUpButton.topAnchor.constraint(equalTo: noAccountLabel.topAnchor),
+            signUpButton.leadingAnchor.constraint(equalTo: noAccountLabel.trailingAnchor, constant: 18),
+            
             appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
@@ -147,6 +166,7 @@ public class LoginViewController: UIViewController {
         findIdButton.addTarget(self, action: #selector(findIdButtonTapped), for: .touchUpInside)
         findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
         loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
         appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
     }
     
@@ -160,6 +180,10 @@ public class LoginViewController: UIViewController {
     
     @objc private func loginButtonTapped() {
         print("login button tapped")
+    }
+    
+    @objc private func signUpButtonTapped() {
+        print("sign up button tapped")
     }
     
     @objc private func appleLoginTapped() {
