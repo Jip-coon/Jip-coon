@@ -9,191 +9,32 @@ import UIKit
 import UI
 
 public class LoginViewController: UIViewController {
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
     private var activeField: UIView?
     private var savedContentOffset: CGPoint?
-    
-    private let loginTitle: UILabel = {
-        let label = UILabel()
-        label.text = "Login"
-        label.font = .systemFont(ofSize: 48, weight: .bold)
-        label.textColor = .mainOrange
-        return label
-    }()
-    
-    private lazy var emailTextField: UITextField = makeTextField(placeholder: "이메일")
-    private lazy var passwordTextField: UITextField = makeTextField(placeholder: "비밀번호")
-    private lazy var findIdButton: UIButton = makeUnderlineButton(title: "아이디 찾기")
-    private lazy var findPasswordButton: UIButton = makeUnderlineButton(title: "비밀번호 찾기")
-    
-    private let loginButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("로그인", for: .normal)
-        button.setTitleColor(.backgroundWhite, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        button.backgroundColor = .mainOrange
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 2)
-        button.layer.shadowOpacity = 0.15
-        button.layer.cornerRadius = 15
-        return button
-    }()
-    
-    private let noAccountLabel: UILabel = {
-        let label = UILabel()
-        label.text = "계정이 없으신가요?"
-        label.textColor = .textGray
-        label.font = .systemFont(ofSize: 14)
-        return label
-    }()
-    
-    private let signUpButton: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.title = "회원가입"
-        config.baseForegroundColor = .secondaryOrange
-        config.contentInsets = .zero
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = .systemFont(ofSize: 16, weight: .bold)
-            return outgoing
-        }
-        let button = UIButton(configuration: config)
-        return button
-    }()
-    
-    private let loginWithLabel: UILabel = {
-        let label = UILabel()
-        label.text = "다음으로 로그인"
-        label.textColor = .textGray
-        label.font = .systemFont(ofSize: 14)
-        return label
-    }()
-    
-    private let googleLoginButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "GoogleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
-        return button
-    }()
-    
-    private let appleLoginButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
-        return button
-    }()
+    private let loginView = LoginView()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setUpView()
         setUpButtonAction()
         setUpDelegate()
         setupKeyboardObservers()
         hideKeyboardWhenTappedAround()
     }
     
-    private func setUpView() {
-        view.backgroundColor = .backgroundWhite
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        
-        [loginTitle,
-         emailTextField,
-         passwordTextField,
-         findIdButton,
-         findPasswordButton,
-         loginButton,
-         noAccountLabel,
-         signUpButton,
-         loginWithLabel,
-         googleLoginButton,
-         appleLoginButton
-        ].forEach(contentView.addSubview)
-        
-        
-        [scrollView,
-         contentView,
-         loginTitle,
-         emailTextField,
-         passwordTextField,
-         findIdButton,
-         findPasswordButton,
-         loginButton,
-         noAccountLabel,
-         signUpButton,
-         loginWithLabel,
-         googleLoginButton,
-         appleLoginButton
-        ].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            
-            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            
-            loginTitle.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            loginTitle.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 91),
-            
-            emailTextField.topAnchor.constraint(equalTo: loginTitle.bottomAnchor, constant: 80),
-            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            emailTextField.heightAnchor.constraint(equalToConstant: 56),
-            
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
-            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 56),
-            
-            findIdButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
-            findIdButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -14),
-            
-            findPasswordButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
-            findPasswordButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 14),
-            
-            loginButton.topAnchor.constraint(equalTo: findIdButton.bottomAnchor, constant: 44),
-            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            loginButton.heightAnchor.constraint(equalToConstant: 56),
-            
-            noAccountLabel.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 17),
-            noAccountLabel.leadingAnchor.constraint(equalTo: findIdButton.leadingAnchor, constant: -10),
-            
-            signUpButton.topAnchor.constraint(equalTo: noAccountLabel.topAnchor),
-            signUpButton.leadingAnchor.constraint(equalTo: noAccountLabel.trailingAnchor, constant: 18),
-            
-            loginWithLabel.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 70),
-            loginWithLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            
-            googleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
-            googleLoginButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -26),
-            googleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
-            
-            appleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
-            appleLoginButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 26)
-        ])
-    }
-    
     private func setUpDelegate() {
-        emailTextField.delegate = self
-        passwordTextField.delegate = self
+        loginView.emailTextField.delegate = self
+        loginView.passwordTextField.delegate = self
     }
     
     private func setUpButtonAction() {
-        findIdButton.addTarget(self, action: #selector(findIdButtonTapped), for: .touchUpInside)
-        findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
-        loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-        signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
-        googleLoginButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
-        appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
+        loginView.findIdButton.addTarget(self, action: #selector(findIdButtonTapped), for: .touchUpInside)
+        loginView.findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
+        loginView.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        loginView.signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        loginView.googleLoginButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
+        loginView.appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
     }
+    // MARK: - Button Action
     
     @objc private func findIdButtonTapped() {
         print("find id button tapped")
@@ -218,29 +59,7 @@ public class LoginViewController: UIViewController {
     @objc private func appleLoginTapped() {
         print("apple login button tapped")
     }
-    
-    private func makeTextField(placeholder: String) -> UITextField {
-        let textField = UITextField()
-        textField.placeholder = placeholder
-        textField.setPlaceholder()
-        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
-        textField.layer.borderWidth = 1
-        textField.layer.cornerRadius = 15
-        textField.leftPadding()
-        return textField
-    }
-    
-    private func makeUnderlineButton(title: String) -> UIButton {
-        let button = UIButton(type: .system)
-        let attributes: [NSAttributedString.Key: Any] = [
-            .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .foregroundColor: UIColor.textGray,
-            .font: UIFont.systemFont(ofSize: 14)
-        ]
-        let attributedTitle = NSAttributedString(string: title, attributes: attributes)
-        button.setAttributedTitle(attributedTitle, for: .normal)
-        return button
-    }
+    // MARK: - Keyboard
     
     // 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
@@ -273,7 +92,7 @@ public class LoginViewController: UIViewController {
     // 키보드 크기 가져와서 뷰 이동
     @objc private func keyboardWillShow(_ notification: Notification) {
         if savedContentOffset == nil {
-            savedContentOffset = scrollView.contentOffset
+            savedContentOffset = loginView.scrollView.contentOffset
         }
         
         guard
@@ -284,22 +103,22 @@ public class LoginViewController: UIViewController {
         let keyboardHeight = keyboardFrame.height
         let minDistance = 50.0
         let insets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight + minDistance, right: 0)
-        scrollView.contentInset = insets
-        scrollView.scrollIndicatorInsets = insets
+        loginView.scrollView.contentInset = insets
+        loginView.scrollView.scrollIndicatorInsets = insets
         
         if let activeField = activeField {
-            let rect = activeField.convert(activeField.bounds, to: scrollView)
-            scrollView.scrollRectToVisible(rect, animated: true)
+            let rect = activeField.convert(activeField.bounds, to: loginView.scrollView)
+            loginView.scrollView.scrollRectToVisible(rect, animated: true)
         }
     }
     
     @objc private func keyboardWillHide() {
         let contentInset = UIEdgeInsets.zero
-        scrollView.contentInset = contentInset
-        scrollView.scrollIndicatorInsets = contentInset
+        loginView.scrollView.contentInset = contentInset
+        loginView.scrollView.scrollIndicatorInsets = contentInset
         
         if let saved = savedContentOffset {
-            scrollView.setContentOffset(saved, animated: true)
+            loginView.scrollView.setContentOffset(saved, animated: true)
             savedContentOffset = nil
         }
     }
