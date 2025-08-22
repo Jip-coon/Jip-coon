@@ -27,6 +27,19 @@ public class LoginViewController: UIViewController {
     private lazy var findIdButton: UIButton = makeUnderlineButton(title: "아이디 찾기")
     private lazy var findPasswordButton: UIButton = makeUnderlineButton(title: "비밀번호 찾기")
     
+    private let loginButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("로그인", for: .normal)
+        button.setTitleColor(.backgroundWhite, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        button.backgroundColor = .mainOrange
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowOpacity = 0.15
+        button.layer.cornerRadius = 15
+        return button
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -52,6 +65,7 @@ public class LoginViewController: UIViewController {
          passwordTextField,
          findIdButton,
          findPasswordButton,
+         loginButton,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -63,6 +77,7 @@ public class LoginViewController: UIViewController {
          passwordTextField,
          findIdButton,
          findPasswordButton,
+         loginButton,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -99,6 +114,11 @@ public class LoginViewController: UIViewController {
             findPasswordButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
             findPasswordButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 14),
             
+            loginButton.topAnchor.constraint(equalTo: findIdButton.bottomAnchor, constant: 44),
+            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            loginButton.heightAnchor.constraint(equalToConstant: 56),
+            
             appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
@@ -112,15 +132,25 @@ public class LoginViewController: UIViewController {
     
     private func setUpButtonAction() {
         findIdButton.addTarget(self, action: #selector(findIdButtonTapped), for: .touchUpInside)
+        findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
+        loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
-    }
-    
-    @objc private func appleLoginTapped() {
-        print("apple login button tapped")
     }
     
     @objc private func findIdButtonTapped() {
         print("find id button tapped")
+    }
+    
+    @objc private func findPasswordButtonTapped() {
+        print("find password button tapped")
+    }
+    
+    @objc private func loginButtonTapped() {
+        print("login button tapped")
+    }
+    
+    @objc private func appleLoginTapped() {
+        print("apple login button tapped")
     }
     
     private func makeTextField(placeholder: String) -> UITextField {
