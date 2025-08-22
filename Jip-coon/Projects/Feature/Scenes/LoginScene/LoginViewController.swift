@@ -45,6 +45,18 @@ public class LoginViewController: UIViewController {
         return textField
     }()
     
+    private let findIdButton: UIButton = {
+        let button = UIButton()
+        let attributes: [NSAttributedString.Key: Any] = [
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .foregroundColor: UIColor.textGray,
+            .font: UIFont.systemFont(ofSize: 14)
+        ]
+        let attributedTitle = NSAttributedString(string: "아이디 찾기", attributes: attributes)
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        return button
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -68,6 +80,7 @@ public class LoginViewController: UIViewController {
         [loginTitle,
          emailTextField,
          passwordTextField,
+         findIdButton,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -77,6 +90,7 @@ public class LoginViewController: UIViewController {
          loginTitle,
          emailTextField,
          passwordTextField,
+         findIdButton,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -107,6 +121,9 @@ public class LoginViewController: UIViewController {
             passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             passwordTextField.heightAnchor.constraint(equalToConstant: 56),
             
+            findIdButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
+            findIdButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -14),
+            
             appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
@@ -119,11 +136,16 @@ public class LoginViewController: UIViewController {
     }
     
     private func setUpButtonAction() {
+        findIdButton.addTarget(self, action: #selector(findIdButtonTapped), for: .touchUpInside)
         appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
     }
     
     @objc private func appleLoginTapped() {
         print("apple login button tapped")
+    }
+    
+    @objc private func findIdButtonTapped() {
+        print("find id button tapped")
     }
     
     // 키보드 숨기기
