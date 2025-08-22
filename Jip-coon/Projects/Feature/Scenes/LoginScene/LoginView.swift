@@ -83,7 +83,7 @@ final class LoginView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setUpView()
-        setUpConstrains()
+        setUpConstraints()
     }
     
     required init?(coder: NSCoder) {
@@ -127,7 +127,7 @@ final class LoginView: UIView {
         }
     }
     
-    private func setUpConstrains() {
+    private func setUpConstraints() {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor),

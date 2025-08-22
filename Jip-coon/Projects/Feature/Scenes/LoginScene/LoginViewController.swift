@@ -13,6 +13,10 @@ public class LoginViewController: UIViewController {
     private var savedContentOffset: CGPoint?
     private let loginView = LoginView()
     
+    override public func loadView() {
+        view = loginView
+    }
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpButtonAction()
