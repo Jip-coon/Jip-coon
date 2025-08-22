@@ -40,6 +40,14 @@ public class LoginViewController: UIViewController {
         return button
     }()
     
+    private let noAccountLabel: UILabel = {
+        let label = UILabel()
+        label.text = "계정이 없으신가요?"
+        label.textColor = .textGray
+        label.font = .systemFont(ofSize: 14)
+        return label
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -66,6 +74,7 @@ public class LoginViewController: UIViewController {
          findIdButton,
          findPasswordButton,
          loginButton,
+         noAccountLabel,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -78,6 +87,7 @@ public class LoginViewController: UIViewController {
          findIdButton,
          findPasswordButton,
          loginButton,
+         noAccountLabel,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -118,6 +128,9 @@ public class LoginViewController: UIViewController {
             loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             loginButton.heightAnchor.constraint(equalToConstant: 56),
+            
+            noAccountLabel.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 17),
+            noAccountLabel.leadingAnchor.constraint(equalTo: findIdButton.leadingAnchor, constant: -10),
             
             appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
