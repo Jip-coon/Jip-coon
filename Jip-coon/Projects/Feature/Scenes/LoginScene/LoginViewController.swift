@@ -62,6 +62,14 @@ public class LoginViewController: UIViewController {
         return button
     }()
     
+    private let loginWithLabel: UILabel = {
+        let label = UILabel()
+        label.text = "다음으로 로그인"
+        label.textColor = .textGray
+        label.font = .systemFont(ofSize: 14)
+        return label
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -90,6 +98,7 @@ public class LoginViewController: UIViewController {
          loginButton,
          noAccountLabel,
          signUpButton,
+         loginWithLabel,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -104,6 +113,7 @@ public class LoginViewController: UIViewController {
          loginButton,
          noAccountLabel,
          signUpButton,
+         loginWithLabel,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -151,9 +161,11 @@ public class LoginViewController: UIViewController {
             signUpButton.topAnchor.constraint(equalTo: noAccountLabel.topAnchor),
             signUpButton.leadingAnchor.constraint(equalTo: noAccountLabel.trailingAnchor, constant: 18),
             
-            appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
-            appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
-            appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
+            loginWithLabel.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 97),
+            loginWithLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
+            appleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
+            appleLoginButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 26)
         ])
     }
     
