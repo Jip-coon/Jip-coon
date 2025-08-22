@@ -70,6 +70,12 @@ public class LoginViewController: UIViewController {
         return label
     }()
     
+    private let googleLoginButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "GoogleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
+        return button
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -99,6 +105,7 @@ public class LoginViewController: UIViewController {
          noAccountLabel,
          signUpButton,
          loginWithLabel,
+         googleLoginButton,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -114,6 +121,7 @@ public class LoginViewController: UIViewController {
          noAccountLabel,
          signUpButton,
          loginWithLabel,
+         googleLoginButton,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -134,7 +142,7 @@ public class LoginViewController: UIViewController {
             loginTitle.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             loginTitle.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 91),
             
-            emailTextField.topAnchor.constraint(equalTo: loginTitle.bottomAnchor, constant: 134),
+            emailTextField.topAnchor.constraint(equalTo: loginTitle.bottomAnchor, constant: 80),
             emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             emailTextField.heightAnchor.constraint(equalToConstant: 56),
@@ -161,8 +169,12 @@ public class LoginViewController: UIViewController {
             signUpButton.topAnchor.constraint(equalTo: noAccountLabel.topAnchor),
             signUpButton.leadingAnchor.constraint(equalTo: noAccountLabel.trailingAnchor, constant: 18),
             
-            loginWithLabel.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 97),
+            loginWithLabel.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 70),
             loginWithLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
+            googleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
+            googleLoginButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -26),
+            googleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             
             appleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
             appleLoginButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 26)
@@ -179,6 +191,7 @@ public class LoginViewController: UIViewController {
         findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
         loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        googleLoginButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
         appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
     }
     
@@ -196,6 +209,10 @@ public class LoginViewController: UIViewController {
     
     @objc private func signUpButtonTapped() {
         print("sign up button tapped")
+    }
+    
+    @objc private func googleLoginTapped() {
+        print("google login button tapped")
     }
     
     @objc private func appleLoginTapped() {
