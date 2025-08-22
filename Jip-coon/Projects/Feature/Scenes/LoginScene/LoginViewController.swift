@@ -22,40 +22,10 @@ public class LoginViewController: UIViewController {
         return label
     }()
     
-    private let emailTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "이메일"
-        textField.setPlaceholder()
-        textField.keyboardType = .emailAddress
-        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
-        textField.layer.borderWidth = 1
-        textField.layer.cornerRadius = 15
-        textField.leftPadding()
-        return textField
-    }()
-    
-    private let passwordTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "비밀번호"
-        textField.setPlaceholder()
-        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
-        textField.layer.borderWidth = 1
-        textField.layer.cornerRadius = 15
-        textField.leftPadding()
-        return textField
-    }()
-    
-    private let findIdButton: UIButton = {
-        let button = UIButton()
-        let attributes: [NSAttributedString.Key: Any] = [
-            .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .foregroundColor: UIColor.textGray,
-            .font: UIFont.systemFont(ofSize: 14)
-        ]
-        let attributedTitle = NSAttributedString(string: "아이디 찾기", attributes: attributes)
-        button.setAttributedTitle(attributedTitle, for: .normal)
-        return button
-    }()
+    private lazy var emailTextField: UITextField = makeTextField(placeholder: "이메일")
+    private lazy var passwordTextField: UITextField = makeTextField(placeholder: "비밀번호")
+    private lazy var findIdButton: UIButton = makeUnderlineButton(title: "아이디 찾기")
+    private lazy var findPasswordButton: UIButton = makeUnderlineButton(title: "비밀번호 찾기")
     
     private let appleLoginButton: UIButton = {
         let button = UIButton()
@@ -81,6 +51,7 @@ public class LoginViewController: UIViewController {
          emailTextField,
          passwordTextField,
          findIdButton,
+         findPasswordButton,
          appleLoginButton
         ].forEach(contentView.addSubview)
         
@@ -91,6 +62,7 @@ public class LoginViewController: UIViewController {
          emailTextField,
          passwordTextField,
          findIdButton,
+         findPasswordButton,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -124,6 +96,9 @@ public class LoginViewController: UIViewController {
             findIdButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
             findIdButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -14),
             
+            findPasswordButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
+            findPasswordButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 14),
+            
             appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
@@ -148,8 +123,31 @@ public class LoginViewController: UIViewController {
         print("find id button tapped")
     }
     
+    private func makeTextField(placeholder: String) -> UITextField {
+        let textField = UITextField()
+        textField.placeholder = placeholder
+        textField.setPlaceholder()
+        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
+        textField.layer.borderWidth = 1
+        textField.layer.cornerRadius = 15
+        textField.leftPadding()
+        return textField
+    }
+    
+    private func makeUnderlineButton(title: String) -> UIButton {
+        let button = UIButton(type: .system)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .foregroundColor: UIColor.textGray,
+            .font: UIFont.systemFont(ofSize: 14)
+        ]
+        let attributedTitle = NSAttributedString(string: title, attributes: attributes)
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        return button
+    }
+    
     // 키보드 숨기기
-    func hideKeyboardWhenTappedAround() {
+    private func hideKeyboardWhenTappedAround() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
