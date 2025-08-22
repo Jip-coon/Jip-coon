@@ -9,6 +9,9 @@ import UIKit
 import UI
 
 public class LoginViewController: UIViewController {
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
     private let loginTitle: UILabel = {
         let label = UILabel()
         label.text = "Login"
@@ -16,7 +19,15 @@ public class LoginViewController: UIViewController {
         label.textColor = .mainOrange
         return label
     }()
-
+    
+    private let appleLoginButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Apple Login", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
+        button.setTitleColor(.mainOrange, for: .normal)
+        return button
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpView()
@@ -24,14 +35,38 @@ public class LoginViewController: UIViewController {
     
     private func setUpView() {
         view.backgroundColor = .white
-        view.addSubview(loginTitle)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(loginTitle)
+        contentView.addSubview(appleLoginButton)
         
-        loginTitle.translatesAutoresizingMaskIntoConstraints = false
+        [scrollView,
+         contentView,
+         loginTitle,
+         appleLoginButton
+        ].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
         
         NSLayoutConstraint.activate([
-            loginTitle.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loginTitle.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 91)
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            
+            loginTitle.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            loginTitle.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 91),
+            
+            appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
+            appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
+            appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
         ])
     }
-
+    
 }
