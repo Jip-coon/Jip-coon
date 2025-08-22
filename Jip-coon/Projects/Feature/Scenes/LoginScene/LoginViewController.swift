@@ -20,6 +20,17 @@ public class LoginViewController: UIViewController {
         return label
     }()
     
+    private let emailTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "이메일"
+        textField.setPlaceholder()
+        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
+        textField.layer.borderWidth = 1
+        textField.layer.cornerRadius = 15
+        textField.leftPadding()
+        return textField
+    }()
+    
     private let appleLoginButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
@@ -30,18 +41,24 @@ public class LoginViewController: UIViewController {
         super.viewDidLoad()
         setUpView()
         setUpButtonAction()
+        hideKeyboardWhenTappedAround()
     }
     
     private func setUpView() {
         view.backgroundColor = .backgroundWhite
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(loginTitle)
-        contentView.addSubview(appleLoginButton)
+        
+        [loginTitle,
+         emailTextField,
+         appleLoginButton
+        ].forEach(contentView.addSubview)
+
         
         [scrollView,
          contentView,
          loginTitle,
+         emailTextField,
          appleLoginButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -62,6 +79,11 @@ public class LoginViewController: UIViewController {
             loginTitle.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             loginTitle.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 91),
             
+            emailTextField.topAnchor.constraint(equalTo: loginTitle.bottomAnchor, constant: 134),
+            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            emailTextField.heightAnchor.constraint(equalToConstant: 56),
+            
             appleLoginButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 706),
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
@@ -74,6 +96,17 @@ public class LoginViewController: UIViewController {
     
     @objc private func appleLoginTapped() {
         print("apple login button tapped")
+    }
+    
+    // 키보드 숨기기
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
 }
