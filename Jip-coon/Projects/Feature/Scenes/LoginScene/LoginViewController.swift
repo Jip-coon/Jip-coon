@@ -21,16 +21,15 @@ public class LoginViewController: UIViewController {
     }()
     
     private let appleLoginButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Apple Login", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
-        button.setTitleColor(.mainOrange, for: .normal)
+        let button = UIButton()
+        button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
         return button
     }()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpView()
+        setUpButtonAction()
     }
     
     private func setUpView() {
@@ -67,6 +66,14 @@ public class LoginViewController: UIViewController {
             appleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
             appleLoginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -131)
         ])
+    }
+    
+    private func setUpButtonAction() {
+        appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
+    }
+    
+    @objc private func appleLoginTapped() {
+        print("apple login button tapped")
     }
     
 }
