@@ -34,7 +34,7 @@ public class LoginViewController: UIViewController {
     }
     
     private func setUpView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .backgroundWhite
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(loginTitle)
