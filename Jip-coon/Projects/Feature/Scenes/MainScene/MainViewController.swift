@@ -22,7 +22,7 @@ public class MainViewController: UIViewController {
     // UIColor 테스트용 View
     let square: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.mainColor
+        view.backgroundColor = UIColor.mainOrange
         return view
     }()
 
@@ -84,16 +84,6 @@ public class MainViewController: UIViewController {
           print("Error getting documents: \(error)")
         }
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
 
