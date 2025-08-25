@@ -18,7 +18,9 @@ let project = Project(
       infoPlist: .default,
       sources: "Sources/**",
       dependencies: [
-        .external(name: "FirebaseFirestore")
+        .external(name: "FirebaseFirestore"),
+        .external(name: "FirebaseAuth"),
+        .external(name: "FirebaseCore")
       ]
     ),
     .target(
