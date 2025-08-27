@@ -36,7 +36,10 @@ let project = Project(
             dependencies: [
                 .project(target: "Feature", path: .relativeToRoot("Projects/Feature")),
                 .external(name: "FirebaseCore")
-            ]
+            ],
+            settings: .settings(
+                base: ["OTHER_LDFLAGS": "$(inherited) -ObjC"]
+            )
         ),
         .target(
             name: "Jip-coonTests",

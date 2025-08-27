@@ -21,7 +21,10 @@ let project = Project(
         .external(name: "FirebaseFirestore"),
         .external(name: "FirebaseAuth"),
         .external(name: "FirebaseCore")
-      ]
+      ],
+      settings: .settings(
+          base: ["OTHER_LDFLAGS": "$(inherited) -ObjC"]
+      )
     ),
     .target(
         name: "CoreTests",
