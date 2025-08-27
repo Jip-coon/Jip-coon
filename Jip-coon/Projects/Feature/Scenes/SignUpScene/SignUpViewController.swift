@@ -25,6 +25,17 @@ public final class SignUpViewController: UIViewController {
         return label
     }()
     
+    private let emailTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "jipcoon@example.com"
+        textField.setPlaceholder()
+        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
+        textField.layer.borderWidth = 1
+        textField.layer.cornerRadius = 15
+        textField.leftPadding()
+        return textField
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpView()
@@ -34,13 +45,15 @@ public final class SignUpViewController: UIViewController {
         view.backgroundColor = .backgroundWhite
         
         [signUpLabel,
-         emailEnterLabel
+         emailEnterLabel,
+         emailTextField
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
         [signUpLabel,
-         emailEnterLabel
+         emailEnterLabel,
+         emailTextField
         ].forEach {
             view.addSubview($0)
         }
@@ -50,7 +63,12 @@ public final class SignUpViewController: UIViewController {
             signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             emailEnterLabel.topAnchor.constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
-            emailEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
+            emailEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            
+            emailTextField.topAnchor.constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
+            emailTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            emailTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            emailTextField.heightAnchor.constraint(equalToConstant: 56)
         ])
     }
     
