@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+public protocol AuthServiceProtocol {
+    func signIn(email: String, password: String) async throws
+    func signUp(email: String, password: String) async throws
+    func signOut() throws
+    var isLoggedIn: Bool { get }
+}
