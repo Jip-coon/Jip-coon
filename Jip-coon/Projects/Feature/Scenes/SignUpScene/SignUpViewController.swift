@@ -17,6 +17,14 @@ public final class SignUpViewController: UIViewController {
         return label
     }()
     
+    private let emailEnterLabel: UILabel = {
+        let label = UILabel()
+        label.text = "이메일을 입력해 주세요"
+        label.textColor = .textGray
+        label.font = .systemFont(ofSize: 14)
+        return label
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpView()
@@ -25,17 +33,24 @@ public final class SignUpViewController: UIViewController {
     private func setUpView() {
         view.backgroundColor = .backgroundWhite
         
-        [signUpLabel].forEach {
+        [signUpLabel,
+         emailEnterLabel
+        ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        [signUpLabel].forEach {
+        [signUpLabel,
+         emailEnterLabel
+        ].forEach {
             view.addSubview($0)
         }
         
         NSLayoutConstraint.activate([
             signUpLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 73),
-            signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            emailEnterLabel.topAnchor.constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
+            emailEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
         ])
     }
     
