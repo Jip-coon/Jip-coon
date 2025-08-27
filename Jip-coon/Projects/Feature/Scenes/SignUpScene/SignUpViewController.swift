@@ -36,6 +36,14 @@ public final class SignUpViewController: UIViewController {
         return textField
     }()
     
+    private let passwordEnterLabel: UILabel = {
+        let label = UILabel()
+        label.text = "비밀번호를 입력해 주세요"
+        label.textColor = .textGray
+        label.font = .systemFont(ofSize: 14)
+        return label
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpView()
@@ -46,14 +54,16 @@ public final class SignUpViewController: UIViewController {
         
         [signUpLabel,
          emailEnterLabel,
-         emailTextField
+         emailTextField,
+         passwordEnterLabel
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
         [signUpLabel,
          emailEnterLabel,
-         emailTextField
+         emailTextField,
+         passwordEnterLabel
         ].forEach {
             view.addSubview($0)
         }
@@ -68,7 +78,10 @@ public final class SignUpViewController: UIViewController {
             emailTextField.topAnchor.constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
             emailTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             emailTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            emailTextField.heightAnchor.constraint(equalToConstant: 56)
+            emailTextField.heightAnchor.constraint(equalToConstant: 56),
+            
+            passwordEnterLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
+            passwordEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
         ])
     }
     
