@@ -38,7 +38,10 @@ let project = Project(
                 .external(name: "FirebaseCore")
             ],
             settings: .settings(
-                base: ["OTHER_LDFLAGS": "$(inherited) -ObjC"]
+                base: [
+                    "OTHER_LDFLAGS": "$(inherited) -ObjC",
+                    "ENABLE_USER_SCRIPT_SANDBOXING": "NO"
+                ]
             )
         ),
         .target(
