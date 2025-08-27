@@ -26,4 +26,8 @@ public final class AuthService: AuthServiceProtocol {
     public var isLoggedIn: Bool {
         return Auth.auth().currentUser != nil
     }
+    
+    public var currentUserEmail: String? {
+        return Auth.auth().currentUser?.email
+    }
 }
