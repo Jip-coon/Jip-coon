@@ -7,11 +7,14 @@
 
 import UIKit
 import UI
+import Combine
 
 public class LoginViewController: UIViewController {
     private var activeField: UIView?
     private var savedContentOffset: CGPoint?
     private let loginView = LoginView()
+    private let viewModel = LoginViewModel()
+    private var cancellables = Set<AnyCancellable>()
     
     override public func loadView() {
         view = loginView
@@ -23,6 +26,7 @@ public class LoginViewController: UIViewController {
         setUpDelegate()
         setupKeyboardObservers()
         hideKeyboardWhenTappedAround()
+        bindViewModel()
     }
     
     private func setUpDelegate() {
@@ -49,7 +53,14 @@ public class LoginViewController: UIViewController {
     }
     
     @objc private func loginButtonTapped() {
-        print("login button tapped")
+        // 입력 필드에서 이메일과 비밀번호 가져오기
+        viewModel.email = loginView.emailTextField.text ?? ""
+        viewModel.password = loginView.passwordTextField.text ?? ""
+        
+        // 로그인 실행
+        Task {
+            await viewModel.signIn()
+        }
     }
     
     @objc private func signUpButtonTapped() {
@@ -125,6 +136,52 @@ public class LoginViewController: UIViewController {
             loginView.scrollView.setContentOffset(saved, animated: true)
             savedContentOffset = nil
         }
+    }
+    
+    // MARK: - ViewModel Binding
+    
+    private func bindViewModel() {
+        // 로그인 성공 시 메인 화면으로 이동
+        viewModel.loginSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToMainScreen()
+            }
+            .store(in: &cancellables)
+        
+        // 에러 메시지 표시
+        viewModel.$errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let error = errorMessage {
+                    self?.showErrorAlert(message: error)
+                }
+            }
+            .store(in: &cancellables)
+        
+        // 로딩 상태 처리
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.updateLoadingState(isLoading)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func navigateToMainScreen() {
+        // 로그인 성공 알림 전송
+        NotificationCenter.default.post(name: NSNotification.Name("LoginSuccess"), object: nil)
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "로그인 실패", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
+    private func updateLoadingState(_ isLoading: Bool) {
+        loginView.loginButton.isEnabled = !isLoading
+        loginView.loginButton.setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
     }
 }
 
