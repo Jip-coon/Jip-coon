@@ -44,6 +44,17 @@ public final class SignUpViewController: UIViewController {
         return label
     }()
     
+    private let passwordTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "6자리 이상 입력해 주세요"
+        textField.setPlaceholder()
+        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
+        textField.layer.borderWidth = 1
+        textField.layer.cornerRadius = 15
+        textField.leftPadding()
+        return textField
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setUpView()
@@ -55,7 +66,8 @@ public final class SignUpViewController: UIViewController {
         [signUpLabel,
          emailEnterLabel,
          emailTextField,
-         passwordEnterLabel
+         passwordEnterLabel,
+         passwordTextField
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -63,7 +75,8 @@ public final class SignUpViewController: UIViewController {
         [signUpLabel,
          emailEnterLabel,
          emailTextField,
-         passwordEnterLabel
+         passwordEnterLabel,
+         passwordTextField
         ].forEach {
             view.addSubview($0)
         }
@@ -81,7 +94,12 @@ public final class SignUpViewController: UIViewController {
             emailTextField.heightAnchor.constraint(equalToConstant: 56),
             
             passwordEnterLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
-            passwordEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
+            passwordEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            
+            passwordTextField.topAnchor.constraint(equalTo: passwordEnterLabel.bottomAnchor, constant: 4),
+            passwordTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            passwordTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            passwordTextField.heightAnchor.constraint(equalToConstant: 56)
         ])
     }
     
