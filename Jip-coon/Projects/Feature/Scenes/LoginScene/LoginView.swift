@@ -21,7 +21,7 @@ final class LoginView: UIView {
     }()
     
     lazy var emailTextField: UITextField = makeTextField(placeholder: "이메일")
-    lazy var passwordTextField: UITextField = makeTextField(placeholder: "비밀번호")
+    lazy var passwordTextField: UITextField = makeTextField(placeholder: "비밀번호", isSecure: true)
     lazy var findIdButton: UIButton = makeUnderlineButton(title: "아이디 찾기")
     lazy var findPasswordButton: UIButton = makeUnderlineButton(title: "비밀번호 찾기")
     
@@ -182,7 +182,7 @@ final class LoginView: UIView {
         ])
     }
     
-    private func makeTextField(placeholder: String) -> UITextField {
+    private func makeTextField(placeholder: String, isSecure: Bool = false) -> UITextField {
         let textField = UITextField()
         textField.placeholder = placeholder
         textField.setPlaceholder()
@@ -190,6 +190,7 @@ final class LoginView: UIView {
         textField.layer.borderWidth = 1
         textField.layer.cornerRadius = 15
         textField.leftPadding()
+        textField.isSecureTextEntry = isSecure
         return textField
     }
     
