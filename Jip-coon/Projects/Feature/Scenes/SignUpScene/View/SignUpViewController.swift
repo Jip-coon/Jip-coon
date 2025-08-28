@@ -47,6 +47,7 @@ public final class SignUpViewController: UIViewController {
         textField.layer.borderWidth = 1
         textField.layer.cornerRadius = 15
         textField.leftPadding()
+        textField.keyboardType = .emailAddress
         return textField
     }()
     
