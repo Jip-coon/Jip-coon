@@ -5,9 +5,9 @@
 //  Created by 예슬 on 8/27/25.
 //
 
-import UIKit
 import Combine
 import UI
+import UIKit
 
 public final class SignUpViewController: UIViewController {
     private let viewModel = SignUpViewModel()
@@ -77,6 +77,19 @@ public final class SignUpViewController: UIViewController {
         return label
     }()
     
+    private let signUpButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("회원 가입", for: .normal)
+        button.setTitleColor(.backgroundWhite, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        button.backgroundColor = .mainOrange
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowOpacity = 0.15
+        button.layer.cornerRadius = 15
+        return button
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -93,7 +106,8 @@ public final class SignUpViewController: UIViewController {
          passwordEnterLabel,
          passwordTextField,
          emailInvalidLabel,
-         passwordInvalidLabel
+         passwordInvalidLabel,
+         signUpButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -104,7 +118,8 @@ public final class SignUpViewController: UIViewController {
          passwordEnterLabel,
          passwordTextField,
          emailInvalidLabel,
-         passwordInvalidLabel
+         passwordInvalidLabel,
+         signUpButton
         ].forEach {
             view.addSubview($0)
         }
@@ -133,7 +148,12 @@ public final class SignUpViewController: UIViewController {
             emailInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             
             passwordInvalidLabel.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 4),
-            passwordInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
+            passwordInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            
+            signUpButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 75),
+            signUpButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            signUpButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            signUpButton.heightAnchor.constraint(equalToConstant: 56)
         ])
     }
     
@@ -149,6 +169,14 @@ public final class SignUpViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isValid in
                 self?.passwordInvalidLabel.isHidden = isValid
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isSignUpEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isEnabled in
+                self?.signUpButton.isEnabled = isEnabled
+                self?.signUpButton.backgroundColor = isEnabled ? .mainOrange : .textFieldStroke
             }
             .store(in: &cancellables)
     }
