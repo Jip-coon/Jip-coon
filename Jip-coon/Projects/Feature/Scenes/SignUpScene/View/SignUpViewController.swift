@@ -6,11 +6,13 @@
 //
 
 import Combine
+import Core
 import UI
 import UIKit
 
 public final class SignUpViewController: UIViewController {
     private let viewModel = SignUpViewModel()
+    private let authService = AuthService()
     private var cancellables = Set<AnyCancellable>()
     private var activeField: UITextField?
     
@@ -211,7 +213,14 @@ public final class SignUpViewController: UIViewController {
     }
     
     @objc private func signUpTapped() {
-        navigationController?.popViewController(animated: true)
+        Task {
+            do {
+                try await authService.signUp(email: viewModel.email, password: viewModel.password)
+                navigationController?.popViewController(animated: true)
+            } catch {
+                print("회원가입 실패: \(error.localizedDescription)")
+            }
+        }
     }
     
     // MARK: - Keyboard
