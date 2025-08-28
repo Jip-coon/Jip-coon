@@ -17,11 +17,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let ws = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: ws)
+        let loginViewController = LoginViewController()
+        let navigationController = UINavigationController(rootViewController: loginViewController)
 
-        window.rootViewController = LoginViewController()
+        window.rootViewController = navigationController
 //        window.rootViewController = MainTabBarController()
-
-
+        
         window.makeKeyAndVisible()
         self.window = window
     }

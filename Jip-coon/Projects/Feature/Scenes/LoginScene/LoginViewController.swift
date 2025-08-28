@@ -25,6 +25,16 @@ public class LoginViewController: UIViewController {
         hideKeyboardWhenTappedAround()
     }
     
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
     private func setUpDelegate() {
         loginView.emailTextField.delegate = self
         loginView.passwordTextField.delegate = self
@@ -53,7 +63,8 @@ public class LoginViewController: UIViewController {
     }
     
     @objc private func signUpButtonTapped() {
-        print("sign up button tapped")
+        let signUpViewController = SignUpViewController()
+        navigationController?.pushViewController(signUpViewController, animated: true)
     }
     
     @objc private func googleLoginTapped() {

@@ -94,7 +94,7 @@ public final class SignUpViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         bindViewModel()
-        setupTextFieldTargets()
+        setupTargets()
     }
     
     private func setupView() {
@@ -125,7 +125,7 @@ public final class SignUpViewController: UIViewController {
         }
         
         NSLayoutConstraint.activate([
-            signUpLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 73),
+            signUpLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 38),
             signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             emailEnterLabel.topAnchor.constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
@@ -181,9 +181,10 @@ public final class SignUpViewController: UIViewController {
             .store(in: &cancellables)
     }
     
-    private func setupTextFieldTargets() {
+    private func setupTargets() {
         emailTextField.addTarget(self, action: #selector(emailChanged), for: .editingChanged)
         passwordTextField.addTarget(self, action: #selector(passwordChanged), for: .editingChanged)
+        signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
     }
     
     @objc private func emailChanged() {
@@ -192,6 +193,10 @@ public final class SignUpViewController: UIViewController {
     
     @objc private func passwordChanged() {
         viewModel.password = passwordTextField.text ?? ""
+    }
+    
+    @objc private func signUpTapped() {
+        navigationController?.popViewController(animated: true)
     }
     
 }
