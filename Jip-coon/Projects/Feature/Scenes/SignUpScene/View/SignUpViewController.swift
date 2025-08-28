@@ -12,6 +12,7 @@ import UIKit
 public final class SignUpViewController: UIViewController {
     private let viewModel = SignUpViewModel()
     private var cancellables = Set<AnyCancellable>()
+    private var activeField: UITextField?
     
     private let signUpLabel: UILabel = {
         let label = UILabel()
@@ -95,6 +96,9 @@ public final class SignUpViewController: UIViewController {
         setupView()
         bindViewModel()
         setupTargets()
+        setupDelegate()
+        hideKeyboardWhenTappedAround()
+        setupKeyboardObservers()
     }
     
     private func setupView() {
@@ -187,6 +191,11 @@ public final class SignUpViewController: UIViewController {
         signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
     }
     
+    private func setupDelegate() {
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+    }
+    
     @objc private func emailChanged() {
         viewModel.email = emailTextField.text ?? ""
     }
@@ -199,4 +208,79 @@ public final class SignUpViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
+    // MARK: - Keyboard
+    
+    // 키보드 숨기기
+    private func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow(_:)),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard
+            let userInfo = notification.userInfo,
+            let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
+            let activeField = activeField
+        else { return }
+        
+        let keyboardMinY = keyboardFrame.minY   // 키보드의 상단 Y좌표
+        let activeFieldFrame = activeField.convert(activeField.bounds, to: view)    // 현재 텍스트필드의 화면(view 기준) 좌표
+        let minDistance = 50.0
+        let activeFieldMaxY = activeFieldFrame.maxY + minDistance    // 텍스트필드의 맨 아래 좌표 + 여유 공간(50px)
+        
+        if activeFieldMaxY > keyboardMinY {
+            let overlap = activeFieldMaxY - keyboardMinY
+            UIView.animate(withDuration: 0.3) {
+                self.view.transform = CGAffineTransform(translationX: 0, y: -overlap)
+            }
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        UIView.animate(withDuration: 0.3) {
+            self.view.transform = .identity
+        }
+    }
+}
+
+extension SignUpViewController: UITextFieldDelegate {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField {
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            view.endEditing(true)
+        }
+        return true
+    }
+    
+    public func textFieldDidBeginEditing(_ textField: UITextField) {
+        activeField = textField
+    }
+    
+    public func textFieldDidEndEditing(_ textField: UITextField) {
+        if activeField == textField {
+            activeField = nil
+        }
+    }
 }

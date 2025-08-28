@@ -29,7 +29,7 @@ public class LoginViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
-
+    
     public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
@@ -151,7 +151,11 @@ extension LoginViewController: UITextFieldDelegate {
     }
     
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.endEditing(true)
+        if textField == loginView.emailTextField {
+            loginView.passwordTextField.becomeFirstResponder()
+        } else if textField == loginView.passwordTextField {
+            view.endEditing(true)
+        }
         return true
     }
 }
