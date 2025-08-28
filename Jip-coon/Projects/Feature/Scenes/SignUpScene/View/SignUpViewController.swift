@@ -68,6 +68,15 @@ public final class SignUpViewController: UIViewController {
         return textField
     }()
     
+    private let passwordInvalidLabel: UILabel = {
+        let label = UILabel()
+        label.text = "6자리 이상 입력해 주세요"
+        label.textColor = .textRed
+        label.font = .systemFont(ofSize: 14)
+        label.isHidden = true
+        return label
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -83,7 +92,8 @@ public final class SignUpViewController: UIViewController {
          emailTextField,
          passwordEnterLabel,
          passwordTextField,
-         emailInvalidLabel
+         emailInvalidLabel,
+         passwordInvalidLabel
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -93,7 +103,8 @@ public final class SignUpViewController: UIViewController {
          emailTextField,
          passwordEnterLabel,
          passwordTextField,
-         emailInvalidLabel
+         emailInvalidLabel,
+         passwordInvalidLabel
         ].forEach {
             view.addSubview($0)
         }
@@ -119,7 +130,10 @@ public final class SignUpViewController: UIViewController {
             passwordTextField.heightAnchor.constraint(equalToConstant: 56),
             
             emailInvalidLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 4),
-            emailInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
+            emailInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            
+            passwordInvalidLabel.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 4),
+            passwordInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
         ])
     }
     
@@ -130,14 +144,26 @@ public final class SignUpViewController: UIViewController {
                 self?.emailInvalidLabel.isHidden = isValid
             }
             .store(in: &cancellables)
+        
+        viewModel.$isPasswordValid
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isValid in
+                self?.passwordInvalidLabel.isHidden = isValid
+            }
+            .store(in: &cancellables)
     }
     
     private func setupTextFieldTargets() {
         emailTextField.addTarget(self, action: #selector(emailChanged), for: .editingChanged)
+        passwordTextField.addTarget(self, action: #selector(passwordChanged), for: .editingChanged)
     }
     
     @objc private func emailChanged() {
         viewModel.email = emailTextField.text ?? ""
+    }
+    
+    @objc private func passwordChanged() {
+        viewModel.password = passwordTextField.text ?? ""
     }
     
 }
