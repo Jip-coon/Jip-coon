@@ -48,6 +48,8 @@ public final class SignUpViewController: UIViewController {
         textField.layer.cornerRadius = 15
         textField.leftPadding()
         textField.keyboardType = .emailAddress
+        textField.autocorrectionType = .no
+        textField.spellCheckingType = .no
         return textField
     }()
     
@@ -68,6 +70,8 @@ public final class SignUpViewController: UIViewController {
         textField.layer.cornerRadius = 15
         textField.leftPadding()
         textField.isSecureTextEntry = true
+        textField.autocorrectionType = .no
+        textField.spellCheckingType = .no
         return textField
     }()
     
