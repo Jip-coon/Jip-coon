@@ -6,9 +6,13 @@
 //
 
 import UIKit
+import Combine
 import UI
 
 public final class SignUpViewController: UIViewController {
+    private let viewModel = SignUpViewModel()
+    private var cancellables = Set<AnyCancellable>()
+    
     private let signUpLabel: UILabel = {
         let label = UILabel()
         label.text = "Sign Up"
@@ -22,6 +26,15 @@ public final class SignUpViewController: UIViewController {
         label.text = "이메일을 입력해 주세요"
         label.textColor = .textGray
         label.font = .systemFont(ofSize: 14)
+        return label
+    }()
+    
+    private let emailInvalidLabel: UILabel = {
+        let label = UILabel()
+        label.text = "이메일 형식이 올바르지 않습니다"
+        label.textColor = .textRed
+        label.font = .systemFont(ofSize: 14)
+        label.isHidden = true
         return label
     }()
     
@@ -57,17 +70,20 @@ public final class SignUpViewController: UIViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setUpView()
+        setupView()
+        bindViewModel()
+        setupTextFieldTargets()
     }
     
-    private func setUpView() {
+    private func setupView() {
         view.backgroundColor = .backgroundWhite
         
         [signUpLabel,
          emailEnterLabel,
          emailTextField,
          passwordEnterLabel,
-         passwordTextField
+         passwordTextField,
+         emailInvalidLabel
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -76,7 +92,8 @@ public final class SignUpViewController: UIViewController {
          emailEnterLabel,
          emailTextField,
          passwordEnterLabel,
-         passwordTextField
+         passwordTextField,
+         emailInvalidLabel
         ].forEach {
             view.addSubview($0)
         }
@@ -99,8 +116,28 @@ public final class SignUpViewController: UIViewController {
             passwordTextField.topAnchor.constraint(equalTo: passwordEnterLabel.bottomAnchor, constant: 4),
             passwordTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             passwordTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 56)
+            passwordTextField.heightAnchor.constraint(equalToConstant: 56),
+            
+            emailInvalidLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 4),
+            emailInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20)
         ])
+    }
+    
+    private func bindViewModel() {
+        viewModel.$isEmailValid
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isValid in
+                self?.emailInvalidLabel.isHidden = isValid
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func setupTextFieldTargets() {
+        emailTextField.addTarget(self, action: #selector(emailChanged), for: .editingChanged)
+    }
+    
+    @objc private func emailChanged() {
+        viewModel.email = emailTextField.text ?? ""
     }
     
 }
