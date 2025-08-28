@@ -7,6 +7,7 @@
 
 import UIKit
 import Feature
+import Core
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -20,11 +21,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let loginViewController = LoginViewController()
         let navigationController = UINavigationController(rootViewController: loginViewController)
 
-        window.rootViewController = navigationController
-//        window.rootViewController = MainTabBarController()
-        
+        // 로그인 상태 확인
+        let authService = AuthService()
+        if authService.isLoggedIn {
+            window.rootViewController = MainTabBarController()
+        } else {
+            window.rootViewController = navigationController
+        }
+
         window.makeKeyAndVisible()
         self.window = window
+        
+        // 로그인 성공 알림 구독
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLoginSuccess),
+            name: NSNotification.Name("LoginSuccess"),
+            object: nil
+        )
+        
+        // 로그아웃 성공 알림 구독
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLogoutSuccess),
+            name: NSNotification.Name("LogoutSuccess"),
+            object: nil
+        )
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -53,5 +75,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+    }
+    
+    @objc private func handleLoginSuccess() {
+        DispatchQueue.main.async { [weak self] in
+            self?.window?.rootViewController = MainTabBarController()
+            self?.window?.makeKeyAndVisible()
+        }
+    }
+    
+    @objc private func handleLogoutSuccess() {
+        DispatchQueue.main.async { [weak self] in
+            self?.window?.rootViewController = LoginViewController()
+            self?.window?.makeKeyAndVisible()
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
