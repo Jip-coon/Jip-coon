@@ -14,6 +14,7 @@ public class LoginViewController: UIViewController {
     private var savedContentOffset: CGPoint?
     private let loginView = LoginView()
     private let viewModel = LoginViewModel()
+    private let appleLoginViewModel = AppleLoginViewModel()
     private var cancellables = Set<AnyCancellable>()
     
     override public func loadView() {
@@ -84,6 +85,7 @@ public class LoginViewController: UIViewController {
     
     @objc private func appleLoginTapped() {
         print("apple login button tapped")
+        appleLoginViewModel.startSignInWithAppleFlow()
     }
     // MARK: - Keyboard
     
