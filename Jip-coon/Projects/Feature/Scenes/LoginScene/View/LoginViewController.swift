@@ -179,6 +179,13 @@ public class LoginViewController: UIViewController {
                 self?.updateLoadingState(isLoading)
             }
             .store(in: &cancellables)
+        
+        appleLoginViewModel.loginSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToMainScreen()
+            }
+            .store(in: &cancellables)
     }
     
     private func navigateToMainScreen() {

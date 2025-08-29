@@ -6,6 +6,7 @@
 //
 
 import AuthenticationServices
+import Combine
 import CryptoKit
 import Foundation
 import FirebaseAuth
@@ -13,6 +14,7 @@ import FirebaseAuth
 final class AppleLoginViewModel: NSObject {
     // Unhashed nonce.
     fileprivate var currentNonce: String?
+    public let loginSuccess = PassthroughSubject<Void, Never>()
     
     @available(iOS 13, *)
     func startSignInWithAppleFlow() {
@@ -93,6 +95,7 @@ extension AppleLoginViewModel: ASAuthorizationControllerDelegate {
                     return
                 }
                 // 로그인에 성공했을 시 실행할 메서드 추가
+                self.loginSuccess.send()
             }
         }
     }
