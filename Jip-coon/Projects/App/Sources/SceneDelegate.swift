@@ -18,13 +18,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let ws = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: ws)
+        let loginViewController = LoginViewController()
+        let navigationController = UINavigationController(rootViewController: loginViewController)
 
         // 로그인 상태 확인
         let authService = AuthService()
         if authService.isLoggedIn {
             window.rootViewController = MainTabBarController()
         } else {
-            window.rootViewController = LoginViewController()
+            window.rootViewController = navigationController
         }
 
         window.makeKeyAndVisible()

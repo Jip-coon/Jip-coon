@@ -16,4 +16,5 @@ public extension UIColor {
     static let placeholderText = UIColor(named: "placeholderText", in: .module, compatibleWith: nil)!
     static let textFieldStroke = UIColor(named: "textFieldStroke", in: .module, compatibleWith: nil)!
     static let textGray = UIColor(named: "textGray", in: .module, compatibleWith: nil)!
+    static let textRed = UIColor(named: "textRed", in: .module, compatibleWith: nil)!
 }
