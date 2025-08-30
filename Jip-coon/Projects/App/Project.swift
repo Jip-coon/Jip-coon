@@ -33,6 +33,7 @@ let project = Project(
             ),
             sources: ["Sources/**"],
             resources: ["Resources/**"],
+            entitlements: "Jip-coon.entitlements",
             dependencies: [
                 .project(target: "Feature", path: .relativeToRoot("Projects/Feature")),
                 .external(name: "FirebaseCore")
