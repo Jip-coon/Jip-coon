@@ -15,6 +15,7 @@ public class LoginViewController: UIViewController {
     private let loginView = LoginView()
     private let viewModel = LoginViewModel()
     private let appleLoginViewModel = AppleLoginViewModel()
+    private let googleLoginViewModel = GoogleLoginViewModel()
     private var cancellables = Set<AnyCancellable>()
     
     override public func loadView() {
@@ -81,6 +82,7 @@ public class LoginViewController: UIViewController {
     
     @objc private func googleLoginTapped() {
         print("google login button tapped")
+        googleLoginViewModel.signIn(presentingVC: self)
     }
     
     @objc private func appleLoginTapped() {
@@ -186,6 +188,13 @@ public class LoginViewController: UIViewController {
                 self?.navigateToMainScreen()
             }
             .store(in: &cancellables)
+        
+        googleLoginViewModel.loginSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToMainScreen()
+            }
+            .store(in: &cancellables)
     }
     
     private func navigateToMainScreen() {
@@ -204,6 +213,8 @@ public class LoginViewController: UIViewController {
         loginView.loginButton.setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
     }
 }
+
+// MARK: - TextFieldDelegate
 
 extension LoginViewController: UITextFieldDelegate {
     public func textFieldDidBeginEditing(_ textField: UITextField) {
