@@ -29,6 +29,12 @@ let project = Project(
                             ]
                         ]
                     ],
+                    "CFBundleURLTypes": [
+                        [
+                            "CFBundleTypeRole": "Editor",
+                            "CFBundleURLSchemes": ["com.googleusercontent.apps.930536285317-qhv64s0qc5u0peoi1j32vipm75msseau"]
+                        ]
+                    ]
                 ]
             ),
             sources: ["Sources/**"],
@@ -36,7 +42,8 @@ let project = Project(
             entitlements: "Jip-coon.entitlements",
             dependencies: [
                 .project(target: "Feature", path: .relativeToRoot("Projects/Feature")),
-                .external(name: "FirebaseCore")
+                .external(name: "FirebaseCore"),
+                .external(name: "GoogleSignIn")
             ],
             settings: .settings(
                 base: [

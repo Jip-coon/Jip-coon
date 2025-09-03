@@ -20,7 +20,8 @@ let project = Project(
             dependencies: [
                 .project(target: "Core", path: .relativeToRoot("Projects/Core")),
                 .project(target: "UI", path: .relativeToRoot("Projects/UI")),
-                .external(name: "FirebaseFirestore")
+                .external(name: "FirebaseFirestore"),
+                .external(name: "GoogleSignIn")
             ],
             settings: .settings(
                 base: [
