@@ -44,6 +44,7 @@ public final class SplashViewController: UIViewController {
         view.addSubview(jipCoonLabel)
         view.addSubview(animationView)
         view.addSubview(jipCoonIcon)
+        
         jipCoonLabel.translatesAutoresizingMaskIntoConstraints = false
         animationView.translatesAutoresizingMaskIntoConstraints = false
         jipCoonIcon.translatesAutoresizingMaskIntoConstraints = false
@@ -63,13 +64,12 @@ public final class SplashViewController: UIViewController {
             jipCoonIcon.topAnchor.constraint(equalTo: jipCoonLabel.bottomAnchor, constant: 10),
             jipCoonIcon.widthAnchor.constraint(equalToConstant: 287),
             jipCoonIcon.heightAnchor.constraint(equalToConstant: 287)
-            
         ])
     }
     
     private func jipCoonLabelAnimation() {
         jipCoonLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
-
+        
         UIView.animate(withDuration: 0.5, delay: 1.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8, options: [], animations: {
             self.jipCoonLabel.alpha = 1
             self.jipCoonLabel.transform = .identity
