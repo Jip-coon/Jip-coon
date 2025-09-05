@@ -13,32 +13,54 @@ public final class SplashViewController: UIViewController {
     private let animationView: LottieAnimationView = {
         let animationView = LottieAnimationView(name: "LaunchScreenText", bundle: uiBundle!)
         animationView.contentMode = .scaleAspectFit
-        animationView.backgroundColor = .green
         animationView.play()
         return animationView
     }()
-
+    
+    private let jipCoonLabel: UILabel = {
+        let label = UILabel()
+        label.text = "집쿤"
+        label.font = .npsExtraBold(ofSize: 36)
+        label.textColor = .mainOrange
+        label.alpha = 0
+        return label
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .backgroundWhite
         setupConstraints()
+        jipCoonLabelAnimation()
     }
     
     private func setupConstraints() {
+        view.backgroundColor = .backgroundWhite
+        
+        view.addSubview(jipCoonLabel)
         view.addSubview(animationView)
+        jipCoonLabel.translatesAutoresizingMaskIntoConstraints = false
         animationView.translatesAutoresizingMaskIntoConstraints = false
         
         let screenHeight = UIScreen.main.bounds.height
-        let ratio: CGFloat = 185 / 874  // label topInset / iPhone 16Pro Height
+        let ratio: CGFloat = 239 / 874  // label topInset / iPhone 16Pro Height
         let topConstant: CGFloat = screenHeight * ratio
         
         NSLayoutConstraint.activate([
+            jipCoonLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            jipCoonLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topConstant),
+            
             animationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            animationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topConstant),
-
+            animationView.bottomAnchor.constraint(equalTo: jipCoonLabel.topAnchor, constant: 20)
+            
         ])
-        
-        
     }
+    
+    private func jipCoonLabelAnimation() {
+        jipCoonLabel.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
 
+        UIView.animate(withDuration: 0.5, delay: 1.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8, options: [], animations: {
+            self.jipCoonLabel.alpha = 1
+            self.jipCoonLabel.transform = .identity
+        })
+    }
+    
 }
