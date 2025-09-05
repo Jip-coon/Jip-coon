@@ -17,20 +17,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let ws = scene as? UIWindowScene else { return }
+        
         let window = UIWindow(windowScene: ws)
+        let splashViewController = SplashViewController()
+        window.rootViewController = splashViewController
+        window.makeKeyAndVisible()
+        self.window = window
+        
         let loginViewController = LoginViewController()
         let navigationController = UINavigationController(rootViewController: loginViewController)
 
         // 로그인 상태 확인
-        let authService = AuthService()
-        if authService.isLoggedIn {
-            window.rootViewController = MainTabBarController()
-        } else {
-            window.rootViewController = navigationController
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            let authService = AuthService()
+            if authService.isLoggedIn {
+                window.rootViewController = MainTabBarController()
+            } else {
+                window.rootViewController = navigationController
+            }
         }
-
-        window.makeKeyAndVisible()
-        self.window = window
         
         // 로그인 성공 알림 구독
         NotificationCenter.default.addObserver(
