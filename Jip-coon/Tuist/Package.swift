@@ -21,7 +21,8 @@ let package = Package(
     dependencies: [
         // Add your own dependencies here:
       .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.1.0"),
-      .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.0.0")
+      .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.0.0"),
+      .package(url: "https://github.com/airbnb/lottie-spm.git", from: "4.5.2")
         // .package(url: "https://github.com/Alamofire/Alamofire", from: "5.0.0"),
         // You can read more about dependencies here: https://docs.tuist.io/documentation/tuist/dependencies
     ]
