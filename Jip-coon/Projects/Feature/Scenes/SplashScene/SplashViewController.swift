@@ -26,6 +26,12 @@ public final class SplashViewController: UIViewController {
         return label
     }()
     
+    private let jipCoonIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "Jip-coon_Icon", in: uiBundle!, compatibleWith: nil))
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
@@ -37,8 +43,10 @@ public final class SplashViewController: UIViewController {
         
         view.addSubview(jipCoonLabel)
         view.addSubview(animationView)
+        view.addSubview(jipCoonIcon)
         jipCoonLabel.translatesAutoresizingMaskIntoConstraints = false
         animationView.translatesAutoresizingMaskIntoConstraints = false
+        jipCoonIcon.translatesAutoresizingMaskIntoConstraints = false
         
         let screenHeight = UIScreen.main.bounds.height
         let ratio: CGFloat = 239 / 874  // label topInset / iPhone 16Pro Height
@@ -49,7 +57,12 @@ public final class SplashViewController: UIViewController {
             jipCoonLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topConstant),
             
             animationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            animationView.bottomAnchor.constraint(equalTo: jipCoonLabel.topAnchor, constant: 20)
+            animationView.bottomAnchor.constraint(equalTo: jipCoonLabel.topAnchor, constant: 20),
+            
+            jipCoonIcon.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            jipCoonIcon.topAnchor.constraint(equalTo: jipCoonLabel.bottomAnchor, constant: 10),
+            jipCoonIcon.widthAnchor.constraint(equalToConstant: 287),
+            jipCoonIcon.heightAnchor.constraint(equalToConstant: 287)
             
         ])
     }
