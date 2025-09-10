@@ -94,15 +94,15 @@ public enum QuestCategory: String, CaseIterable, Codable {
     
     public var backgroundColor: String {
         switch self {
-        case .cleaning: return "blue"
-        case .cooking: return "orange"
-        case .laundry: return "purple"
-        case .dishes: return "green"
-        case .trash: return "gray"
-        case .pet: return "brown"
-        case .study: return "indigo"
-        case .exercise: return "red"
-        case .other: return "teal"
+        case .cleaning: return "blue1"
+        case .cooking: return "orange3"
+        case .laundry: return "purple1"
+        case .dishes: return "green1"
+        case .trash: return "textFieldStroke"
+        case .pet: return "brown1"
+        case .study: return "red1"
+        case .exercise: return "yellow1"
+        case .other: return "blue2"
         }
     }
 }

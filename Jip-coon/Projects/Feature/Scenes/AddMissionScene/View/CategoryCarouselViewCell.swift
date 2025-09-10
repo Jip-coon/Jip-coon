@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Core
 import UI
 
 final class CategoryCarouselViewCell: UICollectionViewCell {
@@ -17,8 +18,6 @@ final class CategoryCarouselViewCell: UICollectionViewCell {
         label.textAlignment = .center
         label.clipsToBounds = true
         label.layer.cornerRadius = 12
-        label.backgroundColor = .orange3
-        label.text = "🧑‍🍳"
         return label
     }()
     
@@ -26,7 +25,7 @@ final class CategoryCarouselViewCell: UICollectionViewCell {
         let label = UILabel()
         label.font = .pretendard(ofSize: 14, weight: .regular)
         label.textAlignment = .center
-        label.text = "요리"
+        label.textColor = .textGray
         return label
     }()
     
@@ -58,9 +57,9 @@ final class CategoryCarouselViewCell: UICollectionViewCell {
         ])
     }
     
-    func configure(emoji: String, color: UIColor, category: String) {
-        categoryIcon.text = emoji
-        categoryIcon.backgroundColor = color
-        categoryLabel.text = category
+    func configure(with category: QuestCategory) {
+        categoryIcon.text = category.emoji
+        categoryIcon.backgroundColor = UIColor.questCategoryColor(for: category.backgroundColor)
+        categoryLabel.text = category.displayName
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Core
 
 final class CategoryCarouselView: UIView {
     private let collectionView: UICollectionView = {
@@ -45,11 +46,13 @@ final class CategoryCarouselView: UIView {
 
 extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return QuestCategory.allCases.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCarouselViewCell.identifier, for: indexPath) as! CategoryCarouselViewCell
+        let category = QuestCategory.allCases[indexPath.item]
+        cell.configure(with: category)
         return cell
     }
 }
