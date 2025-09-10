@@ -9,10 +9,14 @@ import UIKit
 import Core
 
 final class CategoryCarouselView: UIView {
+    private var previousCellIndex = 0
+    private var focusedIndex: Int = 0
+    
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 63, height: 100)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         let uICollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         uICollectionView.showsHorizontalScrollIndicator = false
@@ -28,6 +32,21 @@ final class CategoryCarouselView: UIView {
         setupView()
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        collectionView.layoutIfNeeded()
+        
+        let layout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
+        let cellWidthIncludingSpacing = layout.itemSize.width + layout.minimumLineSpacing
+        let offsetX = CGFloat(focusedIndex) * cellWidthIncludingSpacing - collectionView.contentInset.left
+        collectionView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: false)
+        
+        // 초기 포커스 셀 레이아웃 적용
+        if let cell = collectionView.cellForItem(at: IndexPath(item: focusedIndex, section: 0)) as? CategoryCarouselViewCell {
+            cell.updateLayout(isFocused: true)
+        }
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -41,7 +60,6 @@ final class CategoryCarouselView: UIView {
             collectionView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
-    
 }
 
 extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -54,5 +72,41 @@ extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDele
         let category = QuestCategory.allCases[indexPath.item]
         cell.configure(with: category)
         return cell
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let centerX = scrollView.contentOffset.x + scrollView.bounds.width / 2
+        let centerPoint = CGPoint(x: centerX, y: scrollView.bounds.midY)
+        
+        // 중앙에 가장 가까운 indexPath 찾기
+        if let indexPath = collectionView.indexPathForItem(at: centerPoint),
+           let cell = collectionView.cellForItem(at: indexPath) as? CategoryCarouselViewCell {
+            if focusedIndex != indexPath.item {
+                focusedIndex = indexPath.item
+                collectionView.performBatchUpdates(nil)  // 레이아웃 갱신
+            }
+            
+            // 새로운 중앙 셀 → 확대
+            if previousCellIndex != indexPath.item {
+                // 이전 셀 → 축소
+                if let prevCell = collectionView.cellForItem(at: IndexPath(item: previousCellIndex, section: 0)) as? CategoryCarouselViewCell {
+                    prevCell.updateLayout(isFocused: false)
+                }
+                
+                cell.updateLayout(isFocused: true)
+                previousCellIndex = indexPath.item
+            }
+        }
+    }
+    
+}
+
+extension CategoryCarouselView: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if indexPath.item == focusedIndex {
+            return CGSize(width: 79, height: 109)  // 포커스된 셀
+        } else {
+            return CGSize(width: 63, height: 99)   // 기본 셀
+        }
     }
 }
