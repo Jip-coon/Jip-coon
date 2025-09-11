@@ -26,6 +26,17 @@ public final class AddMissionViewController: UIViewController {
         return textFieldView
     }()
     
+    private let dateInfoRowView = InfoRowView(
+        leading: {
+            let label = UILabel()
+            label.text = "📅"
+            label.font = .systemFont(ofSize: 15)
+            return label
+        }(),
+        title: "날짜",
+        value: Date.now.yyyyMMdEE
+    )
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
@@ -41,6 +52,8 @@ public final class AddMissionViewController: UIViewController {
             categoryCarouselView,
             titleTextField,
             memoTextField,
+            dateInfoRowView,
+            
         ].forEach(containerView.addSubview)
         
         [
@@ -49,6 +62,8 @@ public final class AddMissionViewController: UIViewController {
             categoryCarouselView,
             titleTextField,
             memoTextField,
+            dateInfoRowView,
+            
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -80,6 +95,10 @@ public final class AddMissionViewController: UIViewController {
             memoTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             memoTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
             memoTextField.heightAnchor.constraint(equalToConstant: 35),
+            
+            dateInfoRowView.topAnchor.constraint(equalTo: memoTextField.bottomAnchor, constant: 40),
+            dateInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            dateInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
         ])
     }
     
@@ -90,7 +109,7 @@ public final class AddMissionViewController: UIViewController {
         view.addGestureRecognizer(tap)
     }
     
-    @objc func dismissKeyboard() {
+    @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
 }
