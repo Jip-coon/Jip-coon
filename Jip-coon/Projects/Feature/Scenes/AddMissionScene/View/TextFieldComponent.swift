@@ -18,6 +18,7 @@ final class TextFieldComponent: UIView {
     private let textField: UITextField = {
         let textField = UITextField()
         textField.font = .pretendard(ofSize: 16, weight: .regular)
+        textField.placeholder = "Placeholder"
         textField.setPlaceholder(fontSize: 14)
         textField.layer.borderColor = UIColor.textFieldStroke.cgColor
         textField.layer.borderWidth = 0.7

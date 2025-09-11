@@ -14,9 +14,22 @@ public final class AddMissionViewController: UIViewController {
     private let containerView = UIView()
     private let categoryCarouselView = CategoryCarouselView()
     
+    private let titleTextField: TextFieldComponent = {
+        let textFieldView = TextFieldComponent()
+        textFieldView.configure(title: "제목", placeholder: "제목을 입력해 주세요")
+        return textFieldView
+    }()
+    
+    private let memoTextField: TextFieldComponent = {
+        let textFieldView = TextFieldComponent()
+        textFieldView.configure(title: "메모", placeholder: "(선택) 메모를 입력해 주세요")
+        return textFieldView
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
+        hideKeyboardWhenTappedAround()
     }
     
     private func setupConstraints() {
@@ -25,13 +38,17 @@ public final class AddMissionViewController: UIViewController {
         scrollView.addSubview(containerView)
         
         [
-            categoryCarouselView
+            categoryCarouselView,
+            titleTextField,
+            memoTextField,
         ].forEach(containerView.addSubview)
         
         [
             scrollView,
             containerView,
-            categoryCarouselView
+            categoryCarouselView,
+            titleTextField,
+            memoTextField,
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -53,6 +70,27 @@ public final class AddMissionViewController: UIViewController {
             categoryCarouselView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             categoryCarouselView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
+            
+            titleTextField.topAnchor.constraint(equalTo: categoryCarouselView.bottomAnchor, constant: 36),
+            titleTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            titleTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            titleTextField.heightAnchor.constraint(equalToConstant: 35),
+            
+            memoTextField.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 11),
+            memoTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            memoTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            memoTextField.heightAnchor.constraint(equalToConstant: 35),
         ])
+    }
+    
+    // 키보드 숨기기
+    private func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
