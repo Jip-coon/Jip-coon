@@ -18,4 +18,6 @@ public extension UIColor {
     static let textGray = UIColor(named: "textGray", in: .module, compatibleWith: nil)!
     static let textRed = UIColor(named: "textRed", in: .module, compatibleWith: nil)!
     static let headerBeige = UIColor(named: "headerBeige", in: .module, compatibleWith: nil)!
+    static let headerText = UIColor(named: "headerText", in: .module, compatibleWith: nil)!
+    static let headerNotiBack = UIColor(named: "headerNotiBack", in: .module, compatibleWith: nil)!
 }
