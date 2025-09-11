@@ -8,20 +8,20 @@
 import UIKit
 
 public extension UITextField {
-    func setPlaceholder() {
+    func setPlaceholder(fontSize size: CGFloat = 16) {
         guard let string = self.placeholder else { return }
         
         attributedPlaceholder = NSAttributedString(
             string: string,
             attributes: [
                 .foregroundColor: UIColor.placeholderText,
-                .font: UIFont.systemFont(ofSize: 16)
+                .font: UIFont.pretendard(ofSize: size, weight: .regular)
             ]
         )
     }
     
-    func leftPadding() {
-        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: self.frame.height))
+    func leftPadding(of size: CGFloat = 16) {
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: size, height: self.frame.height))
         self.leftView = paddingView
         self.leftViewMode = ViewMode.always
     }
