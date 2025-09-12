@@ -64,6 +64,17 @@ public final class AddMissionViewController: UIViewController {
         )
     }()
     
+    private let starInfoRowView: InfoRowView = {
+        let imageView = UIImageView(image: UIImage(named: "Star", in: uiBundle, compatibleWith: nil))
+        imageView.contentMode = .scaleAspectFit
+        return InfoRowView(
+            leading: imageView,
+            title: "별",
+            value: "10 개",
+            buttonStyle: .plainMenu
+        )
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
@@ -84,6 +95,7 @@ public final class AddMissionViewController: UIViewController {
             dateInfoRowView,
             timeInfoRowView,
             workerInfoRowView,
+            starInfoRowView,
             
         ].forEach(containerView.addSubview)
         
@@ -96,6 +108,7 @@ public final class AddMissionViewController: UIViewController {
             dateInfoRowView,
             timeInfoRowView,
             workerInfoRowView,
+            starInfoRowView,
             
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -140,6 +153,10 @@ public final class AddMissionViewController: UIViewController {
             workerInfoRowView.topAnchor.constraint(equalTo: timeInfoRowView.bottomAnchor, constant: 31),
             workerInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             workerInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            starInfoRowView.topAnchor.constraint(equalTo: workerInfoRowView.bottomAnchor, constant: 31),
+            starInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            starInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
         ])
     }
     
@@ -170,7 +187,8 @@ public final class AddMissionViewController: UIViewController {
         timeInfoRowView.onTap = { [weak self] in
             self?.presentTimePicker()
         }
-        setupWorkerSelectionMenu()  // workerInfoRowView Action
+        setupWorkerSelectionMenu()  // worker
+        setupStarSelectionMenu()    // star
     }
     
     // 날짜 버튼 -> DatePicker
@@ -223,5 +241,18 @@ public final class AddMissionViewController: UIViewController {
         let menu = UIMenu(title: "누구와 할까요?", children: menuActions)
         
         workerInfoRowView.setupMenu(menu)
+    }
+    
+    private func setupStarSelectionMenu() {
+        let menuActions = stride(from: 10, through: 50, by: 10).map { starCount in
+            let title = "\(starCount) 개"
+            return UIAction(title: title) { [weak self] _ in
+                self?.starInfoRowView.setValueText(title)
+            }
+        }
+        
+        let menu = UIMenu(title: "별의 개수", children: menuActions)
+        
+        starInfoRowView.setupMenu(menu)
     }
 }
