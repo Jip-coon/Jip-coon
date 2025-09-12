@@ -146,7 +146,6 @@ public final class AddMissionViewController: UIViewController {
     private func bindViewModel() {
         viewModel.$selectedWorkerName
             .sink { [weak self] name in
-                // 선택된 이름이 변경되면 workerInfoRowView의 값 업데이트
                 self?.workerInfoRowView.setValueText(name)
             }
             .store(in: &cancellables)
@@ -171,9 +170,7 @@ public final class AddMissionViewController: UIViewController {
         timeInfoRowView.onTap = { [weak self] in
             self?.presentTimePicker()
         }
-        workerInfoRowView.onTap = { [weak self] in
-            self?.presentWorkerSelectionMenu()
-        }
+        setupWorkerSelectionMenu()  // workerInfoRowView Action
     }
     
     // 날짜 버튼 -> DatePicker
@@ -212,22 +209,19 @@ public final class AddMissionViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
-    // 담당 버튼 -> Alert ActionSheet(담당자 선택)
-    private func presentWorkerSelectionMenu() {
+    // 담당 버튼 -> UIMenu(담당자 선택)
+    private func setupWorkerSelectionMenu() {
+        // TODO: - fetch 부분 수정
         viewModel.fetchFamilyMembers(for: "123")
-        let alertController = UIAlertController(title: "누구와 할까요?", message: nil, preferredStyle: .actionSheet)
         
-        // ViewModel에서 가족 구성원 목록을 가져와서 액션시트에 추가
-        for member in viewModel.familyMembers {
-            let action = UIAlertAction(title: member.name, style: .default) { [weak self] _ in
-                self?.viewModel.selectWorker(with: member.name)
+        let menuActions = viewModel.familyMembers.map { member in
+            UIAction(title: member.name) { [weak self] _ in
+                self?.viewModel.selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
             }
-            alertController.addAction(action)
         }
         
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
-        alertController.addAction(cancelAction)
+        let menu = UIMenu(title: "누구와 할까요?", children: menuActions)
         
-        present(alertController, animated: true, completion: nil)
+        workerInfoRowView.setupMenu(menu)
     }
 }

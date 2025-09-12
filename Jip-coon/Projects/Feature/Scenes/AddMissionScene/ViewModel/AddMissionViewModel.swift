@@ -16,7 +16,6 @@ final class AddMissionViewModel {
     // TODO: - Firebase에서 데이터 가져오기
     func fetchFamilyMembers(for currentFamilyId: String) {
         // Sample data
-        let family = Family(id: currentFamilyId, name: "우리 가족", createdBy: "user123")
         let user1 = User(id: "user123", name: "예슬", email: "yeseul@example.com", role: .parent)
         let user2 = User(id: "user456", name: "관혁", email: "jipcoon@example.com", role: .child)
         

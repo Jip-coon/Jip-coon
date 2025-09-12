@@ -9,15 +9,17 @@ import UIKit
 import UI
 
 enum InfoRowButtonStyle {
-    case plain
-    case capsule
+    case plain      // 일반 버튼 + 탭 액션
+    case plainMenu  // 일반 버튼 + UIMenu
+    case capsule    // 캡슐 모양 버튼 + UIMenu
 }
 
 final class InfoRowView: UIView {
-    private var leadingView: UIView
     private var buttonStyle: InfoRowButtonStyle = .plain
-    private let tapGesture = UITapGestureRecognizer()
+    private let colors: [UIColor] = [.blue1, .blue2, .brown1, .green1, .orange3, .purple1, .red1, .yellow1]
     var onTap: (() -> Void)?
+    
+    private var leadingView: UIView
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -25,36 +27,13 @@ final class InfoRowView: UIView {
         return label
     }()
     
-    private let valueLabel: UILabel = {
-        let label = UILabel()
-        label.font = .pretendard(ofSize: 16, weight: .regular)
-        label.textColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let chevronImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
-        imageView.tintColor = .black
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
-    
-    private let valueContainerView: UIView = {
-        let view = UIView()
-        return view
+    private var actionButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     private let titleStack: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.alignment = .center
-        stackView.spacing = 8
-        return stackView
-    }()
-    
-    private let valueStack: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -77,14 +56,9 @@ final class InfoRowView: UIView {
         super.init(frame: .zero)
         
         setupView()
-        setupButtonStyle(buttonStyle)
+        setupButtonStyle(buttonStyle, with: value)
         
         titleLabel.text = title
-        valueLabel.text = value
-        
-        tapGesture.addTarget(self, action: #selector(tapButton))
-        valueStack.addGestureRecognizer(tapGesture)
-        valueStack.isUserInteractionEnabled = true
     }
     
     required init?(coder: NSCoder) {
@@ -95,13 +69,8 @@ final class InfoRowView: UIView {
         titleStack.addArrangedSubview(leadingView)
         titleStack.addArrangedSubview(titleLabel)
         
-        valueContainerView.addSubview(valueLabel)
-        
-        valueStack.addArrangedSubview(valueContainerView)
-        valueStack.addArrangedSubview(chevronImageView)
-        
         stackView.addArrangedSubview(titleStack)
-        stackView.addArrangedSubview(valueStack)
+        stackView.addArrangedSubview(actionButton)
         
         addSubview(stackView)
         
@@ -110,24 +79,54 @@ final class InfoRowView: UIView {
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            valueLabel.topAnchor.constraint(equalTo: valueContainerView.topAnchor, constant: 5),
-            valueLabel.leadingAnchor.constraint(equalTo: valueContainerView.leadingAnchor, constant: 9),
-            valueLabel.trailingAnchor.constraint(equalTo: valueContainerView.trailingAnchor, constant: -9),
-            valueLabel.bottomAnchor.constraint(equalTo: valueContainerView.bottomAnchor, constant: -5)
         ])
     }
     
-    private func setupButtonStyle(_ style: InfoRowButtonStyle) {
+    private func setupButtonStyle(_ style: InfoRowButtonStyle, with text: String) {
+        var config = UIButton.Configuration.plain()
+        
+        config.title = text
+        config.imagePlacement = .trailing
+        config.imagePadding = 8
+        config.baseForegroundColor = .black
+        
         switch style {
-            case .plain:
-                valueContainerView.backgroundColor = .clear
-                valueContainerView.layer.cornerRadius = 0
-            case .capsule:
-                valueContainerView.backgroundColor = .blue1
-                valueContainerView.layer.cornerRadius = 14
-                valueLabel.font = .pretendard(ofSize: 14, weight: .semibold)
+            case .plain:    // 기본 스타일: Label + Chevron + Action
+                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                    var outgoing = incoming
+                    outgoing.font = .pretendard(ofSize: 16, weight: .regular)
+                    return outgoing
+                }
+                config.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
+                config.contentInsets = .zero
+                
+                actionButton.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
+                
+            case .capsule:  // 캡슐 + 메뉴
+                config.background.backgroundColor = colors.randomElement()
+                config.background.cornerRadius = 14
+                config.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 9, bottom: 5, trailing: 9)
+                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                    var outgoing = incoming
+                    outgoing.font = .pretendard(ofSize: 14, weight: .semibold)
+                    return outgoing
+                }
+                
+                actionButton.showsMenuAsPrimaryAction = true    // 메뉴를 기본 액션으로
+                
+            case .plainMenu:    // 기본 + 메뉴
+                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                    var outgoing = incoming
+                    outgoing.font = .pretendard(ofSize: 16, weight: .regular)
+                    return outgoing
+                }
+                config.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
+                config.contentInsets = .zero
+                
+                actionButton.showsMenuAsPrimaryAction = true
         }
+        
+        actionButton.configuration = config
     }
     
     @objc private func tapButton() {
@@ -135,6 +134,16 @@ final class InfoRowView: UIView {
     }
     
     func setValueText(_ text: String) {
-        valueLabel.text = text
+        var config = actionButton.configuration
+        config?.title = text
+        
+        if buttonStyle == .capsule {
+            config?.background.backgroundColor = colors.randomElement()
+        }
+        actionButton.configuration = config
+    }
+    
+    func setupMenu(_ menu: UIMenu) {
+        actionButton.menu = menu
     }
 }
