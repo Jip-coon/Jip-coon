@@ -6,10 +6,14 @@
 //
 
 import UIKit
+import Combine
 import UI
 
 // TODO: - 나중에 public 지우기
 public final class AddMissionViewController: UIViewController {
+    private let viewModel = AddMissionViewModel()
+    private var cancellables = Set<AnyCancellable>()
+    
     private let scrollView = UIScrollView()
     private let containerView = UIView()
     private let categoryCarouselView = CategoryCarouselView()
@@ -54,8 +58,8 @@ public final class AddMissionViewController: UIViewController {
         label.font = .systemFont(ofSize: 15)
         return InfoRowView(
             leading: label,
-            title: "사람",
-            value: "예슬",
+            title: "담당",
+            value: "선택해 주세요",
             buttonStyle: .capsule
         )
     }()
@@ -63,6 +67,7 @@ public final class AddMissionViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
+        bindViewModel()
         hideKeyboardWhenTappedAround()
         setupInfoRowViewButtonAction()
     }
@@ -138,6 +143,15 @@ public final class AddMissionViewController: UIViewController {
         ])
     }
     
+    private func bindViewModel() {
+        viewModel.$selectedWorkerName
+            .sink { [weak self] name in
+                // 선택된 이름이 변경되면 workerInfoRowView의 값 업데이트
+                self?.workerInfoRowView.setValueText(name)
+            }
+            .store(in: &cancellables)
+    }
+    
     // 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
@@ -149,6 +163,7 @@ public final class AddMissionViewController: UIViewController {
         view.endEditing(true)
     }
     
+    // 각 버튼 액션 정의
     private func setupInfoRowViewButtonAction() {
         dateInfoRowView.onTap = { [weak self] in
             self?.presentDatePicker()
@@ -156,8 +171,12 @@ public final class AddMissionViewController: UIViewController {
         timeInfoRowView.onTap = { [weak self] in
             self?.presentTimePicker()
         }
+        workerInfoRowView.onTap = { [weak self] in
+            self?.presentWorkerSelectionMenu()
+        }
     }
     
+    // 날짜 버튼 -> DatePicker
     private func presentDatePicker() {
         let datePickerViewController = DatePickerViewController(datePickerMode: .date)
         
@@ -175,6 +194,7 @@ public final class AddMissionViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
+    // 시간 버튼 -> TimePicker
     private func presentTimePicker() {
         let timePickerViewController = DatePickerViewController(datePickerMode: .time)
         
@@ -190,5 +210,24 @@ public final class AddMissionViewController: UIViewController {
         }
         
         present(navigationController, animated: true)
+    }
+    
+    // 담당 버튼 -> Alert ActionSheet(담당자 선택)
+    private func presentWorkerSelectionMenu() {
+        viewModel.fetchFamilyMembers(for: "123")
+        let alertController = UIAlertController(title: "누구와 할까요?", message: nil, preferredStyle: .actionSheet)
+        
+        // ViewModel에서 가족 구성원 목록을 가져와서 액션시트에 추가
+        for member in viewModel.familyMembers {
+            let action = UIAlertAction(title: member.name, style: .default) { [weak self] _ in
+                self?.viewModel.selectWorker(with: member.name)
+            }
+            alertController.addAction(action)
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
 }
