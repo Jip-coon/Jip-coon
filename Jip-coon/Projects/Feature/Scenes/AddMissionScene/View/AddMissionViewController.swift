@@ -26,16 +26,27 @@ public final class AddMissionViewController: UIViewController {
         return textFieldView
     }()
     
-    private let dateInfoRowView = InfoRowView(
-        leading: {
-            let label = UILabel()
-            label.text = "📅"
-            label.font = .systemFont(ofSize: 15)
-            return label
-        }(),
-        title: "날짜",
-        value: Date.now.yyyyMMdEE
-    )
+    private let dateInfoRowView: InfoRowView = {
+        let label = UILabel()
+        label.text = "📅"
+        label.font = .systemFont(ofSize: 15)
+        return InfoRowView(
+            leading: label,
+            title: "날짜",
+            value: Date.now.yyyyMMdEE
+        )
+    }()
+    
+    private let timeInfoRowView: InfoRowView = {
+        let label = UILabel()
+        label.text = "⏰"
+        label.font = .systemFont(ofSize: 15)
+        return InfoRowView(
+            leading: label,
+            title: "시간",
+            value: Date.now.aHHmm
+        )
+    }()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,6 +65,7 @@ public final class AddMissionViewController: UIViewController {
             titleTextField,
             memoTextField,
             dateInfoRowView,
+            timeInfoRowView,
             
         ].forEach(containerView.addSubview)
         
@@ -64,6 +76,7 @@ public final class AddMissionViewController: UIViewController {
             titleTextField,
             memoTextField,
             dateInfoRowView,
+            timeInfoRowView,
             
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -100,6 +113,10 @@ public final class AddMissionViewController: UIViewController {
             dateInfoRowView.topAnchor.constraint(equalTo: memoTextField.bottomAnchor, constant: 40),
             dateInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             dateInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            timeInfoRowView.topAnchor.constraint(equalTo: dateInfoRowView.bottomAnchor, constant: 31),
+            timeInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            timeInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
         ])
     }
     
@@ -118,6 +135,9 @@ public final class AddMissionViewController: UIViewController {
         dateInfoRowView.onTap = { [weak self] in
             self?.presentDatePicker()
         }
+        timeInfoRowView.onTap = { [weak self] in
+            self?.presentTimePicker()
+        }
     }
     
     private func presentDatePicker() {
@@ -128,6 +148,23 @@ public final class AddMissionViewController: UIViewController {
         }
         
         let navigationController = UINavigationController(rootViewController: datePickerViewController)
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
+    }
+    
+    private func presentTimePicker() {
+        let timePickerViewController = DatePickerViewController(datePickerMode: .time)
+        
+        timePickerViewController.onDidTapDone = { [weak self] date in
+            self?.timeInfoRowView.setValueText(date.aHHmm)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: timePickerViewController)
         
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium()]

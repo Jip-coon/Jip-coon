@@ -10,7 +10,6 @@ import UI
 
 final class DatePickerViewController: UIViewController {
     var onDidTapDone: ((Date) -> Void)?
-    private var datePickerMode: UIDatePicker.Mode
     
     private let datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
@@ -21,7 +20,7 @@ final class DatePickerViewController: UIViewController {
     }()
     
     init(datePickerMode: UIDatePicker.Mode) {
-        self.datePickerMode = datePickerMode
+        datePicker.datePickerMode = datePickerMode
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -50,7 +49,6 @@ final class DatePickerViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "날짜 선택"
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             title: "취소",
             style: .plain,
