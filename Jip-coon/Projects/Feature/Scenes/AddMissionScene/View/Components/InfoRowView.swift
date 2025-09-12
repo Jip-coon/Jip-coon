@@ -86,4 +86,8 @@ final class InfoRowView: UIView {
     @objc private func tapButton() {
         onTap?()
     }
+    
+    func setValueText(_ text: String) {
+        infoValueButton.setTitle(text, for: .normal)
+    }
 }

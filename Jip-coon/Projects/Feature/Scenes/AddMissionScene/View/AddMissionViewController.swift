@@ -41,6 +41,7 @@ public final class AddMissionViewController: UIViewController {
         super.viewDidLoad()
         setupConstraints()
         hideKeyboardWhenTappedAround()
+        setupInfoRowViewButtonAction()
     }
     
     private func setupConstraints() {
@@ -111,5 +112,28 @@ public final class AddMissionViewController: UIViewController {
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)
+    }
+    
+    private func setupInfoRowViewButtonAction() {
+        dateInfoRowView.onTap = { [weak self] in
+            self?.presentDatePicker()
+        }
+    }
+    
+    private func presentDatePicker() {
+        let datePickerViewController = DatePickerViewController(datePickerMode: .date)
+        
+        datePickerViewController.onDidTapDone = { [weak self] date in
+            self?.dateInfoRowView.setValueText(date.yyyyMMdEE)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: datePickerViewController)
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
     }
 }
