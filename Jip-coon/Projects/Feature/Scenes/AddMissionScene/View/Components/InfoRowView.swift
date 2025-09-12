@@ -8,8 +8,15 @@
 import UIKit
 import UI
 
+enum InfoRowButtonStyle {
+    case plain
+    case capsule
+}
+
 final class InfoRowView: UIView {
     private var leadingView: UIView
+    private var buttonStyle: InfoRowButtonStyle = .plain
+    private let tapGesture = UITapGestureRecognizer()
     var onTap: (() -> Void)?
     
     private let titleLabel: UILabel = {
@@ -18,24 +25,36 @@ final class InfoRowView: UIView {
         return label
     }()
     
-    private let infoValueButton: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
-        config.imagePlacement = .trailing
-        config.imagePadding = 8
-        config.baseForegroundColor = .black
-        config.contentInsets = .zero
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = .pretendard(ofSize: 16, weight: .regular)
-            return outgoing
-        }
-        let button = UIButton(configuration: config)
-        button.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
-        return button
+    private let valueLabel: UILabel = {
+        let label = UILabel()
+        label.font = .pretendard(ofSize: 16, weight: .regular)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let chevronImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
+        imageView.tintColor = .black
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
+    private let valueContainerView: UIView = {
+        let view = UIView()
+        return view
     }()
     
     private let titleStack: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
+    }()
+    
+    private let valueStack: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -48,17 +67,24 @@ final class InfoRowView: UIView {
         stackView.axis = .horizontal
         stackView.distribution = .equalSpacing
         stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
     
-    init(leading: UIView, title: String, value: String) {
+    init(leading: UIView, title: String, value: String, buttonStyle: InfoRowButtonStyle = .plain) {
         self.leadingView = leading
+        self.buttonStyle = buttonStyle
         super.init(frame: .zero)
         
         setupView()
+        setupButtonStyle(buttonStyle)
         
         titleLabel.text = title
-        infoValueButton.setTitle(value, for: .normal)
+        valueLabel.text = value
+        
+        tapGesture.addTarget(self, action: #selector(tapButton))
+        valueStack.addGestureRecognizer(tapGesture)
+        valueStack.isUserInteractionEnabled = true
     }
     
     required init?(coder: NSCoder) {
@@ -69,18 +95,39 @@ final class InfoRowView: UIView {
         titleStack.addArrangedSubview(leadingView)
         titleStack.addArrangedSubview(titleLabel)
         
+        valueContainerView.addSubview(valueLabel)
+        
+        valueStack.addArrangedSubview(valueContainerView)
+        valueStack.addArrangedSubview(chevronImageView)
+        
         stackView.addArrangedSubview(titleStack)
-        stackView.addArrangedSubview(infoValueButton)
+        stackView.addArrangedSubview(valueStack)
         
         addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: topAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            valueLabel.topAnchor.constraint(equalTo: valueContainerView.topAnchor, constant: 5),
+            valueLabel.leadingAnchor.constraint(equalTo: valueContainerView.leadingAnchor, constant: 9),
+            valueLabel.trailingAnchor.constraint(equalTo: valueContainerView.trailingAnchor, constant: -9),
+            valueLabel.bottomAnchor.constraint(equalTo: valueContainerView.bottomAnchor, constant: -5)
         ])
+    }
+    
+    private func setupButtonStyle(_ style: InfoRowButtonStyle) {
+        switch style {
+            case .plain:
+                valueContainerView.backgroundColor = .clear
+                valueContainerView.layer.cornerRadius = 0
+            case .capsule:
+                valueContainerView.backgroundColor = .blue1
+                valueContainerView.layer.cornerRadius = 14
+                valueLabel.font = .pretendard(ofSize: 14, weight: .semibold)
+        }
     }
     
     @objc private func tapButton() {
@@ -88,6 +135,6 @@ final class InfoRowView: UIView {
     }
     
     func setValueText(_ text: String) {
-        infoValueButton.setTitle(text, for: .normal)
+        valueLabel.text = text
     }
 }

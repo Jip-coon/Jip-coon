@@ -48,6 +48,18 @@ public final class AddMissionViewController: UIViewController {
         )
     }()
     
+    private let workerInfoRowView: InfoRowView = {
+        let label = UILabel()
+        label.text = "👤"
+        label.font = .systemFont(ofSize: 15)
+        return InfoRowView(
+            leading: label,
+            title: "사람",
+            value: "예슬",
+            buttonStyle: .capsule
+        )
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
@@ -66,6 +78,7 @@ public final class AddMissionViewController: UIViewController {
             memoTextField,
             dateInfoRowView,
             timeInfoRowView,
+            workerInfoRowView,
             
         ].forEach(containerView.addSubview)
         
@@ -77,6 +90,7 @@ public final class AddMissionViewController: UIViewController {
             memoTextField,
             dateInfoRowView,
             timeInfoRowView,
+            workerInfoRowView,
             
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -117,6 +131,10 @@ public final class AddMissionViewController: UIViewController {
             timeInfoRowView.topAnchor.constraint(equalTo: dateInfoRowView.bottomAnchor, constant: 31),
             timeInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             timeInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            workerInfoRowView.topAnchor.constraint(equalTo: timeInfoRowView.bottomAnchor, constant: 31),
+            workerInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            workerInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
         ])
     }
     
