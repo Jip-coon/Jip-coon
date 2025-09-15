@@ -16,8 +16,9 @@ public final class AddMissionViewController: UIViewController {
     
     private let scrollView = UIScrollView()
     private let containerView = UIView()
-    private let categoryCarouselView = CategoryCarouselView()
+    private let categoryCarouselView = CategoryCarouselView()   // 카테고리 뷰
     
+    // 제목, 메모 섹션
     private let titleTextField: TextFieldComponent = {
         let textFieldView = TextFieldComponent()
         textFieldView.configure(title: "제목", placeholder: "제목을 입력해 주세요")
@@ -30,6 +31,7 @@ public final class AddMissionViewController: UIViewController {
         return textFieldView
     }()
     
+    // 날짜
     private let dateInfoRowView: InfoRowView = {
         let label = UILabel()
         label.text = "📅"
@@ -41,6 +43,7 @@ public final class AddMissionViewController: UIViewController {
         )
     }()
     
+    // 시간
     private let timeInfoRowView: InfoRowView = {
         let label = UILabel()
         label.text = "⏰"
@@ -52,6 +55,7 @@ public final class AddMissionViewController: UIViewController {
         )
     }()
     
+    // 담당
     private let workerInfoRowView: InfoRowView = {
         let label = UILabel()
         label.text = "👤"
@@ -64,6 +68,7 @@ public final class AddMissionViewController: UIViewController {
         )
     }()
     
+    // 별
     private let starInfoRowView: InfoRowView = {
         let imageView = UIImageView(image: UIImage(named: "Star", in: uiBundle, compatibleWith: nil))
         imageView.contentMode = .scaleAspectFit
@@ -75,12 +80,18 @@ public final class AddMissionViewController: UIViewController {
         )
     }()
     
+    // 반복
+    private let scheduleRepeatView: ScheduleRepeatView = {
+        let view = ScheduleRepeatView()
+        return view
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setupConstraints()
-        bindViewModel()
-        hideKeyboardWhenTappedAround()
-        setupInfoRowViewButtonAction()
+        setupConstraints()  // UI 설정
+        bindViewModel()     // ViewModel
+        hideKeyboardWhenTappedAround()  // 키보드 관련
+        setupInfoRowViewButtonAction()  // 버튼 액션 관리
     }
     
     private func setupConstraints() {
@@ -96,6 +107,7 @@ public final class AddMissionViewController: UIViewController {
             timeInfoRowView,
             workerInfoRowView,
             starInfoRowView,
+            scheduleRepeatView
             
         ].forEach(containerView.addSubview)
         
@@ -109,6 +121,7 @@ public final class AddMissionViewController: UIViewController {
             timeInfoRowView,
             workerInfoRowView,
             starInfoRowView,
+            scheduleRepeatView
             
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -157,6 +170,11 @@ public final class AddMissionViewController: UIViewController {
             starInfoRowView.topAnchor.constraint(equalTo: workerInfoRowView.bottomAnchor, constant: 31),
             starInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             starInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            scheduleRepeatView.topAnchor.constraint(equalTo: starInfoRowView.bottomAnchor, constant: 42),
+            scheduleRepeatView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            scheduleRepeatView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75)
         ])
     }
     
@@ -168,7 +186,7 @@ public final class AddMissionViewController: UIViewController {
             .store(in: &cancellables)
     }
     
-    // 키보드 숨기기
+    // 화면 탭하면 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
@@ -181,14 +199,23 @@ public final class AddMissionViewController: UIViewController {
     
     // 각 버튼 액션 정의
     private func setupInfoRowViewButtonAction() {
+        // 날짜
         dateInfoRowView.onTap = { [weak self] in
             self?.presentDatePicker()
         }
+        
+        // 시간
         timeInfoRowView.onTap = { [weak self] in
             self?.presentTimePicker()
         }
-        setupWorkerSelectionMenu()  // worker
-        setupStarSelectionMenu()    // star
+        
+        setupWorkerSelectionMenu()  // 담당
+        setupStarSelectionMenu()    // 별
+        
+        // 반복
+        scheduleRepeatView.onDayButtonTapped = { [weak self] days in
+            self?.viewModel.updateSelectedRepeatDays(days)
+        }
     }
     
     // 날짜 버튼 -> DatePicker
@@ -243,6 +270,7 @@ public final class AddMissionViewController: UIViewController {
         workerInfoRowView.setupMenu(menu)
     }
     
+    // 별 개수 선택
     private func setupStarSelectionMenu() {
         let menuActions = stride(from: 10, through: 50, by: 10).map { starCount in
             let title = "\(starCount) 개"

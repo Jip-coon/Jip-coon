@@ -9,9 +9,11 @@ import Foundation
 import Combine
 import Core
 
-final class AddMissionViewModel {
+final class AddMissionViewModel: ObservableObject {
     @Published var familyMembers: [User] = []
     @Published var selectedWorkerName: String = "선택해 주세요"
+    @Published private(set) var recurringType: RecurringType = .none
+    @Published var selectedRepeatDays: Set<Day> = []
     
     // TODO: - Firebase에서 데이터 가져오기
     func fetchFamilyMembers(for currentFamilyId: String) {
@@ -22,8 +24,22 @@ final class AddMissionViewModel {
         self.familyMembers = [user1, user2]
     }
     
-    // UIMenu에서 이름을 선택했을 때 호출되는 메서드
+    // 담당자 저장
     func selectWorker(with name: String) {
         self.selectedWorkerName = name
     }
+    
+    // 요일 반복 저장
+    func updateSelectedRepeatDays(_ days: [Day]) {
+        self.selectedRepeatDays = Set(days)
+        
+        if days.isEmpty {
+            recurringType = .none
+        } else if days.count == 7 {
+            recurringType = .daily
+        } else {
+            recurringType = .weekly
+        }
+    }
+    
 }
