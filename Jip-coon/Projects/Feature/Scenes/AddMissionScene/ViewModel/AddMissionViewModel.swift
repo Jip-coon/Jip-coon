@@ -10,10 +10,18 @@ import Combine
 import Core
 
 final class AddMissionViewModel: ObservableObject {
-    @Published var familyMembers: [User] = []
-    @Published var selectedWorkerName: String = "선택해 주세요"
-    @Published private(set) var recurringType: RecurringType = .none
-    @Published var selectedRepeatDays: Set<Day> = []
+    @Published var missionTitle: String = ""
+    @Published var missionDescription: String = ""
+    @Published var missionCreateDate: Date = Date()
+    @Published var selectedDate: Date = Date()  // 선택된 날짜
+    @Published var selectedTime: Date = Date()  // 선택된 시간
+    @Published var missionDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
+    @Published var missionCategory: QuestCategory = .laundry
+    @Published var familyMembers: [User] = []   // 가족 구성원
+    @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
+    @Published var starCount: Int = 10
+    @Published private(set) var recurringType: RecurringType = .none    // 반복 타입
+    @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
     
     // TODO: - Firebase에서 데이터 가져오기
     func fetchFamilyMembers(for currentFamilyId: String) {
@@ -40,6 +48,48 @@ final class AddMissionViewModel: ObservableObject {
         } else {
             recurringType = .weekly
         }
+    }
+    
+    func combineDateAndTime() {
+        let calendar = Calendar.current
+        
+        // 날짜와 시간 각각의 컴포넌트 추출
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        
+        // 합치기
+        var mergedComponents = DateComponents()
+        mergedComponents.year = dateComponents.year
+        mergedComponents.month = dateComponents.month
+        mergedComponents.day = dateComponents.day
+        mergedComponents.hour = timeComponents.hour
+        mergedComponents.minute = timeComponents.minute
+        mergedComponents.second = 0
+        
+        // 최종 missionDueDate 생성
+        missionDueDate = calendar.date(from: mergedComponents)
+    }
+    
+    // TODO: - 미션 데이터 저장
+    func saveMission() {
+        print("Save Mission:")
+        print("Title:", missionTitle)
+        print("Description:", missionDescription)
+        
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        formatter.timeZone = .current
+        
+        print("MissionDueDate (local):", formatter.string(from: missionDueDate ?? Date()))
+        print("Date:", formatter.string(from: selectedDate))
+        print("Time:", formatter.string(from: selectedTime))
+        
+        print("Worker:", selectedWorkerName)
+        print("Star:", starCount)
+        print("Recurring:", recurringType)
+        print("Repeat Days:", selectedRepeatDays)
+        print("Category:", missionCategory)
     }
     
 }

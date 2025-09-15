@@ -27,6 +27,10 @@ final class TextFieldComponent: UIView {
         return textField
     }()
     
+    var text: String? {
+        return textField.text
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()

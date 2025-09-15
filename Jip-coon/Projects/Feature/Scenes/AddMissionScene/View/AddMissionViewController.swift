@@ -9,12 +9,16 @@ import UIKit
 import Combine
 import UI
 
-// TODO: - 나중에 public 지우기
-public final class AddMissionViewController: UIViewController {
+final class AddMissionViewController: UIViewController {
     private let viewModel = AddMissionViewModel()
     private var cancellables = Set<AnyCancellable>()
     
-    private let scrollView = UIScrollView()
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
+    }()
+    
     private let containerView = UIView()
     private let categoryCarouselView = CategoryCarouselView()   // 카테고리 뷰
     
@@ -86,7 +90,17 @@ public final class AddMissionViewController: UIViewController {
         return view
     }()
     
-    public override func viewDidLoad() {
+    private let missionAddButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("미션 추가", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
+        button.backgroundColor = .mainOrange
+        button.layer.cornerRadius = 12
+        return button
+    }()
+    
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()  // UI 설정
         bindViewModel()     // ViewModel
@@ -96,6 +110,7 @@ public final class AddMissionViewController: UIViewController {
     
     private func setupConstraints() {
         view.backgroundColor = .backgroundWhite
+        navigationItem.title = "미션 추가"
         view.addSubview(scrollView)
         scrollView.addSubview(containerView)
         
@@ -107,7 +122,8 @@ public final class AddMissionViewController: UIViewController {
             timeInfoRowView,
             workerInfoRowView,
             starInfoRowView,
-            scheduleRepeatView
+            scheduleRepeatView,
+            missionAddButton
             
         ].forEach(containerView.addSubview)
         
@@ -121,7 +137,8 @@ public final class AddMissionViewController: UIViewController {
             timeInfoRowView,
             workerInfoRowView,
             starInfoRowView,
-            scheduleRepeatView
+            scheduleRepeatView,
+            missionAddButton
             
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -138,7 +155,6 @@ public final class AddMissionViewController: UIViewController {
             containerView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             containerView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            containerView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
             
             categoryCarouselView.topAnchor.constraint(equalTo: containerView.topAnchor),
             categoryCarouselView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -174,9 +190,16 @@ public final class AddMissionViewController: UIViewController {
             scheduleRepeatView.topAnchor.constraint(equalTo: starInfoRowView.bottomAnchor, constant: 42),
             scheduleRepeatView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             scheduleRepeatView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75)
+            scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
+            
+            missionAddButton.topAnchor.constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 47),
+            missionAddButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            missionAddButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            missionAddButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -34),
+            missionAddButton.heightAnchor.constraint(equalToConstant: 47)
         ])
     }
+    // MARK: - 함수
     
     private func bindViewModel() {
         viewModel.$selectedWorkerName
@@ -197,6 +220,8 @@ public final class AddMissionViewController: UIViewController {
         view.endEditing(true)
     }
     
+    // MARK: - 버튼 관련 함수
+    
     // 각 버튼 액션 정의
     private func setupInfoRowViewButtonAction() {
         // 날짜
@@ -216,6 +241,13 @@ public final class AddMissionViewController: UIViewController {
         scheduleRepeatView.onDayButtonTapped = { [weak self] days in
             self?.viewModel.updateSelectedRepeatDays(days)
         }
+        
+        // 카테고리
+        categoryCarouselView.onCategorySelected = { [weak self] category in
+            self?.viewModel.missionCategory = category
+        }
+        
+        missionAddButton.addTarget(self, action: #selector(missionAddButtonTapped), for: .touchUpInside)
     }
     
     // 날짜 버튼 -> DatePicker
@@ -224,6 +256,8 @@ public final class AddMissionViewController: UIViewController {
         
         datePickerViewController.onDidTapDone = { [weak self] date in
             self?.dateInfoRowView.setValueText(date.yyyyMMdEE)
+            self?.viewModel.selectedDate = date
+            self?.viewModel.combineDateAndTime()
         }
         
         let navigationController = UINavigationController(rootViewController: datePickerViewController)
@@ -242,6 +276,8 @@ public final class AddMissionViewController: UIViewController {
         
         timePickerViewController.onDidTapDone = { [weak self] date in
             self?.timeInfoRowView.setValueText(date.aHHmm)
+            self?.viewModel.selectedTime = date
+            self?.viewModel.combineDateAndTime()
         }
         
         let navigationController = UINavigationController(rootViewController: timePickerViewController)
@@ -276,11 +312,33 @@ public final class AddMissionViewController: UIViewController {
             let title = "\(starCount) 개"
             return UIAction(title: title) { [weak self] _ in
                 self?.starInfoRowView.setValueText(title)
+                self?.viewModel.starCount = starCount
             }
         }
         
         let menu = UIMenu(title: "별의 개수", children: menuActions)
         
         starInfoRowView.setupMenu(menu)
+    }
+    
+    // 미션추가 버튼
+    @objc private func missionAddButtonTapped() {
+        view.endEditing(true)
+        
+        viewModel.missionTitle = titleTextField.text ?? ""
+        viewModel.missionDescription = memoTextField.text ?? ""
+        viewModel.missionCreateDate = Date()
+        
+        viewModel.saveMission()
+    }
+}
+
+extension AddMissionViewController: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField == titleTextField {
+            viewModel.missionTitle = textField.text ?? ""
+        } else {
+            viewModel.missionDescription = textField.text ?? ""
+        }
     }
 }

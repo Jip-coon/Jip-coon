@@ -19,18 +19,13 @@ final class InfoRowView: UIView {
     private let colors: [UIColor] = [.blue1, .blue2, .brown1, .green1, .orange3, .purple1, .red1, .yellow1]
     var onTap: (() -> Void)?
     
+    // 이모지 + 타이틀
     private var leadingView: UIView
     
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .pretendard(ofSize: 16, weight: .semibold)
         return label
-    }()
-    
-    private var actionButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
     }()
     
     private let titleStack: UIStackView = {
@@ -41,6 +36,13 @@ final class InfoRowView: UIView {
         return stackView
     }()
     
+    // 내용
+    private var actionButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
@@ -49,6 +51,10 @@ final class InfoRowView: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
+    
+    var valueText: String {
+        return actionButton.titleLabel?.text ?? ""
+    }
     
     init(leading: UIView, title: String, value: String, buttonStyle: InfoRowButtonStyle = .plain) {
         self.leadingView = leading
@@ -79,6 +85,7 @@ final class InfoRowView: UIView {
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            heightAnchor.constraint(equalToConstant: 30)
         ])
     }
     

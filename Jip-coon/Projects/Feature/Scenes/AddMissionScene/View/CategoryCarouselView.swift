@@ -12,6 +12,7 @@ final class CategoryCarouselView: UIView {
     private var previousCellIndex = 0
     private var focusedIndex: Int = 2
     private var didInitialView = false
+    var onCategorySelected: ((QuestCategory) -> Void)?
     
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -114,6 +115,10 @@ extension CategoryCarouselView: UIScrollViewDelegate {
                 
                 cell.updateLayout(isFocused: true)
                 previousCellIndex = indexPath.item
+                
+                // 뷰모델에 카테고리 저장
+                let category = QuestCategory.allCases[focusedIndex]
+                onCategorySelected?(category)
             }
         }
     }
