@@ -133,3 +133,39 @@ public enum RecurringType: String, CaseIterable, Codable {
         }
     }
 }
+
+// MARK: - 긴급도 레벨
+
+public enum UrgencyLevel: String, CaseIterable, Codable {
+    case low = "low"  // 낮음
+    case medium = "medium"  // 보통
+    case high = "high"  // 높음
+    case critical = "critical"  // 매우 긴급
+
+    public var displayName: String {
+        switch self {
+        case .low: return "여유"
+        case .medium: return "보통"
+        case .high: return "긴급"
+        case .critical: return "매우 긴급"
+        }
+    }
+
+    public var color: String {
+        switch self {
+        case .low: return "textGray"
+        case .medium: return "mainOrange"
+        case .high: return "secondaryOrange"
+        case .critical: return "textRed"
+        }
+    }
+
+    public var emoji: String {
+        switch self {
+        case .low: return "📅"
+        case .medium: return "⏰"
+        case .high: return "⚠️"
+        case .critical: return "🚨"
+        }
+    }
+}
