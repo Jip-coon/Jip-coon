@@ -9,7 +9,7 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
-final public class FirebaseUserService: UserServiceProtocol {
+public final class FirebaseUserService: UserServiceProtocol {
     private let db = Firestore.firestore()
     private var usersCollection: CollectionReference {
         return db.collection(FirestoreCollections.users)
@@ -23,22 +23,22 @@ final public class FirebaseUserService: UserServiceProtocol {
     }
     
     /// 사용자 정보 조회
-    func getUser(by id: String) async throws -> User? {
+    public func getUser(by id: String) async throws -> User? {
         return try await usersCollection.document(id).getDocument(as: User.self)
     }
     
     /// 사용자 정보 업데이트
-    func updateUser(_ user: User) async throws {
+    public func updateUser(_ user: User) async throws {
         try usersCollection.document(user.id).setData(from: user)
     }
     
     /// 사용자 삭제
-    func deleteUser(id: String) async throws {
+    public func deleteUser(id: String) async throws {
         try await usersCollection.document(id).delete()
     }
     
     /// 현재 로그인한 사용자 정보 조회
-    func getCurrentUser() async throws -> User? {
+    public func getCurrentUser() async throws -> User? {
         // Firebase Auth에서 현재 로그인한 사용자 정보 가져오기
         guard let currentUser = Auth.auth().currentUser else {
             // 로그인한 사용자가 없으면 nil 반환
@@ -48,12 +48,12 @@ final public class FirebaseUserService: UserServiceProtocol {
     }
     
     /// 사용자 포인트 업데이트
-    func updateUserPoints(userId: String, points: Int) async throws {
+    public func updateUserPoints(userId: String, points: Int) async throws {
         try await usersCollection.document(userId).updateData(["points": points])
     }
     
     /// 가족 구성원 목록 조회
-    func getFamilyMembers(familyId: String) async throws -> [User] {
+    public func getFamilyMembers(familyId: String) async throws -> [User] {
         // familyId와 일치하는 문서 가져오기
         let snapshot = try await usersCollection.whereField("familyId", isEqualTo: familyId).getDocuments()
         
@@ -63,6 +63,5 @@ final public class FirebaseUserService: UserServiceProtocol {
         
         return users
     }
-    
     
 }
