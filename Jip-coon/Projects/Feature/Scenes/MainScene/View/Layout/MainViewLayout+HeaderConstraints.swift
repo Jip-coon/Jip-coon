@@ -77,15 +77,16 @@ extension MainViewLayout {
             components.scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
             // 콘텐츠뷰 제약조건
-            components.contentView.topAnchor.constraint(equalTo: components.scrollView.contentLayoutGuide.topAnchor),
+            components.contentView.topAnchor
+                .constraint(equalTo:components.scrollView.contentLayoutGuide.topAnchor),
             components.contentView.leadingAnchor
                 .constraint(equalTo: components.scrollView.contentLayoutGuide.leadingAnchor),
             components.contentView.trailingAnchor
                 .constraint(equalTo: components.scrollView.contentLayoutGuide.trailingAnchor),
             components.contentView.bottomAnchor
                 .constraint(equalTo: components.scrollView.contentLayoutGuide.bottomAnchor),
-            components.contentView.widthAnchor.constraint(equalTo: components.scrollView.frameLayoutGuide.widthAnchor),
-      
+            components.contentView.widthAnchor
+                .constraint(equalTo: components.scrollView.frameLayoutGuide.widthAnchor),
 
         ])
     }

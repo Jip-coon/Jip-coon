@@ -72,12 +72,13 @@ public class RecentActivityCollectionViewCell: UICollectionViewCell {
             statusIconLabel.widthAnchor.constraint(equalToConstant: 20),
             statusIconLabel.heightAnchor.constraint(equalToConstant: 20),
 
-            titleLabel.leadingAnchor.constraint(equalTo: statusIconLabel.trailingAnchor, constant: 8),
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: statusIconLabel.trailingAnchor, constant: 8),
             titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            titleLabel.heightAnchor.constraint(equalToConstant: 17.5),
 
-            timeLabel.leadingAnchor.constraint(equalTo: statusIconLabel.trailingAnchor, constant: 8),
             timeLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            timeLabel.leadingAnchor.constraint(equalTo: statusIconLabel.trailingAnchor, constant: 8),
             timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             timeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
         ])
@@ -126,30 +127,12 @@ public class EmptyRecentActivityCollectionViewCell: UICollectionViewCell {
 
     // MARK: - UI 구성요소
 
-    private let iconLabel: UILabel = {
-        let label = UILabel()
-        label.text = "📰"
-        label.font = .systemFont(ofSize: 24)
-        label.textAlignment = .center
-        return label
-    }()
-
     private let messageLabel: UILabel = {
         let label = UILabel()
         label.text = "아직 활동이 없어요"
-        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.font = .systemFont(ofSize: 14, weight: .medium)
         label.textColor = UIColor.systemGray
         label.textAlignment = .center
-        return label
-    }()
-
-    private let subMessageLabel: UILabel = {
-        let label = UILabel()
-        label.text = "가족들과 함께 할 일을 시작해보세요!"
-        label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = UIColor.textGray
-        label.textAlignment = .center
-        label.numberOfLines = 0
         return label
     }()
 
@@ -170,27 +153,13 @@ public class EmptyRecentActivityCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = UIColor.systemGray6.withAlphaComponent(0.5)
         contentView.layer.cornerRadius = 8
 
-        contentView.addSubview(iconLabel)
         contentView.addSubview(messageLabel)
-        contentView.addSubview(subMessageLabel)
 
-        iconLabel.translatesAutoresizingMaskIntoConstraints = false
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        subMessageLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-
             messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            messageLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 8),
-
-            subMessageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            subMessageLabel.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 4),
-            subMessageLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            subMessageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            subMessageLabel.bottomAnchor.constraint(
-                lessThanOrEqualTo: contentView.bottomAnchor, constant: -20),
+            messageLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
     }
 }

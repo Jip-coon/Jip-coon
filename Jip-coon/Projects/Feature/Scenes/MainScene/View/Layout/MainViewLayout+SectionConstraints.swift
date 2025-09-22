@@ -21,6 +21,7 @@ extension MainViewLayout {
                 equalTo: components.contentView.leadingAnchor, constant: 20),
             components.urgentSectionView.trailingAnchor.constraint(
                 equalTo: components.contentView.trailingAnchor, constant: -20),
+            components.urgentSectionView.heightAnchor.constraint(equalToConstant: 150),
 
             // 긴급 할일 타이틀과 개수
             components.urgentTitleLabel.topAnchor.constraint(
@@ -84,6 +85,7 @@ extension MainViewLayout {
                 equalTo: components.contentView.leadingAnchor, constant: 20),
             components.statsSectionView.trailingAnchor.constraint(
                 equalTo: components.contentView.trailingAnchor, constant: -20),
+            components.statsSectionView.heightAnchor.constraint(equalToConstant: 172),
 
             components.statsTitleLabel.topAnchor.constraint(
                 equalTo: components.statsSectionView.topAnchor, constant: 16),
@@ -96,9 +98,9 @@ extension MainViewLayout {
                 equalTo: components.statsTitleLabel.bottomAnchor, constant: 12),
             components.progressView.leadingAnchor.constraint(
                 equalTo: components.statsSectionView.leadingAnchor, constant: 16),
+            components.progressView.heightAnchor.constraint(equalToConstant: 8),
             components.progressView.trailingAnchor.constraint(
                 equalTo: components.progressLabel.leadingAnchor, constant: -12),
-            components.progressView.heightAnchor.constraint(equalToConstant: 8),
 
             components.progressLabel.centerYAnchor.constraint(
                 equalTo: components.progressView.centerYAnchor),
@@ -124,6 +126,7 @@ extension MainViewLayout {
                 equalTo: components.contentView.leadingAnchor, constant: 20),
             components.quickActionsSectionView.trailingAnchor.constraint(
                 equalTo: components.contentView.trailingAnchor, constant: -20),
+            components.quickActionsSectionView.heightAnchor.constraint(equalToConstant: 126),
 
             components.quickActionsTitleLabel.topAnchor.constraint(
                 equalTo: components.quickActionsSectionView.topAnchor, constant: 16),

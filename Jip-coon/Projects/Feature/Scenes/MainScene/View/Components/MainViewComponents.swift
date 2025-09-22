@@ -39,6 +39,7 @@ public class MainViewComponents: NSObject {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = UIColor.backgroundWhite
         scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
         scrollView.alwaysBounceVertical = true
         return scrollView
     }()
