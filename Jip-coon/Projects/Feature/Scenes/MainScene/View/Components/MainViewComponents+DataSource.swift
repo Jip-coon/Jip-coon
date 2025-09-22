@@ -23,7 +23,7 @@ extension MainViewComponents: UICollectionViewDataSource {
             return myTasks.isEmpty ? 1 : myTasks.count
         case categoryStatsCollectionView:
             let validStats = categoryStats.filter { $0.value > 0 }
-            return validStats.isEmpty ? 1 : min(validStats.count, 4)
+            return validStats.isEmpty ? 1 : validStats.count  // 모든 카테고리 표시
         case quickActionsCollectionView:
             return quickActions.count
         case recentActivityCollectionView:

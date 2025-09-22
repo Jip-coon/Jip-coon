@@ -69,20 +69,22 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),  // 12 → 16
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            titleLabel.heightAnchor.constraint(equalToConstant: 20),
 
             statusLabel.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            statusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            statusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
             statusLabel.widthAnchor.constraint(equalToConstant: 60),
             statusLabel.heightAnchor.constraint(equalToConstant: 20),
             statusLabel.leadingAnchor.constraint(
                 greaterThanOrEqualTo: titleLabel.trailingAnchor, constant: 8),
 
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),  // 8 → 12
-            descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            descriptionLabel.trailingAnchor.constraint(equalTo: statusLabel.leadingAnchor, constant: -8),
-            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),  // -12 → -16
+            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            descriptionLabel.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor, constant: -12),
+            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
         ])
     }
 
@@ -93,15 +95,14 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
     }
 
     @objc private func handleTap() {
-        // 탭 애니메이션
         UIView.animate(
             withDuration: 0.1,
             animations: {
-                self.contentView.transform = CGAffineTransform(scaleX: 0.98, y: 0.98)
+                self.contentView.alpha = 0.6
             }
         ) { _ in
             UIView.animate(withDuration: 0.1) {
-                self.contentView.transform = .identity
+                self.contentView.alpha = 1.0
             }
         }
 
@@ -141,7 +142,7 @@ public class EmptyMyTasksCollectionViewCell: UICollectionViewCell {
     private let iconLabel: UILabel = {
         let label = UILabel()
         label.text = "🎉"
-        label.font = .systemFont(ofSize: 24)
+        label.font = .systemFont(ofSize: 20)
         label.textAlignment = .center
         return label
     }()
@@ -193,15 +194,17 @@ public class EmptyMyTasksCollectionViewCell: UICollectionViewCell {
 
         NSLayoutConstraint.activate([
             iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
 
             messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             messageLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 8),
+            messageLabel.heightAnchor.constraint(equalToConstant: 20),
 
             subMessageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             subMessageLabel.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 4),
+            subMessageLabel.heightAnchor.constraint(equalToConstant: 14),
             subMessageLabel.bottomAnchor.constraint(
-                lessThanOrEqualTo: contentView.bottomAnchor, constant: -20),
+                lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
         ])
     }
 }

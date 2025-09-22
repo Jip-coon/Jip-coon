@@ -58,10 +58,8 @@ public class CategoryStatsCollectionViewCell: UICollectionViewCell {
     private func setupUI() {
         contentView.backgroundColor = UIColor.white.withAlphaComponent(0.9)
         contentView.layer.cornerRadius = 12
-        contentView.layer.shadowColor = UIColor.black.cgColor
-        contentView.layer.shadowOpacity = 0.1
-        contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        contentView.layer.shadowRadius = 4
+        contentView.layer.borderWidth = 1
+        contentView.layer.borderColor = UIColor.textGray.withAlphaComponent(0.3).cgColor
 
         contentView.addSubview(emojiLabel)
         contentView.addSubview(countLabel)
@@ -77,9 +75,11 @@ public class CategoryStatsCollectionViewCell: UICollectionViewCell {
 
             countLabel.topAnchor.constraint(equalTo: emojiLabel.bottomAnchor, constant: 2),
             countLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            countLabel.heightAnchor.constraint(equalToConstant: 18),
 
             nameLabel.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: 2),
             nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            nameLabel.heightAnchor.constraint(equalToConstant: 12),
             nameLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
     }
@@ -91,15 +91,14 @@ public class CategoryStatsCollectionViewCell: UICollectionViewCell {
     }
 
     @objc private func handleTap() {
-        // 탭 애니메이션
         UIView.animate(
             withDuration: 0.1,
             animations: {
-                self.contentView.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+                self.contentView.alpha = 0.6
             }
         ) { _ in
             UIView.animate(withDuration: 0.1) {
-                self.contentView.transform = .identity
+                self.contentView.alpha = 1.0
             }
         }
 

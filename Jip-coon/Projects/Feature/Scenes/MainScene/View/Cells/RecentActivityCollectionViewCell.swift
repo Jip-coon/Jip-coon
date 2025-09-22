@@ -90,15 +90,14 @@ public class RecentActivityCollectionViewCell: UICollectionViewCell {
     }
 
     @objc private func handleTap() {
-        // 탭 애니메이션
         UIView.animate(
             withDuration: 0.1,
             animations: {
-                self.contentView.transform = CGAffineTransform(scaleX: 0.98, y: 0.98)
+                self.contentView.alpha = 0.6
             }
         ) { _ in
             UIView.animate(withDuration: 0.1) {
-                self.contentView.transform = .identity
+                self.contentView.alpha = 1.0
             }
         }
 

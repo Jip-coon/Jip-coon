@@ -30,6 +30,11 @@ public class MainViewController: UIViewController {
         viewModel.refreshData()
     }
 
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        components.updateShadowPaths()
+    }
+
     private func setupUI() {
         view.backgroundColor = UIColor.headerBeige
         self.navigationController?.navigationBar.isHidden = true

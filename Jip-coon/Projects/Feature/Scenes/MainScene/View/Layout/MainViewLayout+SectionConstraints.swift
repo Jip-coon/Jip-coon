@@ -74,7 +74,6 @@ extension MainViewLayout {
                 equalTo: components.myTasksSectionView.leadingAnchor, constant: 16),
             components.myTasksCollectionView.trailingAnchor.constraint(
                 equalTo: components.myTasksSectionView.trailingAnchor, constant: -16),
-            components.myTasksCollectionView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
             components.myTasksCollectionView.bottomAnchor.constraint(
                 equalTo: components.myTasksSectionView.bottomAnchor, constant: -16),
 
@@ -140,7 +139,7 @@ extension MainViewLayout {
             components.quickActionsCollectionView.trailingAnchor.constraint(
                 equalTo: components.quickActionsSectionView.trailingAnchor, constant: -16),
             components.quickActionsCollectionView.heightAnchor.constraint(
-                greaterThanOrEqualToConstant: 70),
+                greaterThanOrEqualToConstant: 60),
             components.quickActionsCollectionView.bottomAnchor.constraint(
                 equalTo: components.quickActionsSectionView.bottomAnchor, constant: -16),
 
@@ -165,8 +164,6 @@ extension MainViewLayout {
                 equalTo: components.recentActivitySectionView.leadingAnchor, constant: 16),
             components.recentActivityCollectionView.trailingAnchor.constraint(
                 equalTo: components.recentActivitySectionView.trailingAnchor, constant: -16),
-            components.recentActivityCollectionView.heightAnchor.constraint(
-                greaterThanOrEqualToConstant: 75),
             components.recentActivityCollectionView.bottomAnchor.constraint(
                 equalTo: components.recentActivitySectionView.bottomAnchor, constant: -16),
 
@@ -196,5 +193,14 @@ extension MainViewLayout {
             components.achievementLabel.bottomAnchor.constraint(
                 equalTo: components.achievementSectionView.bottomAnchor, constant: -16),
         ])
+
+        components.myTasksCollectionViewHeightConstraint = components.myTasksCollectionView.heightAnchor
+            .constraint(equalToConstant: 80)  // 최소 높이로 초기화
+        components.myTasksCollectionViewHeightConstraint?.isActive = true
+
+        components.recentActivityCollectionViewHeightConstraint = components
+            .recentActivityCollectionView.heightAnchor
+            .constraint(equalToConstant: 68)  // 최소 높이로 초기화
+        components.recentActivityCollectionViewHeightConstraint?.isActive = true
     }
 }

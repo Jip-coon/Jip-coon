@@ -74,22 +74,18 @@ public class UrgentTaskCollectionViewCell: UICollectionViewCell {
     }
 
     @objc private func handleTap() {
-        performTapAnimation()
-        onTap?()
-    }
-
-    private func performTapAnimation() {
         UIView.animate(
             withDuration: 0.1,
-            animations: { [weak self] in
-                self?.contentView.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-            },
-            completion: { [weak self] _ in
-                UIView.animate(withDuration: 0.1) {
-                    self?.contentView.transform = .identity
-                }
+            animations: {
+                self.contentView.alpha = 0.6
             }
-        )
+        ) { _ in
+            UIView.animate(withDuration: 0.1) {
+                self.contentView.alpha = 1.0
+            }
+        }
+
+        onTap?()
     }
 
     // MARK: - 구성

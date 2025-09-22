@@ -20,28 +20,19 @@ extension MainViewComponents: UICollectionViewDelegate, UICollectionViewDelegate
         switch collectionView {
         case urgentCollectionView:
             let cellWidth = collectionView.frame.width
-            return CGSize(width: max(180, cellWidth), height: 60)
+            return CGSize(width: cellWidth, height: 60)
         case myTasksCollectionView:
-            let width = max(300, collectionView.frame.width - 32)
-            return CGSize(width: width, height: 100)
+            let width = collectionView.frame.width
+            return CGSize(width: width, height: 80)
         case categoryStatsCollectionView:
             return CGSize(width: 70, height: 80)
         case quickActionsCollectionView:
-            let totalWidth = collectionView.frame.width
-            let sectionPadding: CGFloat = 32
-            let buttonCount = CGFloat(quickActions.count)
-            let interItemSpacing: CGFloat = 12
-
-            let totalSpacing = (buttonCount - 1) * interItemSpacing
-            let availableWidth = totalWidth - sectionPadding - totalSpacing
-
-            let dynamicWidth = availableWidth / buttonCount
-            let width = min(max(60, dynamicWidth), 100)
-
-            return CGSize(width: width, height: 70)
+            let totalWith = collectionView.frame.width
+            let itemWidth = totalWith - 24
+            return CGSize(width: itemWidth/4, height: 60)
         case recentActivityCollectionView:
-            let width = max(300, collectionView.frame.width - 32)
-            return CGSize(width: width, height: 75)
+            let width = collectionView.frame.width
+            return CGSize(width: width, height: 60)
         default:
             return CGSize(width: 100, height: 100)
         }
@@ -54,6 +45,8 @@ extension MainViewComponents: UICollectionViewDelegate, UICollectionViewDelegate
         switch collectionView {
         case myTasksCollectionView:
             return UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+        case categoryStatsCollectionView:
+            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 16)
         case recentActivityCollectionView:
             return UIEdgeInsets(top: 4, left: 0, bottom: 4, right: 0)
         default:

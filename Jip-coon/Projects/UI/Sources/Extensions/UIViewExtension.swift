@@ -48,6 +48,16 @@ extension UIView {
         layer.shadowRadius = radius
     }
 
+    public func updateShadowPath(cornerRadius: CGFloat = 12) {
+        if bounds != .zero {
+            layer.shadowPath =
+            UIBezierPath(
+                roundedRect: bounds,
+                cornerRadius: cornerRadius
+            ).cgPath
+        }
+    }
+
     /// 표준 모서리 둥글기를 적용합니다
     public func applyCornerRadius(_ radius: CGFloat = 12) {
         layer.cornerRadius = radius

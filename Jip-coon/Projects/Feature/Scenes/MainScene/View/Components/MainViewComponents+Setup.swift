@@ -20,6 +20,9 @@ extension MainViewComponents {
         self.myTasks = Array(quests.prefix(10))  // 최대 10개
         self.onMyTaskTap = onMyTaskTap
         myTasksCollectionView.reloadData()
+
+        // 컬렉션뷰 높이 업데이트
+        updateMyTasksCollectionViewHeight()
     }
 
     /// 빠른 액션 데이터 설정
@@ -38,6 +41,9 @@ extension MainViewComponents {
         }
         self.onRecentActivityTap = onRecentActivityTap
         recentActivityCollectionView.reloadData()
+
+        // 컬렉션뷰 높이 업데이트
+        updateRecentActivityCollectionViewHeight()
     }
 
     /// 카테고리 통계 데이터 설정

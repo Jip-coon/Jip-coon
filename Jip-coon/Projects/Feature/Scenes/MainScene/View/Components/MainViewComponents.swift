@@ -28,6 +28,11 @@ public class MainViewComponents: NSObject {
     public var recentActivities: [RecentActivity] = []
     public var onRecentActivityTap: ((RecentActivity) -> Void)?
 
+    // MARK: - 담당한 할 일 & 최근 활동 높이
+
+    public var myTasksCollectionViewHeightConstraint: NSLayoutConstraint?
+    public var recentActivityCollectionViewHeightConstraint: NSLayoutConstraint?
+
     // MARK: - UI Components
 
     public lazy var scrollView: UIScrollView = {
@@ -233,7 +238,7 @@ public class MainViewComponents: NSObject {
         return label
     }()
 
-    // MARK: - Collection Views
+    // MARK: - 컬렉션뷰들
 
     public lazy var urgentCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -282,7 +287,8 @@ public class MainViewComponents: NSObject {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.isScrollEnabled = false
+        collectionView.isScrollEnabled = true
+        collectionView.contentInsetAdjustmentBehavior = .automatic
 
         collectionView.register(
             MyTasksCollectionViewCell.self,
@@ -297,15 +303,13 @@ public class MainViewComponents: NSObject {
     public lazy var categoryStatsCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 70, height: 70)
         layout.minimumInteritemSpacing = 8
         layout.minimumLineSpacing = 8
-        layout.sectionInset = UIEdgeInsets.zero
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.isScrollEnabled = false
+        collectionView.isScrollEnabled = true  // 스크롤 활성화
 
         collectionView.register(
             CategoryStatsCollectionViewCell.self,
@@ -320,14 +324,14 @@ public class MainViewComponents: NSObject {
     public lazy var quickActionsCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.minimumInteritemSpacing = 12
-        layout.minimumLineSpacing = 12
+        layout.minimumInteritemSpacing = 8
+        layout.minimumLineSpacing = 8
         layout.sectionInset = UIEdgeInsets.zero
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.isScrollEnabled = false
+        collectionView.isScrollEnabled = true
 
         collectionView.register(
             QuickActionCollectionViewCell.self,
@@ -347,6 +351,7 @@ public class MainViewComponents: NSObject {
         collectionView.backgroundColor = .clear
         collectionView.showsVerticalScrollIndicator = false
         collectionView.isScrollEnabled = false
+        collectionView.contentInsetAdjustmentBehavior = .automatic
 
         collectionView.register(
             RecentActivityCollectionViewCell.self,
@@ -380,5 +385,64 @@ public class MainViewComponents: NSObject {
 
         recentActivityCollectionView.dataSource = self
         recentActivityCollectionView.delegate = self
+    }
+
+    // MARK: - Shadow Path Setup
+
+    public func updateShadowPaths() {
+        notificationButton.updateShadowPath(cornerRadius: 12)
+        urgentSectionView.updateShadowPath()
+        myTasksSectionView.updateShadowPath()
+        statsSectionView.updateShadowPath()
+        quickActionsSectionView.updateShadowPath()
+        recentActivitySectionView.updateShadowPath()
+        achievementSectionView.updateShadowPath()
+    }
+
+    // MARK: - 동적 높이 업데이트
+
+    /// 할 일 개수에 따라 MyTasksCollectionView의 높이를 동적으로 업데이트
+    public func updateMyTasksCollectionViewHeight() {
+        let taskCount = myTasks.count
+        let cellHeight: CGFloat = 80
+        let lineSpacing: CGFloat = 12
+        let sectionInset: CGFloat = 16
+
+        // 최소 1개, 최대 3개까지 표시되도록 계산
+        let visibleCells = min(max(taskCount, 1), 3)
+        let calculatedHeight =
+        CGFloat(visibleCells) * cellHeight + CGFloat(visibleCells - 1) * lineSpacing + sectionInset
+
+        // 80~340 범위로 제한
+        let finalHeight = min(max(calculatedHeight, 80), 340)
+
+        // 높이 제약 조건 업데이트
+        myTasksCollectionViewHeightConstraint?.constant = finalHeight
+
+        // 애니메이션과 함께 레이아웃 업데이트
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            self.myTasksCollectionView.superview?.layoutIfNeeded()
+        }
+    }
+
+    public func updateRecentActivityCollectionViewHeight() {
+        let activityCount = recentActivities.count
+        let cellHeight: CGFloat = 60
+        let lineSpacing: CGFloat = 12
+        let sectionInset: CGFloat = 8
+
+        // 최소 1개, 최대 3개까지 표시되도록 계산
+        let visibleCells = min(max(activityCount, 1), 3)
+        let calculatedHeight =
+        CGFloat(visibleCells) * cellHeight + CGFloat(max(visibleCells - 1, 0)) * lineSpacing
+        + sectionInset
+
+        let finalHeight = min(max(calculatedHeight, 68), 200)
+
+        recentActivityCollectionViewHeightConstraint?.constant = finalHeight
+
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            self.recentActivityCollectionView.superview?.layoutIfNeeded()
+        }
     }
 }

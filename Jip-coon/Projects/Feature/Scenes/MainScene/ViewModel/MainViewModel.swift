@@ -117,6 +117,8 @@ public class MainViewModel: ObservableObject {
                     CategoryStatistic(category: .cooking, count: 2, emoji: "🍳"),
                     CategoryStatistic(category: .dishes, count: 1, emoji: "🍽️"),
                     CategoryStatistic(category: .laundry, count: 2, emoji: "👕"),
+                    CategoryStatistic(category: .pet, count: 3, emoji: "🐶"),
+                    CategoryStatistic(category: .trash, count: 1, emoji: "🗑️"),
                 ]
                 return categoryStats
             }
@@ -165,12 +167,12 @@ public class MainViewModel: ObservableObject {
 
     private func createDummyQuests() -> [Quest] {
         let questData: [(String, String, QuestCategory, Int)] = [
-            ("설거지", "식사 후 설거지 • 1시간 전 시작", .dishes, 15),
-            ("빨래 널기", "세탁기 완료 • 30분 전 시작", .laundry, 10),
-            ("청소기 돌리기", "거실 청소 • 오늘까지", .cleaning, 20),
-            ("쓰레기 배출", "분리수거 • 오늘 밤 12시까지", .trash, 5),
-            ("약국 가기", "감기약 사오기 • 1시간 남음", .other, 10),
-            ("강아지 산책", "30분 산책 • 2시간 지남", .pet, 8),
+//            ("설거지", "식사 후 설거지 • 1시간 전 시작", .dishes, 15),
+//            ("빨래 널기", "세탁기 완료 • 30분 전 시작", .laundry, 10),
+//            ("청소기 돌리기", "거실 청소 • 오늘까지", .cleaning, 20),
+//            ("쓰레기 배출", "분리수거 • 오늘 밤 12시까지", .trash, 5),
+//            ("약국 가기", "감기약 사오기 • 1시간 남음", .other, 10),
+//            ("강아지 산책", "30분 산책 • 2시간 지남", .pet, 8),
         ]
 
         var quests = questData.map { title, description, category, points in
@@ -187,13 +189,13 @@ public class MainViewModel: ObservableObject {
         }
 
         // 상태 및 마감일 설정
-        quests[0].status = .inProgress
-        quests[1].status = .inProgress
-
-        let now = Date()
-        quests[3].dueDate = Calendar.current.date(byAdding: .hour, value: 6, to: now)
-        quests[4].dueDate = Calendar.current.date(byAdding: .hour, value: 1, to: now)
-        quests[5].dueDate = Calendar.current.date(byAdding: .hour, value: -2, to: now)
+//        quests[0].status = .inProgress
+//        quests[1].status = .inProgress
+//
+//        let now = Date()
+//        quests[3].dueDate = Calendar.current.date(byAdding: .hour, value: 6, to: now)
+//        quests[4].dueDate = Calendar.current.date(byAdding: .hour, value: 1, to: now)
+//        quests[5].dueDate = Calendar.current.date(byAdding: .hour, value: -2, to: now)
 
         return quests
     }
@@ -216,9 +218,8 @@ public class MainViewModel: ObservableObject {
     private func loadRecentActivitiesAsync() async throws -> [String] {
         try await Task.sleep(nanoseconds: 600_000_000)  // 0.6초 지연
         return [
-            "김철수님이 '설거지' 완료했어요",
-            "이영희님이 '빨래 널기' 시작했어요",
-            "박민수님이 '청소기 돌리기' 완료했어요",
+            "관혁님이 '설거지' 완료했어요",
+            "예슬님이 '빨래 널기' 시작했어요",
         ]
     }
 }

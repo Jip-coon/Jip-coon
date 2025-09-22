@@ -14,7 +14,7 @@ import UIKit
 public class QuickActionCollectionViewCell: UICollectionViewCell {
 
     static let identifier = "QuickActionCollectionViewCell"
-    
+
     var onTap: (() -> Void)?
 
     // MARK: - UI 구성요소
@@ -63,14 +63,12 @@ public class QuickActionCollectionViewCell: UICollectionViewCell {
 
         NSLayoutConstraint.activate([
             iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
 
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             titleLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 4),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 4),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
-            titleLabel.bottomAnchor.constraint(
-                lessThanOrEqualTo: contentView.bottomAnchor, constant: -12),
+            titleLabel.heightAnchor.constraint(equalToConstant: 18),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
         ])
     }
 
@@ -81,15 +79,14 @@ public class QuickActionCollectionViewCell: UICollectionViewCell {
     }
 
     @objc private func handleTap() {
-        // 탭 애니메이션
         UIView.animate(
             withDuration: 0.1,
             animations: {
-                self.contentView.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                self.contentView.alpha = 0.6
             }
         ) { _ in
             UIView.animate(withDuration: 0.1) {
-                self.contentView.transform = .identity
+                self.contentView.alpha = 1.0
             }
         }
 
