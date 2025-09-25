@@ -13,15 +13,47 @@ public extension UIFont {
         FontRegistrar.registerIfNeeded()
         return UIFont(name: "NPS font ExtraBold", size: size)!
     }
+    
+    static func pretendard(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        FontRegistrar.registerIfNeeded()
+        
+        let fontName: String
+        switch weight {
+            case .regular:
+                fontName = "Pretendard-Regular"
+            case .semibold:
+                fontName = "Pretendard-SemiBold"
+            case .bold:
+                fontName = "Pretendard-Bold"
+            default:
+                fontName = "Pretendard-Regular"
+        }
+        
+        guard let font = UIFont(name: fontName, size: size) else {
+            assertionFailure("❌ Pretendard font not found: \(fontName)")
+            return UIFont.systemFont(ofSize: size, weight: weight)
+        }
+        return font
+    }
 }
 
 // MARK: - 폰트 등록 유틸
 private enum FontRegistrar {
     private static var didRegister = false
-
+    
     static func registerIfNeeded() {
         guard !didRegister else { return }  // 한 번만 등록
-
+        
+        let fontNames = [
+            "Pretendard-Regular",
+            "Pretendard-SemiBold",
+            "Pretendard-Bold"
+        ]
+        
+        for fontName in fontNames {
+            registerFont(named: fontName, ext: "otf")
+        }
+        
         registerFont(named: "NPSfont_extrabold", ext: "ttf")
         didRegister = true
     }
@@ -34,7 +66,7 @@ private enum FontRegistrar {
             print("❌ Failed to load font: \(named).\(ext)")
             return
         }
-
+        
         var error: Unmanaged<CFError>?
         CTFontManagerRegisterGraphicsFont(font, &error) // 폰트를 시스템에 등록
         if let error = error {
