@@ -27,8 +27,8 @@ extension MainViewComponents: UICollectionViewDelegate, UICollectionViewDelegate
         case categoryStatsCollectionView:
             return CGSize(width: 70, height: 80)
         case quickActionsCollectionView:
-            let totalWith = collectionView.frame.width
-            let itemWidth = totalWith - 24
+            let totalWidth = collectionView.frame.width
+            let itemWidth = totalWidth - 24
             return CGSize(width: itemWidth/4, height: 60)
         case recentActivityCollectionView:
             let width = collectionView.frame.width
