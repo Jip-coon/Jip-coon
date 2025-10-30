@@ -31,21 +31,24 @@ class MainTabBarController: UITabBarController {
     private func setupViewControllers() {
         // 해당 부분에 다른 뷰컨트롤러 추가
         // (VC(), 탭이름, 미선택 이미지, 선택 이미지)
-		viewControllers = [
+        let navs: [UINavigationController] = [
             (MainViewController(), "홈", "house", "house.fill"),
-            (UIViewController(), "설정", "gear", "gear.fill"), // 임시 뷰
-        ].enumerated().map { index, tab in
-			createNavigationController(
-                viewController: tab.0,
-                title: tab.1,
-                image: tab.2,
-                selectedImage: tab.3,
-                tag: index
-            )
-        }
+            (SettingViewController(), "설정", "gear", "gear.fill"),
+        ]
+            .enumerated()
+            .map { (index: Int, tab: (UIViewController, String, String, String)) in
+                createNavigationController(
+                    viewController: tab.0,
+                    title: tab.1,
+                    image: tab.2,
+                    selectedImage: tab.3,
+                    tag: index
+                )
+            }
+        self.viewControllers = navs
     }
 
-	private func createNavigationController(
+    private func createNavigationController(
         viewController: UIViewController,
         title: String,
         image: String,
