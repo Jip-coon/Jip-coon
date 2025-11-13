@@ -279,6 +279,7 @@ extension MainViewController {
     private func handleQuickActionTapped(_ action: QuickAction) {
         switch action.type {
             case .newQuest:
+                navigationItem.backButtonTitle = ""
                 let addMissionViewController = AddMissionViewController()
                 navigationController?.pushViewController(addMissionViewController, animated: true)
                 break
