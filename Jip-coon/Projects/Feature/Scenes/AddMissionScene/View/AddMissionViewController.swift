@@ -13,6 +13,8 @@ final class AddMissionViewController: UIViewController {
     private let viewModel = AddMissionViewModel()
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - View
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
@@ -100,17 +102,27 @@ final class AddMissionViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupConstraints()  // UI 설정
+        setupView()         // UI 설정
         bindViewModel()     // ViewModel
         hideKeyboardWhenTappedAround()  // 키보드 관련
         setupInfoRowViewButtonAction()  // 버튼 액션 관리
     }
     
-    private func setupConstraints() {
+    // MARK: - 함수들
+    
+    private func setupView() {
         view.backgroundColor = .backgroundWhite
         navigationItem.title = "미션 추가"
+        
+        addSubviews()
+        setupConstraints()
+    }
+    
+    private func addSubviews() {
         view.addSubview(scrollView)
         scrollView.addSubview(containerView)
         
@@ -143,7 +155,9 @@ final class AddMissionViewController: UIViewController {
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-        
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -156,7 +170,7 @@ final class AddMissionViewController: UIViewController {
             containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             containerView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
-            categoryCarouselView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            categoryCarouselView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 26),
             categoryCarouselView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             categoryCarouselView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
@@ -199,7 +213,6 @@ final class AddMissionViewController: UIViewController {
             missionAddButton.heightAnchor.constraint(equalToConstant: 47)
         ])
     }
-    // MARK: - 함수
     
     private func bindViewModel() {
         viewModel.$selectedWorkerName
@@ -332,6 +345,8 @@ final class AddMissionViewController: UIViewController {
         viewModel.saveMission()
     }
 }
+
+// MARK: - TextFieldDelegate
 
 extension AddMissionViewController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
