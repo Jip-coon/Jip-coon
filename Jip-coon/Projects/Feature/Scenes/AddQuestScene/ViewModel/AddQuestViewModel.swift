@@ -1,5 +1,5 @@
 //
-//  AddMissionViewModel.swift
+//  AddQuestViewModel.swift
 //  Feature
 //
 //  Created by 예슬 on 9/12/25.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import Core
 
-final class AddMissionViewModel: ObservableObject {
+final class AddQuestViewModel: ObservableObject {
     @Published var missionTitle: String = ""
     @Published var missionDescription: String = ""
     @Published var missionCreateDate: Date = Date()
@@ -70,7 +70,7 @@ final class AddMissionViewModel: ObservableObject {
         missionDueDate = calendar.date(from: mergedComponents)
     }
     
-    // TODO: - 미션 데이터 저장
+    // TODO: - 퀘스트 데이터 저장
     func saveMission() {
         print("Save Mission:")
         print("Title:", missionTitle)

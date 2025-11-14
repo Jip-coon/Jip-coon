@@ -1,5 +1,5 @@
 //
-//  AddMissionViewController.swift
+//  AddQuestViewController.swift
 //  Feature
 //
 //  Created by 예슬 on 9/8/25.
@@ -9,8 +9,8 @@ import UIKit
 import Combine
 import UI
 
-final class AddMissionViewController: UIViewController {
-    private let viewModel = AddMissionViewModel()
+final class AddQuestViewController: UIViewController {
+    private let viewModel = AddQuestViewModel()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - View
@@ -94,7 +94,7 @@ final class AddMissionViewController: UIViewController {
     
     private let missionAddButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("미션 추가", for: .normal)
+        button.setTitle("퀘스트 추가", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
         button.backgroundColor = .mainOrange
@@ -116,7 +116,7 @@ final class AddMissionViewController: UIViewController {
     
     private func setupView() {
         view.backgroundColor = .backgroundWhite
-        navigationItem.title = "미션 추가"
+        navigationItem.title = "퀘스트 추가"
         
         addSubviews()
         setupConstraints()
@@ -334,7 +334,7 @@ final class AddMissionViewController: UIViewController {
         starInfoRowView.setupMenu(menu)
     }
     
-    // 미션추가 버튼
+    // 퀘스트추가 버튼
     @objc private func missionAddButtonTapped() {
         view.endEditing(true)
         
@@ -348,7 +348,7 @@ final class AddMissionViewController: UIViewController {
 
 // MARK: - TextFieldDelegate
 
-extension AddMissionViewController: UITextFieldDelegate {
+extension AddQuestViewController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField == titleTextField {
             viewModel.missionTitle = textField.text ?? ""

@@ -280,8 +280,8 @@ extension MainViewController {
         switch action.type {
             case .newQuest:
                 navigationItem.backButtonTitle = ""
-                let addMissionViewController = AddMissionViewController()
-                navigationController?.pushViewController(addMissionViewController, animated: true)
+                let addQuestViewController = AddQuestViewController()
+                navigationController?.pushViewController(addQuestViewController, animated: true)
                 break
             case .search:
                 // TODO: - 검색 화면으로 이동
