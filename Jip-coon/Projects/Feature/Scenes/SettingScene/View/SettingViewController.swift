@@ -115,7 +115,6 @@ public final class SettingViewController: UIViewController {
                 do {
                     try self.authService.signOut()
                     NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
-                    self.navigationController?.popViewController(animated: true)
                 } catch {
                     print("로그아웃 실패: \(error.localizedDescription)")
                 }
@@ -128,8 +127,27 @@ public final class SettingViewController: UIViewController {
     }
 
     private func handleDeleteAccount() {
-        // TODO: 회원 탈퇴 처리
-        print("회원 탈퇴 처리")
+        let deleteAccountAlert = UIAlertController(
+            title: "회원탈퇴",
+            message: "회원탈퇴하시겠습니까?",
+            preferredStyle: .alert
+        )
+        let okButton = UIAlertAction(title: "회원탈퇴", style: .destructive) { _ in
+            Task {
+                do {
+                    try await self.authService.deleteAccount()
+                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                } catch {
+                    print("회원 탈퇴 실패: \(error.localizedDescription)")
+                }
+            }
+        }
+        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        deleteAccountAlert.addAction(okButton)
+        deleteAccountAlert.addAction(cancelButton)
+        present(deleteAccountAlert, animated: true, completion: nil)
+
+
     }
 }
 
