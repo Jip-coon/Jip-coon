@@ -70,6 +70,7 @@ public final class SettingViewController: UIViewController {
 
     private let authService = AuthService()
 
+
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -104,16 +105,26 @@ public final class SettingViewController: UIViewController {
     }
 
     private func handleLogout() {
-        //TODO: - Alert to Signout
-        Task {
-            do {
-                try authService.signOut()
-                NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
-                navigationController?.popViewController(animated: true)
-            } catch {
-                print("로그아웃 실패: \(error.localizedDescription)")
+        let signoutAlert = UIAlertController(
+            title: "로그아웃",
+            message: "로그아웃하시겠습니까?",
+            preferredStyle: .alert
+        )
+        let okButton = UIAlertAction(title: "로그아웃", style: .destructive) { _ in
+            Task {
+                do {
+                    try self.authService.signOut()
+                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                    self.navigationController?.popViewController(animated: true)
+                } catch {
+                    print("로그아웃 실패: \(error.localizedDescription)")
+                }
             }
         }
+        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        signoutAlert.addAction(okButton)
+        signoutAlert.addAction(cancelButton)
+        present(signoutAlert, animated: true, completion: nil)
     }
 
     private func handleDeleteAccount() {
