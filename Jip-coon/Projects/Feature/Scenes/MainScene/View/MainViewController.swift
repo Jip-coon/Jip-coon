@@ -297,6 +297,9 @@ extension MainViewController {
 
     private func handleMyTaskTapped(_ quest: Quest) {
         // TODO: - 할일 상세 화면으로 이동
+        let questDetailViewController = QuestDetailViewController(quest: quest)
+        navigationItem.backButtonTitle = ""
+        navigationController?.pushViewController(questDetailViewController, animated: true)
     }
 
     private func handleRecentActivityTapped(_ activity: RecentActivity) {

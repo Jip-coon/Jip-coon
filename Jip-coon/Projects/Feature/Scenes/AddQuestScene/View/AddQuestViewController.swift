@@ -70,7 +70,7 @@ final class AddQuestViewController: UIViewController {
             leading: label,
             title: "담당",
             value: "선택해 주세요",
-            buttonStyle: .capsule
+            buttonStyle: .capsuleMenu
         )
     }()
     
@@ -82,7 +82,7 @@ final class AddQuestViewController: UIViewController {
             leading: imageView,
             title: "별",
             value: "10 개",
-            buttonStyle: .plainMenu
+            buttonStyle: .rightArrowMenu
         )
     }()
     
