@@ -23,6 +23,10 @@ public final class AuthService: AuthServiceProtocol {
         try Auth.auth().signOut()
     }
 
+    public func deleteAccount() throws {
+        // TODO: - 회원 탈퇴 처리
+    }
+
     public var isLoggedIn: Bool {
         return Auth.auth().currentUser != nil
     }
