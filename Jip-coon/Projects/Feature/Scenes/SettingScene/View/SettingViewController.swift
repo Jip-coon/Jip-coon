@@ -68,6 +68,8 @@ private enum SettingItem {
 
 public final class SettingViewController: UIViewController {
 
+    private let authService = AuthService()
+
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -102,9 +104,16 @@ public final class SettingViewController: UIViewController {
     }
 
     private func handleLogout() {
-        // TODO: Firebase Auth 로그아웃 처리
-        print("로그아웃 처리")
-        NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+        //TODO: - Alert to Signout
+        Task {
+            do {
+                try authService.signOut()
+                NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                navigationController?.popViewController(animated: true)
+            } catch {
+                print("로그아웃 실패: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func handleDeleteAccount() {
@@ -164,3 +173,4 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 }
+
