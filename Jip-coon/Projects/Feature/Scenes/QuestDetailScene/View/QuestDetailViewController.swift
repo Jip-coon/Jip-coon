@@ -27,6 +27,7 @@ final class QuestDetailViewController: UIViewController {
         let textField = UITextField()
         textField.font = .pretendard(ofSize: 20, weight: .semibold)
         textField.placeholder = "Placeholder"
+        textField.textAlignment = .center
         textField.setPlaceholder(fontSize: 16)
         textField.layer.borderColor = UIColor.textFieldStroke.cgColor
         textField.layer.borderWidth = 0.7
@@ -79,7 +80,7 @@ final class QuestDetailViewController: UIViewController {
         }(),
         title: "사람",
         value: quest.assignedTo ?? "",
-        buttonStyle: isEditingMode ? .capsuleMenu : .textOnly
+        buttonStyle: .capsuleMenu
     )
     
     private lazy var starRowView = InfoRowView(
@@ -112,16 +113,18 @@ final class QuestDetailViewController: UIViewController {
         let textField = UITextField()
         textField.font = .pretendard(ofSize: 16, weight: .regular)
         textField.placeholder = "Placeholder"
-        textField.setPlaceholder(fontSize: 14)
+        textField.setPlaceholder(fontSize: 16)
         textField.layer.borderColor = UIColor.textFieldStroke.cgColor
         textField.layer.borderWidth = 0.7
         textField.layer.cornerRadius = 10
+        textField.leftPadding()
         return textField
     }()
     
     // 하단 버튼
     private lazy var completeQuestButton: UIButton = {
         let button = UIButton(type: .system)
+        button.setTitle("퀘스트 완료", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
         button.layer.cornerRadius = 12
@@ -173,7 +176,7 @@ final class QuestDetailViewController: UIViewController {
         contentView.addSubview(memoContentLabel)
         contentView.addSubview(memoEditTextField)
         
-        contentView.addSubview(completeQuestButton)
+        view.addSubview(completeQuestButton)
         
         [scrollView, contentView, categoryIcon, titleLabel, categoryCarouselView, titleEditTextField,
          dateRowView, timeRowView, workerRowView, starRowView,
@@ -198,15 +201,15 @@ final class QuestDetailViewController: UIViewController {
             categoryIcon.widthAnchor.constraint(equalToConstant: 80),
             categoryIcon.heightAnchor.constraint(equalToConstant: 80),
             
-            categoryCarouselView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            categoryCarouselView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             categoryCarouselView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             categoryCarouselView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
+            categoryCarouselView.heightAnchor.constraint(equalToConstant: 120),
             
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             titleLabel.topAnchor.constraint(equalTo: categoryIcon.bottomAnchor, constant: 12),
             
-            titleEditTextField.topAnchor.constraint(equalTo: categoryCarouselView.bottomAnchor, constant: 12),
+            titleEditTextField.topAnchor.constraint(equalTo: categoryCarouselView.bottomAnchor, constant: 20),
             titleEditTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             titleEditTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             titleEditTextField.heightAnchor.constraint(equalToConstant: 35),
@@ -237,6 +240,7 @@ final class QuestDetailViewController: UIViewController {
             memoEditTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             memoEditTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             memoEditTextField.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
+            memoEditTextField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
             
             completeQuestButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             completeQuestButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
@@ -300,15 +304,14 @@ final class QuestDetailViewController: UIViewController {
         if isEditingMode {
             dateRowView.updateButtonStyle(.rightArrowAction, quest.dueDate?.yyyyMMdEE ?? "")
             timeRowView.updateButtonStyle(.rightArrowAction, quest.dueDate?.aHHmm ?? "")
-            workerRowView.updateButtonStyle(.rightArrowMenu, quest.assignedTo ?? "")
             starRowView.updateButtonStyle(.rightArrowMenu, "\(quest.points) 개")
+            categoryCarouselView.setInitialCategory(quest.category)
         } else {
             dateRowView.updateButtonStyle(.textOnly, quest.dueDate?.yyyyMMdEE ?? "")
             timeRowView.updateButtonStyle(.textOnly, quest.dueDate?.aHHmm ?? "")
-            workerRowView.updateButtonStyle(.capsuleMenu, quest.assignedTo ?? "")
             starRowView.updateButtonStyle(.textOnly, "\(quest.points) 개")
         }
-        completeQuestButton.isHidden = isEditingMode ? false : true
+        completeQuestButton.isHidden = isEditingMode ? true : false
     }
     
     // 날짜 버튼 -> DatePicker

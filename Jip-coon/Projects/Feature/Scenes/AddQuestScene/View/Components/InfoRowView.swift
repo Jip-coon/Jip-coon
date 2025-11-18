@@ -25,7 +25,7 @@ final class InfoRowView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .pretendard(ofSize: 16, weight: .semibold)
+        label.font = .pretendard(ofSize: 16, weight: .regular)
         return label
     }()
     

@@ -10,9 +10,12 @@ import Core
 
 final class CategoryCarouselView: UIView {
     private var previousCellIndex = 0
-    private var focusedIndex: Int = 2
+    private var focusedIndex: Int = 0
     private var didInitialView = false
     var onCategorySelected: ((QuestCategory) -> Void)?
+    
+    private var didInitialScroll = false
+    private let focusedCellWidth: CGFloat = 79
     
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -36,18 +39,28 @@ final class CategoryCarouselView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        collectionView.layoutIfNeeded()
         
-        // 첫 번째 셀과 마지막 셀도 화면 중앙에 올 수 있도록
-        let layout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
-        let insetX = (collectionView.bounds.width - layout.itemSize.width) / 2
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: insetX, bottom: 0, right: insetX)
-        collectionView.decelerationRate = .fast
+        let insetX = (collectionView.bounds.width - focusedCellWidth) / 2
         
-        // 초기 포커스 셀 레이아웃 적용
-        if let cell = collectionView.cellForItem(at: IndexPath(item: focusedIndex, section: 0)) as? CategoryCarouselViewCell {
-            cell.updateLayout(isFocused: true)
-            didInitialView = true
+        if collectionView.contentInset.left != insetX {
+            collectionView.contentInset = UIEdgeInsets(top: 0, left: insetX, bottom: 0, right: insetX)
+            collectionView.decelerationRate = .fast
+        }
+        
+        if !didInitialScroll && QuestCategory.allCases.count > focusedIndex {
+            
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                
+                self.scrollToCenterOffset(for: self.focusedIndex, animated: false)
+                self.collectionView.collectionViewLayout.invalidateLayout()
+                self.didInitialScroll = true
+                
+                let indexPath = IndexPath(item: self.focusedIndex, section: 0)
+                if let cell = self.collectionView.cellForItem(at: indexPath) as? CategoryCarouselViewCell {
+                    cell.updateLayout(isFocused: true)
+                }
+            }
         }
     }
     
@@ -64,6 +77,70 @@ final class CategoryCarouselView: UIView {
             collectionView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
+    
+    func setInitialCategory(_ category: QuestCategory) {
+        if let index = QuestCategory.allCases.firstIndex(of: category) {
+            focusedIndex = index
+            previousCellIndex = index
+            didInitialScroll = false
+            collectionView.reloadData()
+            collectionView.setNeedsLayout()
+            collectionView.layoutIfNeeded()
+        }
+    }
+    
+    private func scrollToCenterOffset(for index: Int, animated: Bool) {
+        let indexPath = IndexPath(item: index, section: 0)
+        
+        guard index < collectionView.numberOfItems(inSection: 0) else { return }
+        
+        let targetAttributes = collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+        guard let frame = targetAttributes?.frame else {
+            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
+            return
+        }
+        
+        let cellCenter = frame.origin.x + (focusedCellWidth / 2)
+        let halfWidth = collectionView.bounds.width / 2
+        
+        let targetOffset = cellCenter - halfWidth + collectionView.contentInset.left
+        
+        let newOffset = CGPoint(x: targetOffset, y: 0)
+        
+        let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - collectionView.bounds.width
+        let finalOffset = max(min(newOffset.x, maxOffset), -collectionView.contentInset.left)
+        
+        collectionView.setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
+    }
+    
+    private func updateFocusedCell() {
+        // 중앙 좌표 계산 (스크롤뷰의 중앙점)
+        let centerX = collectionView.contentOffset.x + collectionView.bounds.width / 2
+        let centerPoint = CGPoint(x: centerX, y: collectionView.bounds.midY)
+        
+        // 중앙에 가장 가까운 indexPath 찾기
+        if let indexPath = collectionView.indexPathForItem(at: centerPoint) {
+            let newFocusedIndex = indexPath.item
+            
+            if focusedIndex != newFocusedIndex {
+                
+                if let prevCell = collectionView.cellForItem(at: IndexPath(item: focusedIndex, section: 0)) as? CategoryCarouselViewCell {
+                    prevCell.updateLayout(isFocused: false)
+                }
+                
+                focusedIndex = newFocusedIndex
+                previousCellIndex = newFocusedIndex
+                collectionView.collectionViewLayout.invalidateLayout()
+                
+                if let newCell = collectionView.cellForItem(at: indexPath) as? CategoryCarouselViewCell {
+                    newCell.updateLayout(isFocused: true)
+                }
+                
+                let category = QuestCategory.allCases[focusedIndex]
+                onCategorySelected?(category)
+            }
+        }
+    }
 }
 
 extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -72,10 +149,25 @@ extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDele
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCarouselViewCell.identifier, for: indexPath) as! CategoryCarouselViewCell
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCarouselViewCell.identifier, for: indexPath) as? CategoryCarouselViewCell else {
+            return UICollectionViewCell()
+        }
+        
         let category = QuestCategory.allCases[indexPath.item]
         cell.configure(with: category)
+        cell.updateLayout(isFocused: indexPath.item == focusedIndex)
+        
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        scrollToCenterOffset(for: indexPath.item, animated: true)
+        
+        if focusedIndex != indexPath.item {
+            focusedIndex = indexPath.item
+            previousCellIndex = indexPath.item
+            updateFocusedCell()
+        }
     }
 }
 
@@ -91,32 +183,27 @@ extension CategoryCarouselView: UICollectionViewDelegateFlowLayout {
 
 extension CategoryCarouselView: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard didInitialView else {
-            didInitialView = false
-            return
-        }
-        let centerX = scrollView.contentOffset.x + scrollView.bounds.width / 2
-        let centerPoint = CGPoint(x: centerX, y: scrollView.bounds.midY)
+        // 중앙 좌표 계산 (컬렉션뷰의 보이는 영역 중앙 + 현재 오프셋)
+        let centerX = collectionView.contentOffset.x + collectionView.bounds.width / 2
+        let centerPoint = CGPoint(x: centerX, y: collectionView.bounds.midY)
         
-        // 중앙에 가장 가까운 indexPath 찾기
-        if let indexPath = collectionView.indexPathForItem(at: centerPoint),
-           let cell = collectionView.cellForItem(at: indexPath) as? CategoryCarouselViewCell {
-            if focusedIndex != indexPath.item {
-                focusedIndex = indexPath.item
-                collectionView.performBatchUpdates(nil)  // 레이아웃 갱신
-            }
+        if let indexPath = collectionView.indexPathForItem(at: centerPoint) {
+            let newFocusedIndex = indexPath.item
             
-            // 새로운 중앙 셀 → 확대
-            if previousCellIndex != indexPath.item {
-                // 이전 셀 → 축소
-                if let prevCell = collectionView.cellForItem(at: IndexPath(item: previousCellIndex, section: 0)) as? CategoryCarouselViewCell {
+            if focusedIndex != newFocusedIndex {
+                
+                if let prevCell = collectionView.cellForItem(at: IndexPath(item: focusedIndex, section: 0)) as? CategoryCarouselViewCell {
                     prevCell.updateLayout(isFocused: false)
                 }
                 
-                cell.updateLayout(isFocused: true)
-                previousCellIndex = indexPath.item
+                focusedIndex = newFocusedIndex
                 
-                // 뷰모델에 카테고리 저장
+                collectionView.collectionViewLayout.invalidateLayout()
+                
+                if let newCell = collectionView.cellForItem(at: indexPath) as? CategoryCarouselViewCell {
+                    newCell.updateLayout(isFocused: true)
+                }
+                
                 let category = QuestCategory.allCases[focusedIndex]
                 onCategorySelected?(category)
             }
