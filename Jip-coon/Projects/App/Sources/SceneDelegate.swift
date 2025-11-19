@@ -91,7 +91,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     @objc private func handleLogoutSuccess() {
         DispatchQueue.main.async { [weak self] in
-            self?.window?.rootViewController = LoginViewController()
+            let loginVC = LoginViewController()
+            let nav = UINavigationController(rootViewController: loginVC)
+            self?.window?.rootViewController = nav
             self?.window?.makeKeyAndVisible()
         }
     }

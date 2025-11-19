@@ -68,6 +68,9 @@ private enum SettingItem {
 
 public final class SettingViewController: UIViewController {
 
+    private let authService = AuthService()
+
+
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -102,14 +105,49 @@ public final class SettingViewController: UIViewController {
     }
 
     private func handleLogout() {
-        // TODO: Firebase Auth 로그아웃 처리
-        print("로그아웃 처리")
-        NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+        let signoutAlert = UIAlertController(
+            title: "로그아웃",
+            message: "로그아웃하시겠습니까?",
+            preferredStyle: .alert
+        )
+        let okButton = UIAlertAction(title: "로그아웃", style: .destructive) { _ in
+            Task {
+                do {
+                    try self.authService.signOut()
+                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                } catch {
+                    print("로그아웃 실패: \(error.localizedDescription)")
+                }
+            }
+        }
+        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        signoutAlert.addAction(okButton)
+        signoutAlert.addAction(cancelButton)
+        present(signoutAlert, animated: true, completion: nil)
     }
 
     private func handleDeleteAccount() {
-        // TODO: 회원 탈퇴 처리
-        print("회원 탈퇴 처리")
+        let deleteAccountAlert = UIAlertController(
+            title: "회원탈퇴",
+            message: "회원탈퇴하시겠습니까?",
+            preferredStyle: .alert
+        )
+        let okButton = UIAlertAction(title: "회원탈퇴", style: .destructive) { _ in
+            Task {
+                do {
+                    try await self.authService.deleteAccount()
+                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                } catch {
+                    print("회원 탈퇴 실패: \(error.localizedDescription)")
+                }
+            }
+        }
+        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        deleteAccountAlert.addAction(okButton)
+        deleteAccountAlert.addAction(cancelButton)
+        present(deleteAccountAlert, animated: true, completion: nil)
+
+
     }
 }
 
@@ -164,3 +202,4 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 }
+
