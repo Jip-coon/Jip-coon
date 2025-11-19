@@ -10,13 +10,13 @@ import Combine
 import Core
 
 final class AddQuestViewModel: ObservableObject {
-    @Published var missionTitle: String = ""
-    @Published var missionDescription: String = ""
-    @Published var missionCreateDate: Date = Date()
+    @Published var title: String = ""
+    @Published var description: String = ""
+    @Published var questCreateDate: Date = Date()
     @Published var selectedDate: Date = Date()  // 선택된 날짜
     @Published var selectedTime: Date = Date()  // 선택된 시간
-    @Published var missionDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
-    @Published var missionCategory: QuestCategory = .laundry
+    @Published var questDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
+    @Published var category: QuestCategory = .laundry
     @Published var familyMembers: [User] = []   // 가족 구성원
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
     @Published var starCount: Int = 10
@@ -67,21 +67,21 @@ final class AddQuestViewModel: ObservableObject {
         mergedComponents.second = 0
         
         // 최종 missionDueDate 생성
-        missionDueDate = calendar.date(from: mergedComponents)
+        questDueDate = calendar.date(from: mergedComponents)
     }
     
     // TODO: - 퀘스트 데이터 저장
     func saveMission() {
         print("Save Mission:")
-        print("Title:", missionTitle)
-        print("Description:", missionDescription)
+        print("Title:", title)
+        print("Description:", description)
         
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         formatter.timeZone = .current
         
-        print("MissionDueDate (local):", formatter.string(from: missionDueDate ?? Date()))
+        print("MissionDueDate (local):", formatter.string(from: questDueDate ?? Date()))
         print("Date:", formatter.string(from: selectedDate))
         print("Time:", formatter.string(from: selectedTime))
         
@@ -89,7 +89,7 @@ final class AddQuestViewModel: ObservableObject {
         print("Star:", starCount)
         print("Recurring:", recurringType)
         print("Repeat Days:", selectedRepeatDays)
-        print("Category:", missionCategory)
+        print("Category:", category)
     }
     
 }

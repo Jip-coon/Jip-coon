@@ -257,7 +257,7 @@ final class AddQuestViewController: UIViewController {
         
         // 카테고리
         categoryCarouselView.onCategorySelected = { [weak self] category in
-            self?.viewModel.missionCategory = category
+            self?.viewModel.category = category
         }
         
         missionAddButton.addTarget(self, action: #selector(missionAddButtonTapped), for: .touchUpInside)
@@ -338,9 +338,11 @@ final class AddQuestViewController: UIViewController {
     @objc private func missionAddButtonTapped() {
         view.endEditing(true)
         
-        viewModel.missionTitle = titleTextField.text ?? ""
-        viewModel.missionDescription = memoTextField.text ?? ""
-        viewModel.missionCreateDate = Date()
+        // TODO: - 모든 정보 입력했는지 확인
+        
+        viewModel.title = titleTextField.text ?? ""
+        viewModel.description = memoTextField.text ?? ""
+        viewModel.questCreateDate = Date()
         
         viewModel.saveMission()
     }
@@ -351,9 +353,9 @@ final class AddQuestViewController: UIViewController {
 extension AddQuestViewController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField == titleTextField {
-            viewModel.missionTitle = textField.text ?? ""
+            viewModel.title = textField.text ?? ""
         } else {
-            viewModel.missionDescription = textField.text ?? ""
+            viewModel.description = textField.text ?? ""
         }
     }
 }
