@@ -166,16 +166,22 @@ public class MainViewModel: ObservableObject {
     }
 
     private func createDummyQuests() -> [Quest] {
-        let questData: [(String, String, QuestCategory, Int)] = [
-//            ("설거지", "식사 후 설거지 • 1시간 전 시작", .dishes, 15),
-//            ("빨래 널기", "세탁기 완료 • 30분 전 시작", .laundry, 10),
-//            ("청소기 돌리기", "거실 청소 • 오늘까지", .cleaning, 20),
-//            ("쓰레기 배출", "분리수거 • 오늘 밤 12시까지", .trash, 5),
-//            ("약국 가기", "감기약 사오기 • 1시간 남음", .other, 10),
-//            ("강아지 산책", "30분 산책 • 2시간 지남", .pet, 8),
+        let questData: [(String, String, QuestCategory, Int, Date?)] = [
+            ("설거지", "식사 후 설거지 • 1시간 전 시작", .dishes, 15,
+             makeDate(daysFromNow: 0, hour: 19, minute: 00)),
+            ("빨래 널기", "세탁기 완료 • 30분 전 시작", .laundry, 10,
+             makeDate(daysFromNow: 0, hour: 18, minute: 30)),
+            ("청소기 돌리기", "거실 청소 • 오늘까지", .cleaning, 20,
+             makeDate(daysFromNow: 0, hour: 23, minute: 59)),
+            ("쓰레기 배출", "분리수거 • 오늘 밤 12시까지", .trash, 5,
+             makeDate(daysFromNow: 0, hour: 24, minute: 00)),
+            ("약국 가기", "감기약 사오기 • 1시간 남음", .other, 10,
+             makeDate(daysFromNow: 1, hour: 10, minute: 00)),
+            ("강아지 산책", "30분 산책 • 2시간 지남", .pet, 8,
+             makeDate(daysFromNow: -1, hour: 16, minute: 00)),
         ]
 
-        var quests = questData.map { title, description, category, points in
+        var quests = questData.map { title, description, category, points, dueDate in
             var quest = Quest(
                 title: title,
                 description: description,
@@ -184,6 +190,7 @@ public class MainViewModel: ObservableObject {
                 familyId: "family1",
                 points: points
             )
+            quest.dueDate = dueDate
             quest.assignedTo = "user1"
             return quest
         }
@@ -198,6 +205,22 @@ public class MainViewModel: ObservableObject {
 //        quests[5].dueDate = Calendar.current.date(byAdding: .hour, value: -2, to: now)
 
         return quests
+    }
+    
+    private func makeDate(daysFromNow: Int, hour: Int, minute: Int) -> Date {
+        var components = DateComponents()
+        let calendar = Calendar.current
+        let now = Date()
+
+        let today = calendar.dateComponents([.year, .month, .day], from: now)
+        
+        components.year = today.year
+        components.month = today.month
+        components.day = (today.day ?? 1) + daysFromNow
+        components.hour = hour
+        components.minute = minute
+
+        return calendar.date(from: components)!
     }
 
     private func loadStatisticsDataAsync() async throws -> UserStatistics? {

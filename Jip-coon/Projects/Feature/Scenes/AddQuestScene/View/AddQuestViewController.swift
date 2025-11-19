@@ -1,5 +1,5 @@
 //
-//  AddMissionViewController.swift
+//  AddQuestViewController.swift
 //  Feature
 //
 //  Created by 예슬 on 9/8/25.
@@ -9,9 +9,11 @@ import UIKit
 import Combine
 import UI
 
-final class AddMissionViewController: UIViewController {
-    private let viewModel = AddMissionViewModel()
+final class AddQuestViewController: UIViewController {
+    private let viewModel = AddQuestViewModel()
     private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - View
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -68,7 +70,7 @@ final class AddMissionViewController: UIViewController {
             leading: label,
             title: "담당",
             value: "선택해 주세요",
-            buttonStyle: .capsule
+            buttonStyle: .capsuleMenu
         )
     }()
     
@@ -80,7 +82,7 @@ final class AddMissionViewController: UIViewController {
             leading: imageView,
             title: "별",
             value: "10 개",
-            buttonStyle: .plainMenu
+            buttonStyle: .rightArrowMenu
         )
     }()
     
@@ -92,7 +94,7 @@ final class AddMissionViewController: UIViewController {
     
     private let missionAddButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("미션 추가", for: .normal)
+        button.setTitle("퀘스트 추가", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
         button.backgroundColor = .mainOrange
@@ -100,17 +102,27 @@ final class AddMissionViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupConstraints()  // UI 설정
+        setupView()         // UI 설정
         bindViewModel()     // ViewModel
         hideKeyboardWhenTappedAround()  // 키보드 관련
         setupInfoRowViewButtonAction()  // 버튼 액션 관리
     }
     
-    private func setupConstraints() {
+    // MARK: - 함수들
+    
+    private func setupView() {
         view.backgroundColor = .backgroundWhite
-        navigationItem.title = "미션 추가"
+        navigationItem.title = "퀘스트 추가"
+        
+        addSubviews()
+        setupConstraints()
+    }
+    
+    private func addSubviews() {
         view.addSubview(scrollView)
         scrollView.addSubview(containerView)
         
@@ -143,7 +155,9 @@ final class AddMissionViewController: UIViewController {
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-        
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -156,7 +170,7 @@ final class AddMissionViewController: UIViewController {
             containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             containerView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
-            categoryCarouselView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            categoryCarouselView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 26),
             categoryCarouselView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             categoryCarouselView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
@@ -199,7 +213,6 @@ final class AddMissionViewController: UIViewController {
             missionAddButton.heightAnchor.constraint(equalToConstant: 47)
         ])
     }
-    // MARK: - 함수
     
     private func bindViewModel() {
         viewModel.$selectedWorkerName
@@ -244,7 +257,7 @@ final class AddMissionViewController: UIViewController {
         
         // 카테고리
         categoryCarouselView.onCategorySelected = { [weak self] category in
-            self?.viewModel.missionCategory = category
+            self?.viewModel.category = category
         }
         
         missionAddButton.addTarget(self, action: #selector(missionAddButtonTapped), for: .touchUpInside)
@@ -321,24 +334,28 @@ final class AddMissionViewController: UIViewController {
         starInfoRowView.setupMenu(menu)
     }
     
-    // 미션추가 버튼
+    // 퀘스트추가 버튼
     @objc private func missionAddButtonTapped() {
         view.endEditing(true)
         
-        viewModel.missionTitle = titleTextField.text ?? ""
-        viewModel.missionDescription = memoTextField.text ?? ""
-        viewModel.missionCreateDate = Date()
+        // TODO: - 모든 정보 입력했는지 확인
+        
+        viewModel.title = titleTextField.text ?? ""
+        viewModel.description = memoTextField.text ?? ""
+        viewModel.questCreateDate = Date()
         
         viewModel.saveMission()
     }
 }
 
-extension AddMissionViewController: UITextFieldDelegate {
+// MARK: - TextFieldDelegate
+
+extension AddQuestViewController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField == titleTextField {
-            viewModel.missionTitle = textField.text ?? ""
+            viewModel.title = textField.text ?? ""
         } else {
-            viewModel.missionDescription = textField.text ?? ""
+            viewModel.description = textField.text ?? ""
         }
     }
 }

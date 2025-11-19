@@ -34,10 +34,19 @@ public class MainViewController: UIViewController {
         super.viewDidLayoutSubviews()
         components.updateShadowPaths()
     }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+    }
 
     private func setupUI() {
         view.backgroundColor = UIColor.headerBeige
-        self.navigationController?.navigationBar.isHidden = true
         layoutManager.setupViewHierarchy(in: view)
         layoutManager.setupConstraints(in: view)
         setupQuickActions()
@@ -269,23 +278,28 @@ extension MainViewController {
 
     private func handleQuickActionTapped(_ action: QuickAction) {
         switch action.type {
-        case .newQuest:
-            // TODO: - 새 퀘스트 생성 화면으로 이동
-            break
-        case .search:
-            // TODO: - 검색 화면으로 이동
-            break
-        case .invite:
-            // TODO: - 초대 화면으로 이동
-            break
-        case .approval:
-            // TODO: - 승인 대기 화면으로 이동
-            break
+            case .newQuest:
+                navigationItem.backButtonTitle = ""
+                let addQuestViewController = AddQuestViewController()
+                navigationController?.pushViewController(addQuestViewController, animated: true)
+                break
+            case .search:
+                // TODO: - 검색 화면으로 이동
+                break
+            case .invite:
+                // TODO: - 초대 화면으로 이동
+                break
+            case .approval:
+                // TODO: - 승인 대기 화면으로 이동
+                break
         }
     }
 
     private func handleMyTaskTapped(_ quest: Quest) {
         // TODO: - 할일 상세 화면으로 이동
+        let questDetailViewController = QuestDetailViewController(quest: quest)
+        navigationItem.backButtonTitle = ""
+        navigationController?.pushViewController(questDetailViewController, animated: true)
     }
 
     private func handleRecentActivityTapped(_ activity: RecentActivity) {

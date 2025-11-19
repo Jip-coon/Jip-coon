@@ -9,13 +9,14 @@ import UIKit
 import UI
 
 enum InfoRowButtonStyle {
-    case plain      // 일반 버튼 + 탭 액션
-    case plainMenu  // 일반 버튼 + UIMenu
-    case capsule    // 캡슐 모양 버튼 + UIMenu
+    case rightArrowAction   // Text + chevron -> 여러가지...
+    case rightArrowMenu     // Text + chevron -> UIMenu
+    case capsuleMenu        // 캡슐 모양 버튼 -> UIMenu
+    case textOnly           // Text (연결된 액션 없음)
 }
 
 final class InfoRowView: UIView {
-    private var buttonStyle: InfoRowButtonStyle = .plain
+    private var buttonStyle: InfoRowButtonStyle = .rightArrowAction
     private let colors: [UIColor] = [.blue1, .blue2, .brown1, .green1, .orange3, .purple1, .red1, .yellow1]
     var onTap: (() -> Void)?
     
@@ -24,7 +25,7 @@ final class InfoRowView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .pretendard(ofSize: 16, weight: .semibold)
+        label.font = .pretendard(ofSize: 16, weight: .regular)
         return label
     }()
     
@@ -56,7 +57,7 @@ final class InfoRowView: UIView {
         return actionButton.titleLabel?.text ?? ""
     }
     
-    init(leading: UIView, title: String, value: String, buttonStyle: InfoRowButtonStyle = .plain) {
+    init(leading: UIView, title: String, value: String, buttonStyle: InfoRowButtonStyle = .rightArrowAction) {
         self.leadingView = leading
         self.buttonStyle = buttonStyle
         super.init(frame: .zero)
@@ -98,7 +99,7 @@ final class InfoRowView: UIView {
         config.baseForegroundColor = .black
         
         switch style {
-            case .plain:    // 기본 스타일: Label + Chevron + Action
+            case .rightArrowAction:    // (기본 스타일: Label + Chevron) + Action
                 config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
                     var outgoing = incoming
                     outgoing.font = .pretendard(ofSize: 16, weight: .regular)
@@ -109,7 +110,7 @@ final class InfoRowView: UIView {
                 
                 actionButton.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
                 
-            case .capsule:  // 캡슐 + 메뉴
+            case .capsuleMenu:  // 캡슐 + 메뉴
                 config.background.backgroundColor = colors.randomElement()
                 config.background.cornerRadius = 14
                 config.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 9, bottom: 5, trailing: 9)
@@ -121,7 +122,7 @@ final class InfoRowView: UIView {
                 
                 actionButton.showsMenuAsPrimaryAction = true    // 메뉴를 기본 액션으로
                 
-            case .plainMenu:    // 기본 + 메뉴
+            case .rightArrowMenu:    // 기본 + 메뉴
                 config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
                     var outgoing = incoming
                     outgoing.font = .pretendard(ofSize: 16, weight: .regular)
@@ -131,6 +132,14 @@ final class InfoRowView: UIView {
                 config.contentInsets = .zero
                 
                 actionButton.showsMenuAsPrimaryAction = true
+            
+            case .textOnly:
+                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                    var outgoing = incoming
+                    outgoing.font = .pretendard(ofSize: 16, weight: .regular)
+                    return outgoing
+                }
+                config.contentInsets = .zero
         }
         
         actionButton.configuration = config
@@ -144,7 +153,7 @@ final class InfoRowView: UIView {
         var config = actionButton.configuration
         config?.title = text
         
-        if buttonStyle == .capsule {
+        if buttonStyle == .capsuleMenu {
             config?.background.backgroundColor = colors.randomElement()
         }
         actionButton.configuration = config
@@ -152,5 +161,9 @@ final class InfoRowView: UIView {
     
     func setupMenu(_ menu: UIMenu) {
         actionButton.menu = menu
+    }
+    
+    func updateButtonStyle(_ style: InfoRowButtonStyle, _ text: String) {
+        setupButtonStyle(style, with: text)
     }
 }
