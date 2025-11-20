@@ -94,21 +94,18 @@ final class CategoryCarouselView: UIView {
         
         guard index < collectionView.numberOfItems(inSection: 0) else { return }
         
-        let targetAttributes = collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
-        guard let frame = targetAttributes?.frame else {
+        guard let attributes = collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath) else {
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
             return
         }
         
-        let cellCenter = frame.origin.x + (focusedCellWidth / 2)
+        let cellCenter = attributes.center.x
         let halfWidth = collectionView.bounds.width / 2
         
-        let targetOffset = cellCenter - halfWidth + collectionView.contentInset.left
-        
-        let newOffset = CGPoint(x: targetOffset, y: 0)
+        let targetOffset = cellCenter - halfWidth
         
         let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - collectionView.bounds.width
-        let finalOffset = max(min(newOffset.x, maxOffset), -collectionView.contentInset.left)
+        let finalOffset = max(min(targetOffset, maxOffset), -collectionView.contentInset.left)
         
         collectionView.setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
     }
