@@ -206,4 +206,44 @@ extension CategoryCarouselView: UIScrollViewDelegate {
             }
         }
     }
+    
+    // 스크롤 종료 시, 포커스된 셀 중앙정렬
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView,
+                                   withVelocity velocity: CGPoint,
+                                   targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let proposedX = targetContentOffset.pointee.x
+        let boundsWidth = collectionView.bounds.width
+        let proposedCenterX = proposedX + boundsWidth / 2
+        
+        let searchRect = CGRect(
+            x: max(proposedX - boundsWidth, -collectionView.contentInset.left),
+            y: 0,
+            width: boundsWidth * 2,
+            height: collectionView.bounds.height
+        )
+        
+        guard let attributesArray = collectionView.collectionViewLayout.layoutAttributesForElements(in: searchRect),
+              !attributesArray.isEmpty else { return }
+        
+        let nearest = attributesArray.min { a, b in
+            abs(a.center.x - proposedCenterX) < abs(b.center.x - proposedCenterX)
+        }
+        
+        guard let itemCenterX = nearest?.center.x else { return }
+        
+        var newX = itemCenterX - boundsWidth / 2
+        let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - boundsWidth
+        newX = max(min(newX, maxOffset), -collectionView.contentInset.left)
+        targetContentOffset.pointee = CGPoint(x: newX, y: 0)
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            scrollToCenterOffset(for: focusedIndex, animated: true)
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollToCenterOffset(for: focusedIndex, animated: true)
+    }
 }
