@@ -94,21 +94,18 @@ final class CategoryCarouselView: UIView {
         
         guard index < collectionView.numberOfItems(inSection: 0) else { return }
         
-        let targetAttributes = collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
-        guard let frame = targetAttributes?.frame else {
+        guard let attributes = collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath) else {
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
             return
         }
         
-        let cellCenter = frame.origin.x + (focusedCellWidth / 2)
+        let cellCenter = attributes.center.x
         let halfWidth = collectionView.bounds.width / 2
         
-        let targetOffset = cellCenter - halfWidth + collectionView.contentInset.left
-        
-        let newOffset = CGPoint(x: targetOffset, y: 0)
+        let targetOffset = cellCenter - halfWidth
         
         let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - collectionView.bounds.width
-        let finalOffset = max(min(newOffset.x, maxOffset), -collectionView.contentInset.left)
+        let finalOffset = max(min(targetOffset, maxOffset), -collectionView.contentInset.left)
         
         collectionView.setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
     }
@@ -208,5 +205,45 @@ extension CategoryCarouselView: UIScrollViewDelegate {
                 onCategorySelected?(category)
             }
         }
+    }
+    
+    // 스크롤 종료 시, 포커스된 셀 중앙정렬
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView,
+                                   withVelocity velocity: CGPoint,
+                                   targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let proposedX = targetContentOffset.pointee.x
+        let boundsWidth = collectionView.bounds.width
+        let proposedCenterX = proposedX + boundsWidth / 2
+        
+        let searchRect = CGRect(
+            x: max(proposedX - boundsWidth, -collectionView.contentInset.left),
+            y: 0,
+            width: boundsWidth * 2,
+            height: collectionView.bounds.height
+        )
+        
+        guard let attributesArray = collectionView.collectionViewLayout.layoutAttributesForElements(in: searchRect),
+              !attributesArray.isEmpty else { return }
+        
+        let nearest = attributesArray.min { a, b in
+            abs(a.center.x - proposedCenterX) < abs(b.center.x - proposedCenterX)
+        }
+        
+        guard let itemCenterX = nearest?.center.x else { return }
+        
+        var newX = itemCenterX - boundsWidth / 2
+        let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - boundsWidth
+        newX = max(min(newX, maxOffset), -collectionView.contentInset.left)
+        targetContentOffset.pointee = CGPoint(x: newX, y: 0)
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            scrollToCenterOffset(for: focusedIndex, animated: true)
+        }
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollToCenterOffset(for: focusedIndex, animated: true)
     }
 }
