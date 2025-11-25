@@ -146,8 +146,12 @@ public final class SettingViewController: UIViewController {
         deleteAccountAlert.addAction(okButton)
         deleteAccountAlert.addAction(cancelButton)
         present(deleteAccountAlert, animated: true, completion: nil)
-
-
+    }
+    
+    private func handleProfileEdit() {
+        let profileEditViewController = ProfileEditViewController()
+        navigationItem.backButtonTitle = ""
+        navigationController?.pushViewController(profileEditViewController, animated: true)
     }
 }
 
@@ -193,12 +197,14 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         let item = SettingSection.allCases[indexPath.section].items[indexPath.row]
 
         switch item {
-        case .logout:
-            handleLogout()
-        case .deleteAccount:
-            handleDeleteAccount()
-        default:
-            print("\(item.title) 선택됨")
+            case .editProfile:
+                handleProfileEdit()
+            case .logout:
+                handleLogout()
+            case .deleteAccount:
+                handleDeleteAccount()
+            default:
+                print("\(item.title) 선택됨")
         }
     }
 }
