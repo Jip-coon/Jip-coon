@@ -13,6 +13,7 @@ import UIKit
 
 private enum SettingSection: Int, CaseIterable {
     case profile
+    case familyManage
     case appSettings
     case support
     case account
@@ -21,6 +22,8 @@ private enum SettingSection: Int, CaseIterable {
         switch self {
         case .profile:
             return "프로필"
+        case .familyManage:
+            return "가족 관리"
         case .appSettings:
             return "앱 설정"
         case .support:
@@ -34,6 +37,8 @@ private enum SettingSection: Int, CaseIterable {
         switch self {
         case .profile:
             return [.editProfile]
+        case .familyManage:
+            return [.manageFamily]
         case .appSettings:
             return [.notifications]
         case .support:
@@ -46,6 +51,7 @@ private enum SettingSection: Int, CaseIterable {
 
 private enum SettingItem {
     case editProfile
+    case manageFamily
     case notifications
     case termsOfService
     case privacyPolicy
@@ -56,6 +62,7 @@ private enum SettingItem {
     var title: String {
         switch self {
         case .editProfile: return "프로필 수정"
+        case .manageFamily: return "가족 관리"
         case .notifications: return "알림 설정"
         case .termsOfService: return "서비스 이용약관"
         case .privacyPolicy: return "개인정보 처리방침"
