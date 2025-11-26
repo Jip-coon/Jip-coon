@@ -77,6 +77,7 @@ final class ProfileEditViewController: UIViewController {
         textField.placeholder = "이름"
         textField.font = .systemFont(ofSize: 16, weight: .regular)
         textField.textColor = .black
+        textField.isUserInteractionEnabled = false
         return textField
     }()
     
@@ -88,12 +89,23 @@ final class ProfileEditViewController: UIViewController {
         .init(title: "Family")
     }()
     
+    private let profileInfoEditButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("수정 하기", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
+        button.backgroundColor = .mainOrange
+        button.layer.cornerRadius = 12
+        return button
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupButtonActions()
+        hideKeyboardWhenTappedAround()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -123,6 +135,9 @@ final class ProfileEditViewController: UIViewController {
         
         addSubviews()
         setupConstraints()
+        
+        emailInfoView.setInfo("yesle2005")
+        familyInfoView.setInfo("hahaha")
     }
     
     private func addSubviews() {
@@ -133,6 +148,7 @@ final class ProfileEditViewController: UIViewController {
         view.addSubview(nameStackView)
         view.addSubview(emailInfoView)
         view.addSubview(familyInfoView)
+        view.addSubview(profileInfoEditButton)
         
         nameStackView.addArrangedSubview(nameLabel)
         nameStackView.addArrangedSubview(nameTextField)
@@ -144,6 +160,7 @@ final class ProfileEditViewController: UIViewController {
         nameStackView.translatesAutoresizingMaskIntoConstraints = false
         emailInfoView.translatesAutoresizingMaskIntoConstraints = false
         familyInfoView.translatesAutoresizingMaskIntoConstraints = false
+        profileInfoEditButton.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func setupConstraints() {
@@ -178,12 +195,16 @@ final class ProfileEditViewController: UIViewController {
             familyInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             familyInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            
+            profileInfoEditButton.topAnchor.constraint(equalTo: familyInfoView.bottomAnchor, constant: 50),
+            profileInfoEditButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            profileInfoEditButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            profileInfoEditButton.heightAnchor.constraint(equalToConstant: 47),
         ])
     }
     
     private func setupButtonActions() {
         profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)
+        profileInfoEditButton.addTarget(self, action: #selector(profileInfoEditButtonTapped), for: .touchUpInside)
     }
     
     @objc private func profileImageEditButtonTapped() {
@@ -195,6 +216,29 @@ final class ProfileEditViewController: UIViewController {
         imagePickerController.delegate = self
         imagePickerController.sourceType = .photoLibrary
         present(imagePickerController, animated: true)
+    }
+    
+    @objc private func profileInfoEditButtonTapped() {
+        if profileInfoEditButton.titleLabel?.text == "수정 하기" {
+            nameTextField.isUserInteractionEnabled = true
+            nameTextField.becomeFirstResponder()
+            profileInfoEditButton.setTitle("수정 완료", for: .normal)
+        } else {
+            view.endEditing(true)
+            nameTextField.isUserInteractionEnabled = false
+            profileInfoEditButton.setTitle("수정 하기", for: .normal)
+            // TODO: - 서버에 이름 저장
+        }
+    }
+    
+    private func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     // TODO: - 데이터 불러오기
