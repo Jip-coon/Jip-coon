@@ -27,7 +27,31 @@ public final class AuthService: AuthServiceProtocol {
         guard let user = Auth.auth().currentUser else {
             throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "로그인 정보가 존재하지 않습니다."])
         }
-		
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            user.delete { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    public func deleteAccountWithReauth(password: String) async throws {
+        guard let user = Auth.auth().currentUser,
+              let email = user.email else {
+            throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "로그인 정보가 존재하지 않습니다."])
+        }
+
+        // 현재 사용자의 이메일과 입력된 비밀번호로 credential 생성
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+
+        // 재인증 수행
+        try await user.reauthenticate(with: credential)
+
+        // 재인증 성공 후 계정 삭제
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             user.delete { error in
                 if let error {

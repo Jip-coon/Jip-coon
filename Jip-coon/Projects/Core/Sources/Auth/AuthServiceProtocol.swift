@@ -13,7 +13,9 @@ public protocol AuthServiceProtocol {
     func signUp(email: String, password: String) async throws
     func signOut() throws
     func deleteAccount() async throws
-    
+    func deleteAccountWithReauth(password: String) async throws
+
     var isLoggedIn: Bool { get }
+    var currentUser: FirebaseAuth.User? { get }
     var currentUserEmail: String? { get }
 }
