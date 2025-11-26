@@ -8,8 +8,7 @@
 import Foundation
 
 // MARK: - Firestore 컬렉션 이름
-
-struct FirestoreCollections {
+public struct FirestoreCollections {
     static let users = "users"
     static let families = "families"
     static let quests = "quests"
@@ -21,7 +20,7 @@ struct FirestoreCollections {
 
 // MARK: - Firestore 필드 이름
 
-struct FirestoreFields {
+public struct FirestoreFields {
     
     struct User {
         static let id = "id"

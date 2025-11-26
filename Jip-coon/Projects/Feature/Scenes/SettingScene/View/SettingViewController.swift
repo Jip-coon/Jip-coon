@@ -9,6 +9,7 @@ import Core
 import UI
 import UIKit
 import FirebaseAuth
+import FirebaseFirestore
 
 // MARK: - 설정 메뉴 데이터 모델
 
@@ -76,15 +77,12 @@ private enum SettingItem {
 
 public final class SettingViewController: UIViewController {
 
-    private let authService = AuthService()
-    private let userService = FirebaseUserService()
+    private let viewModel = SettingViewModel()
 
-    // 현재 사용자 정보
-    private var currentUser: Core.User?
-
-    // 앱 버전
-    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-    private let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    // 현재 사용자 정보 (ViewModel에서 가져옴)
+    private var currentUser: Core.User? {
+        return viewModel.currentUser
+    }
 
 
     private let tableView: UITableView = {
@@ -102,7 +100,7 @@ public final class SettingViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTableView()
-        loadCurrentUser()
+        Task { await loadCurrentUser() }
     }
 
     private func setupUI() {
@@ -125,26 +123,9 @@ public final class SettingViewController: UIViewController {
         tableView.delegate = self
     }
 
-    private func loadCurrentUser() {
-        Task {
-            do {
-                currentUser = try await userService.getCurrentUser()
-                if currentUser == nil { //TODO: - FireStore에 정보 없음 문제
-                    print(
-                        "Firebase Auth UID: \(Auth.auth().currentUser?.uid ?? "없음")"
-                    )
-                    print("이메일: \(Auth.auth().currentUser?.email ?? "없음")")
-                }
-                tableView.reloadData()
-            } catch {
-                print("사용자 정보 로드 실패: \(error.localizedDescription)")
-                print(
-                    "Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")"
-                )
-                // 기본적으로 자녀 권한으로 처리
-                tableView.reloadData()
-            }
-        }
+    private func loadCurrentUser() async {
+        await viewModel.loadCurrentUser()
+        tableView.reloadData()
     }
 
     private func handleLogout() {
@@ -156,7 +137,7 @@ public final class SettingViewController: UIViewController {
         let okButton = UIAlertAction(title: "로그아웃", style: .destructive) { _ in
             Task {
                 do {
-                    try self.authService.signOut()
+                    try await self.viewModel.performLogout()
                     NotificationCenter.default
                         .post(
                             name: NSNotification.Name("LogoutSuccess"),
@@ -180,33 +161,73 @@ public final class SettingViewController: UIViewController {
     private func handleDeleteAccount() {
         let deleteAccountAlert = UIAlertController(
             title: "회원탈퇴",
-            message: "회원탈퇴하시겠습니까?",
+            message: "회원탈퇴를 위해 비밀번호를 다시 입력해주세요.",
             preferredStyle: .alert
         )
-        let okButton = UIAlertAction(title: "회원탈퇴", style: .destructive) { _ in
+
+        deleteAccountAlert.addTextField { textField in
+            textField.placeholder = "비밀번호"
+            textField.isSecureTextEntry = true
+        }
+
+        let okButton = UIAlertAction(title: "회원탈퇴", style: .destructive) { [weak self] _ in
+            guard let self = self,
+                  let password = deleteAccountAlert.textFields?.first?.text,
+                  !password.isEmpty else {
+                self?.showErrorAlert(message: "비밀번호를 입력해주세요.")
+                return
+            }
+
             Task {
                 do {
-                    try await self.authService.deleteAccount()
-                    NotificationCenter.default
-                        .post(
+                    try await self.viewModel
+                        .performDeleteAccount(password: password)
+
+                    // 회원탈퇴 성공 Alert 표시
+                    let successAlert = UIAlertController(
+                        title: "회원탈퇴 완료",
+                        message: "회원탈퇴가 성공적으로 처리되었습니다.",
+                        preferredStyle: .alert
+                    )
+                    let confirmButton = UIAlertAction(
+                        title: "확인",
+                        style: .default
+                    ) { _ in
+                        // 확인 버튼을 누르면 로그인 화면으로 이동
+                        NotificationCenter.default.post(
                             name: NSNotification.Name("LogoutSuccess"),
                             object: nil
                         )
+                    }
+                    successAlert.addAction(confirmButton)
+                    self.present(successAlert, animated: true, completion: nil)
                 } catch {
                     print("회원 탈퇴 실패: \(error.localizedDescription)")
+                    self.showErrorAlert(message: "회원탈퇴에 실패했습니다. 다시 시도해주세요.")
                 }
             }
         }
+
         let cancelButton = UIAlertAction(
             title: "취소",
             style: .cancel,
             handler: nil
         )
+
         deleteAccountAlert.addAction(okButton)
         deleteAccountAlert.addAction(cancelButton)
         present(deleteAccountAlert, animated: true, completion: nil)
+    }
 
-
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "오류",
+            message: message,
+            preferredStyle: .alert
+        )
+        let okButton = UIAlertAction(title: "확인", style: .default, handler: nil)
+        alert.addAction(okButton)
+        present(alert, animated: true, completion: nil)
     }
 }
 
@@ -258,7 +279,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
 
         switch item {
         case .appVersion:
-            content.secondaryText = "\(appVersion).\(buildNumber)"
+            content.secondaryText = viewModel.fullVersionString
             cell.accessoryType = .none
             cell.selectionStyle = .none
         case .logout, .deleteAccount:
