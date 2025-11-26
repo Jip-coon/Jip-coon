@@ -80,6 +80,14 @@ final class ProfileEditViewController: UIViewController {
         return textField
     }()
     
+    private let emailInfoView: ProfileInfoView = {
+        .init(title: "Email Address")
+    }()
+    
+    private let familyInfoView: ProfileInfoView = {
+        .init(title: "Family")
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -123,6 +131,8 @@ final class ProfileEditViewController: UIViewController {
         view.addSubview(starImageView)
         view.addSubview(starCountLabel)
         view.addSubview(nameStackView)
+        view.addSubview(emailInfoView)
+        view.addSubview(familyInfoView)
         
         nameStackView.addArrangedSubview(nameLabel)
         nameStackView.addArrangedSubview(nameTextField)
@@ -132,6 +142,8 @@ final class ProfileEditViewController: UIViewController {
         starImageView.translatesAutoresizingMaskIntoConstraints = false
         starCountLabel.translatesAutoresizingMaskIntoConstraints = false
         nameStackView.translatesAutoresizingMaskIntoConstraints = false
+        emailInfoView.translatesAutoresizingMaskIntoConstraints = false
+        familyInfoView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func setupConstraints() {
@@ -157,6 +169,14 @@ final class ProfileEditViewController: UIViewController {
             nameStackView.topAnchor.constraint(equalTo: starImageView.bottomAnchor, constant: 27),
             nameStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             nameStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            emailInfoView.topAnchor.constraint(equalTo: nameStackView.bottomAnchor, constant: 20),
+            emailInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            emailInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            familyInfoView.topAnchor.constraint(equalTo: emailInfoView.bottomAnchor, constant: 20),
+            familyInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            familyInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
             
         ])
