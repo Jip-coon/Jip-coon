@@ -36,6 +36,50 @@ final class ProfileEditViewController: UIViewController {
         return button
     }()
     
+    private let starImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "Star", in: uiBundle, with: nil)
+        return imageView
+    }()
+    
+    private let starCountLabel: UILabel = {
+        let label = UILabel()
+        label.text = "250"
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .black
+        return label
+    }()
+    
+    private let nameStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 3
+        stackView.layer.borderColor = UIColor.textFieldStroke.cgColor
+        stackView.layer.borderWidth = 0.7
+        stackView.layer.cornerRadius = 12
+        stackView.backgroundColor = .white
+        stackView.alignment = .leading
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.layoutMargins = .init(top: 9, left: 14, bottom: 9, right: 14)
+        return stackView
+    }()
+    
+    private let nameLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Name"
+        label.font = .systemFont(ofSize: 11, weight: .regular)
+        label.textColor = .textGray
+        return label
+    }()
+    
+    private let nameTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "이름"
+        textField.font = .systemFont(ofSize: 16, weight: .regular)
+        textField.textColor = .black
+        return textField
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -76,9 +120,18 @@ final class ProfileEditViewController: UIViewController {
     private func addSubviews() {
         view.addSubview(profileImageView)
         view.addSubview(profileImageEditButton)
+        view.addSubview(starImageView)
+        view.addSubview(starCountLabel)
+        view.addSubview(nameStackView)
+        
+        nameStackView.addArrangedSubview(nameLabel)
+        nameStackView.addArrangedSubview(nameTextField)
         
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         profileImageEditButton.translatesAutoresizingMaskIntoConstraints = false
+        starImageView.translatesAutoresizingMaskIntoConstraints = false
+        starCountLabel.translatesAutoresizingMaskIntoConstraints = false
+        nameStackView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func setupConstraints() {
@@ -93,6 +146,17 @@ final class ProfileEditViewController: UIViewController {
             profileImageEditButton.heightAnchor.constraint(equalToConstant: 30),
             profileImageEditButton.trailingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: -5),
             profileImageEditButton.bottomAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: -10),
+            
+            starImageView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 27),
+            starImageView.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: -30),
+            starImageView.widthAnchor.constraint(equalToConstant: 19),
+            
+            starCountLabel.topAnchor.constraint(equalTo: starImageView.topAnchor),
+            starCountLabel.leadingAnchor.constraint(equalTo: starImageView.trailingAnchor, constant: 10),
+            
+            nameStackView.topAnchor.constraint(equalTo: starImageView.bottomAnchor, constant: 27),
+            nameStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            nameStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
             
         ])
@@ -112,6 +176,8 @@ final class ProfileEditViewController: UIViewController {
         imagePickerController.sourceType = .photoLibrary
         present(imagePickerController, animated: true)
     }
+    
+    // TODO: - 데이터 불러오기
 }
 
 extension ProfileEditViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
