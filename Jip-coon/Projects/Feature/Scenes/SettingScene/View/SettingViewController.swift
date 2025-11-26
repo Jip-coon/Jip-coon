@@ -8,6 +8,7 @@
 import Core
 import UI
 import UIKit
+import FirebaseAuth
 
 // MARK: - 설정 메뉴 데이터 모델
 
@@ -76,7 +77,11 @@ private enum SettingItem {
 public final class SettingViewController: UIViewController {
 
     private let authService = AuthService()
-    
+    private let userService = FirebaseUserService()
+
+    // 현재 사용자 정보
+    private var currentUser: Core.User?
+
     // 앱 버전
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     private let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
@@ -93,6 +98,7 @@ public final class SettingViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTableView()
+        loadCurrentUser()
     }
 
     private func setupUI() {
@@ -113,6 +119,24 @@ public final class SettingViewController: UIViewController {
     private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
+    }
+
+    private func loadCurrentUser() {
+        Task {
+            do {
+                currentUser = try await userService.getCurrentUser()
+                if currentUser == nil { //TODO: - FireStore에 정보 없음 문제
+                    print("Firebase Auth UID: \(Auth.auth().currentUser?.uid ?? "없음")")
+                    print("이메일: \(Auth.auth().currentUser?.email ?? "없음")")
+                }
+                tableView.reloadData()
+            } catch {
+                print("사용자 정보 로드 실패: \(error.localizedDescription)")
+                print("Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")")
+                // 기본적으로 자녀 권한으로 처리
+                tableView.reloadData()
+            }
+        }
     }
 
     private func handleLogout() {
@@ -164,22 +188,43 @@ public final class SettingViewController: UIViewController {
 
 extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
     public func numberOfSections(in tableView: UITableView) -> Int {
-        return SettingSection.allCases.count
+        let allSections = SettingSection.allCases
+        // 부모인 경우에만 familyManage 섹션 포함
+        if currentUser?.isParent == true {
+            return allSections.count
+        } else {
+            return allSections.count - 1 // familyManage 섹션 제외
+        }
     }
 
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return SettingSection.allCases[section].items.count
+        let actualSection = getActualSection(for: section)
+        return actualSection.items.count
     }
 
     public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return SettingSection.allCases[section].title
+        let actualSection = getActualSection(for: section)
+        return actualSection.title
+    }
+
+    private func getActualSection(for section: Int) -> SettingSection {
+        let allSections = SettingSection.allCases
+
+        if currentUser?.isParent == true {
+            return allSections[section]
+        } else {
+            // 부모가 아닌 경우 familyManage 섹션을 건너뜀
+            let nonAdminSections = allSections.filter { $0 != .familyManage }
+            return nonAdminSections[section]
+        }
     }
 
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
     -> UITableViewCell
     {
         let cell = tableView.dequeueReusableCell(withIdentifier: "settingCell", for: indexPath)
-        let item = SettingSection.allCases[indexPath.section].items[indexPath.row]
+        let actualSection = getActualSection(for: indexPath.section)
+        let item = actualSection.items[indexPath.row]
 
         var content = cell.defaultContentConfiguration()
         content.text = item.title
@@ -201,7 +246,8 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
 
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let item = SettingSection.allCases[indexPath.section].items[indexPath.row]
+        let actualSection = getActualSection(for: indexPath.section)
+        let item = actualSection.items[indexPath.row]
 
         switch item {
         case .logout:

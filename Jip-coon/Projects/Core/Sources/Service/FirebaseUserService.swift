@@ -24,7 +24,12 @@ public final class FirebaseUserService: UserServiceProtocol {
     
     /// 사용자 정보 조회
     public func getUser(by id: String) async throws -> User? {
-        return try await usersCollection.document(id).getDocument(as: User.self)
+        let document = try await usersCollection.document(id).getDocument()
+        if document.exists {
+            return try document.data(as: User.self)
+        } else {
+            return nil
+        }
     }
     
     /// 사용자 정보 업데이트
