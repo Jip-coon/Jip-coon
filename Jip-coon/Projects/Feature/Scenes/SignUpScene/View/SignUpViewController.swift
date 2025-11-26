@@ -13,6 +13,7 @@ import UIKit
 public final class SignUpViewController: UIViewController {
     private let viewModel = SignUpViewModel()
     private let authService = AuthService()
+    private let userService = FirebaseUserService()
     private var cancellables = Set<AnyCancellable>()
     private var activeField: UITextField?
     
@@ -215,10 +216,35 @@ public final class SignUpViewController: UIViewController {
     @objc private func signUpTapped() {
         Task {
             do {
+                // Firebase Auth로 계정 생성
                 try await authService.signUp(email: viewModel.email, password: viewModel.password)
+
+                // 현재 생성된 사용자의 UID 가져오기
+                guard let currentUser = authService.currentUser else {
+                    throw NSError(domain: "SignUp", code: -1, userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 가져올 수 없습니다."])
+                }
+
+                // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
+                let emailPrefix = viewModel.email.components(separatedBy: "@").first ?? "사용자"
+                let user = User(id: currentUser.uid,
+                              name: emailPrefix,
+                              email: viewModel.email,
+                              role: .child) // 기본적으로 자녀로 설정
+
+                // Firestore에 사용자 정보 저장
+                try await userService.createUser(user)
+
+                print("회원가입 및 Firestore 저장 성공")
                 navigationController?.popViewController(animated: true)
             } catch {
                 print("회원가입 실패: \(error.localizedDescription)")
+                // 회원가입 실패 시 Firebase Auth 계정 삭제
+                do {
+                    try await authService.deleteAccount()
+                    print("실패한 계정 정리 완료")
+                } catch {
+                    print("실패한 계정 정리 실패: \(error.localizedDescription)")
+                }
             }
         }
     }

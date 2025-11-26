@@ -43,6 +43,10 @@ public final class AuthService: AuthServiceProtocol {
         return Auth.auth().currentUser != nil
     }
     
+    public var currentUser: FirebaseAuth.User? {
+        return Auth.auth().currentUser
+    }
+
     public var currentUserEmail: String? {
         return Auth.auth().currentUser?.email
     }
