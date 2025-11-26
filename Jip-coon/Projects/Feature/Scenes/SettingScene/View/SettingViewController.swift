@@ -232,6 +232,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         switch item {
         case .appVersion:
             content.secondaryText = "\(appVersion).\(buildNumber)"
+            cell.accessoryType = .none
             cell.selectionStyle = .none
         case .logout, .deleteAccount:
             content.textProperties.color = .systemRed
@@ -254,6 +255,8 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
             handleLogout()
         case .deleteAccount:
             handleDeleteAccount()
+        case .appVersion:
+            break
         default:
             print("\(item.title) 선택됨")
         }
