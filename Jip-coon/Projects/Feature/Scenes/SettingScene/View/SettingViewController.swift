@@ -90,7 +90,11 @@ public final class SettingViewController: UIViewController {
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingCell")
+        tableView
+            .register(
+                UITableViewCell.self,
+                forCellReuseIdentifier: "settingCell"
+            )
         return tableView
     }()
 
@@ -126,13 +130,17 @@ public final class SettingViewController: UIViewController {
             do {
                 currentUser = try await userService.getCurrentUser()
                 if currentUser == nil { //TODO: - FireStore에 정보 없음 문제
-                    print("Firebase Auth UID: \(Auth.auth().currentUser?.uid ?? "없음")")
+                    print(
+                        "Firebase Auth UID: \(Auth.auth().currentUser?.uid ?? "없음")"
+                    )
                     print("이메일: \(Auth.auth().currentUser?.email ?? "없음")")
                 }
                 tableView.reloadData()
             } catch {
                 print("사용자 정보 로드 실패: \(error.localizedDescription)")
-                print("Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")")
+                print(
+                    "Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")"
+                )
                 // 기본적으로 자녀 권한으로 처리
                 tableView.reloadData()
             }
@@ -149,13 +157,21 @@ public final class SettingViewController: UIViewController {
             Task {
                 do {
                     try self.authService.signOut()
-                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                    NotificationCenter.default
+                        .post(
+                            name: NSNotification.Name("LogoutSuccess"),
+                            object: nil
+                        )
                 } catch {
                     print("로그아웃 실패: \(error.localizedDescription)")
                 }
             }
         }
-        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let cancelButton = UIAlertAction(
+            title: "취소",
+            style: .cancel,
+            handler: nil
+        )
         signoutAlert.addAction(okButton)
         signoutAlert.addAction(cancelButton)
         present(signoutAlert, animated: true, completion: nil)
@@ -171,13 +187,21 @@ public final class SettingViewController: UIViewController {
             Task {
                 do {
                     try await self.authService.deleteAccount()
-                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                    NotificationCenter.default
+                        .post(
+                            name: NSNotification.Name("LogoutSuccess"),
+                            object: nil
+                        )
                 } catch {
                     print("회원 탈퇴 실패: \(error.localizedDescription)")
                 }
             }
         }
-        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let cancelButton = UIAlertAction(
+            title: "취소",
+            style: .cancel,
+            handler: nil
+        )
         deleteAccountAlert.addAction(okButton)
         deleteAccountAlert.addAction(cancelButton)
         present(deleteAccountAlert, animated: true, completion: nil)
@@ -222,7 +246,10 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
     -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "settingCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "settingCell",
+            for: indexPath
+        )
         let actualSection = getActualSection(for: indexPath.section)
         let item = actualSection.items[indexPath.row]
 
@@ -245,7 +272,10 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    public func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
         let actualSection = getActualSection(for: indexPath.section)
         let item = actualSection.items[indexPath.row]
