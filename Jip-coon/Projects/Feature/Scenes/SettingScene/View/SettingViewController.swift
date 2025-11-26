@@ -76,6 +76,10 @@ private enum SettingItem {
 public final class SettingViewController: UIViewController {
 
     private let authService = AuthService()
+    
+    // 앱 버전
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    private let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
 
 
     private let tableView: UITableView = {
@@ -182,7 +186,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
 
         switch item {
         case .appVersion:
-            content.secondaryText = "1.0.0"  // TODO: 실제 앱 버전 정보 가져오기
+            content.secondaryText = "\(appVersion).\(buildNumber)"
             cell.selectionStyle = .none
         case .logout, .deleteAccount:
             content.textProperties.color = .systemRed
