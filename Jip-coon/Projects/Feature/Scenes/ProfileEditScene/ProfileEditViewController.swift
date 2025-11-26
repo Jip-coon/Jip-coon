@@ -41,6 +41,7 @@ final class ProfileEditViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        setupButtonActions()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -97,5 +98,31 @@ final class ProfileEditViewController: UIViewController {
         ])
     }
     
+    private func setupButtonActions() {
+        profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)
+    }
     
+    @objc private func profileImageEditButtonTapped() {
+        presentPhotoPicker()
+    }
+    
+    private func presentPhotoPicker() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .photoLibrary
+        present(imagePickerController, animated: true)
+    }
+}
+
+extension ProfileEditViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
+        
+        guard let selectedImage = info[.originalImage] as? UIImage else { return }
+        
+        profileImageView.image = selectedImage
+        profileImageView.contentMode = .scaleAspectFill
+        
+        // TODO: - 서버에 프로필 이미지 저장
+    }
 }
