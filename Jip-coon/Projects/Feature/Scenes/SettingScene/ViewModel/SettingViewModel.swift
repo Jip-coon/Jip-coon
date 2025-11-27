@@ -80,9 +80,9 @@ final class SettingViewModel {
         let db = Firestore.firestore()
 
         // Firestore 컬렉션 이름
-        let questSubmissionsCollection = "quest_submissions"
-        let questsCollection = "quests"
-        let familiesCollection = "families"
+        let questSubmissionsCollection = FirestoreCollections.questSubmissions
+        let questsCollection = FirestoreCollections.quests
+        let familiesCollection = FirestoreCollections.families
 
         // 사용자의 퀘스트 데이터 삭제
         let submissionsQuery = db.collection(questSubmissionsCollection)

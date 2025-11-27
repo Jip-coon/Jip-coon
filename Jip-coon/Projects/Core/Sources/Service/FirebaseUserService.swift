@@ -12,7 +12,7 @@ import FirebaseFirestore
 public final class FirebaseUserService: UserServiceProtocol {
     private let db = Firestore.firestore()
     private var usersCollection: CollectionReference {
-        return db.collection("users")
+        return db.collection(FirestoreCollections.users)
     }
     
     public init() { }

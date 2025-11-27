@@ -9,12 +9,12 @@ import Foundation
 
 // MARK: - Firestore 컬렉션 이름
 public struct FirestoreCollections {
-    static let users = "users"
-    static let families = "families"
-    static let quests = "quests"
-    static let questSubmissions = "quest_submissions"
-    static let statistics = "statistics"
-    static let notifications = "notifications"
+    public static let users = "users"
+    public static let families = "families"
+    public static let quests = "quests"
+    public static let questSubmissions = "quest_submissions"
+    public static let statistics = "statistics"
+    public static let notifications = "notifications"
 }
 
 
