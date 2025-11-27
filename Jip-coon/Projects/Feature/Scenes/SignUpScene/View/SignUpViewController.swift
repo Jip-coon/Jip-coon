@@ -12,8 +12,6 @@ import UIKit
 
 public final class SignUpViewController: UIViewController {
     private let viewModel = SignUpViewModel()
-    private let authService = AuthService()
-    private let userService = FirebaseUserService()
     private var cancellables = Set<AnyCancellable>()
     private var activeField: UITextField?
     
@@ -177,19 +175,43 @@ public final class SignUpViewController: UIViewController {
                 self?.emailInvalidLabel.isHidden = isValid
             }
             .store(in: &cancellables)
-        
+
         viewModel.$isPasswordValid
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isValid in
                 self?.passwordInvalidLabel.isHidden = isValid
             }
             .store(in: &cancellables)
-        
+
         viewModel.$isSignUpEnabled
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isEnabled in
                 self?.signUpButton.isEnabled = isEnabled
                 self?.signUpButton.backgroundColor = isEnabled ? .mainOrange : .textFieldStroke
+            }
+            .store(in: &cancellables)
+
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.signUpButton.isEnabled = !isLoading && self?.viewModel.isSignUpEnabled == true
+                // 로딩 중일 때는 버튼 비활성화
+                if isLoading {
+                    self?.signUpButton.setTitle("회원 가입 중...", for: .disabled)
+                } else {
+                    self?.signUpButton.setTitle("회원 가입", for: .normal)
+                }
+            }
+            .store(in: &cancellables)
+
+        viewModel.$errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let errorMessage = errorMessage {
+                    // 에러 메시지를 사용자에게 표시 (예: Alert)
+                    print("회원가입 에러: \(errorMessage)")
+                    // 실제 앱에서는 Alert이나 Toast 메시지로 표시
+                }
             }
             .store(in: &cancellables)
     }
@@ -216,35 +238,10 @@ public final class SignUpViewController: UIViewController {
     @objc private func signUpTapped() {
         Task {
             do {
-                // Firebase Auth로 계정 생성
-                try await authService.signUp(email: viewModel.email, password: viewModel.password)
-
-                // 현재 생성된 사용자의 UID 가져오기
-                guard let currentUser = authService.currentUser else {
-                    throw NSError(domain: "SignUp", code: -1, userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 가져올 수 없습니다."])
-                }
-
-                // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
-                let emailPrefix = viewModel.email.components(separatedBy: "@").first ?? "사용자"
-                let user = User(id: currentUser.uid,
-                              name: emailPrefix,
-                              email: viewModel.email,
-                              role: .child) // 기본적으로 자녀로 설정
-
-                // Firestore에 사용자 정보 저장
-                try await userService.createUser(user)
-
-                print("회원가입 및 Firestore 저장 성공")
+                try await viewModel.performSignUp()
                 navigationController?.popViewController(animated: true)
             } catch {
-                print("회원가입 실패: \(error.localizedDescription)")
-                // 회원가입 실패 시 Firebase Auth 계정 삭제
-                do {
-                    try await authService.deleteAccount()
-                    print("실패한 계정 정리 완료")
-                } catch {
-                    print("실패한 계정 정리 실패: \(error.localizedDescription)")
-                }
+                print("회원가입 UI 처리 완료")
             }
         }
     }
