@@ -8,11 +8,14 @@
 import Core
 import UI
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 // MARK: - 설정 메뉴 데이터 모델
 
 private enum SettingSection: Int, CaseIterable {
     case profile
+    case familyManage
     case appSettings
     case support
     case account
@@ -21,6 +24,8 @@ private enum SettingSection: Int, CaseIterable {
         switch self {
         case .profile:
             return "프로필"
+        case .familyManage:
+            return "가족 관리"
         case .appSettings:
             return "앱 설정"
         case .support:
@@ -34,6 +39,8 @@ private enum SettingSection: Int, CaseIterable {
         switch self {
         case .profile:
             return [.editProfile]
+        case .familyManage:
+            return [.manageFamily]
         case .appSettings:
             return [.notifications]
         case .support:
@@ -46,6 +53,7 @@ private enum SettingSection: Int, CaseIterable {
 
 private enum SettingItem {
     case editProfile
+    case manageFamily
     case notifications
     case termsOfService
     case privacyPolicy
@@ -56,6 +64,7 @@ private enum SettingItem {
     var title: String {
         switch self {
         case .editProfile: return "프로필 수정"
+        case .manageFamily: return "가족 관리"
         case .notifications: return "알림 설정"
         case .termsOfService: return "서비스 이용약관"
         case .privacyPolicy: return "개인정보 처리방침"
@@ -68,13 +77,22 @@ private enum SettingItem {
 
 public final class SettingViewController: UIViewController {
 
-    private let authService = AuthService()
+    private let viewModel = SettingViewModel()
+
+    // 현재 사용자 정보 (ViewModel에서 가져옴)
+    private var currentUser: Core.User? {
+        return viewModel.currentUser
+    }
 
 
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingCell")
+        tableView
+            .register(
+                UITableViewCell.self,
+                forCellReuseIdentifier: "settingCell"
+            )
         return tableView
     }()
 
@@ -82,6 +100,7 @@ public final class SettingViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTableView()
+        Task { await loadCurrentUser() }
     }
 
     private func setupUI() {
@@ -104,6 +123,11 @@ public final class SettingViewController: UIViewController {
         tableView.delegate = self
     }
 
+    private func loadCurrentUser() async {
+        await viewModel.loadCurrentUser()
+        tableView.reloadData()
+    }
+
     private func handleLogout() {
         let signoutAlert = UIAlertController(
             title: "로그아웃",
@@ -113,14 +137,22 @@ public final class SettingViewController: UIViewController {
         let okButton = UIAlertAction(title: "로그아웃", style: .destructive) { _ in
             Task {
                 do {
-                    try self.authService.signOut()
-                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                    try await self.viewModel.performLogout()
+                    NotificationCenter.default
+                        .post(
+                            name: NSNotification.Name("LogoutSuccess"),
+                            object: nil
+                        )
                 } catch {
                     print("로그아웃 실패: \(error.localizedDescription)")
                 }
             }
         }
-        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let cancelButton = UIAlertAction(
+            title: "취소",
+            style: .cancel,
+            handler: nil
+        )
         signoutAlert.addAction(okButton)
         signoutAlert.addAction(cancelButton)
         present(signoutAlert, animated: true, completion: nil)
@@ -129,53 +161,126 @@ public final class SettingViewController: UIViewController {
     private func handleDeleteAccount() {
         let deleteAccountAlert = UIAlertController(
             title: "회원탈퇴",
-            message: "회원탈퇴하시겠습니까?",
+            message: "회원탈퇴를 위해 비밀번호를 다시 입력해주세요.",
             preferredStyle: .alert
         )
-        let okButton = UIAlertAction(title: "회원탈퇴", style: .destructive) { _ in
+
+        deleteAccountAlert.addTextField { textField in
+            textField.placeholder = "비밀번호"
+            textField.isSecureTextEntry = true
+        }
+
+        let okButton = UIAlertAction(title: "회원탈퇴", style: .destructive) { [weak self] _ in
+            guard let self = self,
+                  let password = deleteAccountAlert.textFields?.first?.text,
+                  !password.isEmpty else {
+                self?.showErrorAlert(message: "비밀번호를 입력해주세요.")
+                return
+            }
+
             Task {
                 do {
-                    try await self.authService.deleteAccount()
-                    NotificationCenter.default.post(name: NSNotification.Name("LogoutSuccess"), object: nil)
+                    try await self.viewModel
+                        .performDeleteAccount(password: password)
+
+                    // 회원탈퇴 성공 Alert 표시
+                    let successAlert = UIAlertController(
+                        title: "회원탈퇴 완료",
+                        message: "회원탈퇴가 성공적으로 처리되었습니다.",
+                        preferredStyle: .alert
+                    )
+                    let confirmButton = UIAlertAction(
+                        title: "확인",
+                        style: .default
+                    ) { _ in
+                        // 확인 버튼을 누르면 로그인 화면으로 이동
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("LogoutSuccess"),
+                            object: nil
+                        )
+                    }
+                    successAlert.addAction(confirmButton)
+                    self.present(successAlert, animated: true, completion: nil)
                 } catch {
                     print("회원 탈퇴 실패: \(error.localizedDescription)")
+                    self.showErrorAlert(message: "회원탈퇴에 실패했습니다. 다시 시도해주세요.")
                 }
             }
         }
-        let cancelButton = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+
+        let cancelButton = UIAlertAction(
+            title: "취소",
+            style: .cancel,
+            handler: nil
+        )
+
         deleteAccountAlert.addAction(okButton)
         deleteAccountAlert.addAction(cancelButton)
         present(deleteAccountAlert, animated: true, completion: nil)
+    }
 
-
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "오류",
+            message: message,
+            preferredStyle: .alert
+        )
+        let okButton = UIAlertAction(title: "확인", style: .default, handler: nil)
+        alert.addAction(okButton)
+        present(alert, animated: true, completion: nil)
     }
 }
 
 extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
     public func numberOfSections(in tableView: UITableView) -> Int {
-        return SettingSection.allCases.count
+        let allSections = SettingSection.allCases
+        // 부모인 경우에만 familyManage 섹션 포함
+        if currentUser?.isParent == true {
+            return allSections.count
+        } else {
+            return allSections.count - 1 // familyManage 섹션 제외
+        }
     }
 
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return SettingSection.allCases[section].items.count
+        let actualSection = getActualSection(for: section)
+        return actualSection.items.count
     }
 
     public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return SettingSection.allCases[section].title
+        let actualSection = getActualSection(for: section)
+        return actualSection.title
+    }
+
+    private func getActualSection(for section: Int) -> SettingSection {
+        let allSections = SettingSection.allCases
+
+        if currentUser?.isParent == true {
+            return allSections[section]
+        } else {
+            // 부모가 아닌 경우 familyManage 섹션을 건너뜀
+            let nonAdminSections = allSections.filter { $0 != .familyManage }
+            return nonAdminSections[section]
+        }
     }
 
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
     -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "settingCell", for: indexPath)
-        let item = SettingSection.allCases[indexPath.section].items[indexPath.row]
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "settingCell",
+            for: indexPath
+        )
+        let actualSection = getActualSection(for: indexPath.section)
+        let item = actualSection.items[indexPath.row]
 
         var content = cell.defaultContentConfiguration()
         content.text = item.title
 
         switch item {
         case .appVersion:
-            content.secondaryText = "1.0.0"  // TODO: 실제 앱 버전 정보 가져오기
+            content.secondaryText = viewModel.fullVersionString
+            cell.accessoryType = .none
             cell.selectionStyle = .none
         case .logout, .deleteAccount:
             content.textProperties.color = .systemRed
@@ -188,15 +293,21 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    public func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let item = SettingSection.allCases[indexPath.section].items[indexPath.row]
+        let actualSection = getActualSection(for: indexPath.section)
+        let item = actualSection.items[indexPath.row]
 
         switch item {
         case .logout:
             handleLogout()
         case .deleteAccount:
             handleDeleteAccount()
+        case .appVersion:
+            break
         default:
             print("\(item.title) 선택됨")
         }
