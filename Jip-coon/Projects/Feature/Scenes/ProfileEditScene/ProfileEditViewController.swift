@@ -5,10 +5,13 @@
 //  Created by 예슬 on 11/25/25.
 //
 
+import Core
 import UI
 import UIKit
 
 final class ProfileEditViewController: UIViewController {
+//    var currentUser: User
+    
     // MARK: - View
     
     private let profileImageView: UIImageView = {
@@ -99,6 +102,15 @@ final class ProfileEditViewController: UIViewController {
         return button
     }()
     
+//    init(currentUser: User) {
+//        self.currentUser = currentUser
+//        super.init(nibName: nil, bundle: nil)
+//    }
+//    
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -106,6 +118,7 @@ final class ProfileEditViewController: UIViewController {
         setupView()
         setupButtonActions()
         hideKeyboardWhenTappedAround()
+//        configure(with: currentUser)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -136,8 +149,8 @@ final class ProfileEditViewController: UIViewController {
         addSubviews()
         setupConstraints()
         
-        emailInfoView.setInfo("yesle2005")
-        familyInfoView.setInfo("hahaha")
+        emailInfoView.updateInfo("yesle2005")
+        familyInfoView.updateInfo("hahaha")
     }
     
     private func addSubviews() {
@@ -202,6 +215,13 @@ final class ProfileEditViewController: UIViewController {
         ])
     }
     
+    // TODO: - 유저 정보 불러오기
+//    private func configure(with user: User) {
+//        nameTextField.text = user.email.components(separatedBy: "@").first
+//        emailInfoView.updateInfo(user.email)
+////        familyInfoView.updateInfo(user)
+//    }
+    
     private func setupButtonActions() {
         profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)
         profileInfoEditButton.addTarget(self, action: #selector(profileInfoEditButtonTapped), for: .touchUpInside)
@@ -209,13 +229,6 @@ final class ProfileEditViewController: UIViewController {
     
     @objc private func profileImageEditButtonTapped() {
         presentPhotoPicker()
-    }
-    
-    private func presentPhotoPicker() {
-        let imagePickerController = UIImagePickerController()
-        imagePickerController.delegate = self
-        imagePickerController.sourceType = .photoLibrary
-        present(imagePickerController, animated: true)
     }
     
     @objc private func profileInfoEditButtonTapped() {
@@ -231,6 +244,13 @@ final class ProfileEditViewController: UIViewController {
         }
     }
     
+    private func presentPhotoPicker() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .photoLibrary
+        present(imagePickerController, animated: true)
+    }
+    
     private func hideKeyboardWhenTappedAround() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
@@ -240,8 +260,6 @@ final class ProfileEditViewController: UIViewController {
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
-    
-    // TODO: - 데이터 불러오기
 }
 
 extension ProfileEditViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {

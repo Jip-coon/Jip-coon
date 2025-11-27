@@ -55,7 +55,7 @@ final class ProfileInfoView: UIView {
         ])
     }
     
-    func setInfo(_ text: String) {
+    func updateInfo(_ text: String) {
         self.infoLabel.text = text
     }
 }
