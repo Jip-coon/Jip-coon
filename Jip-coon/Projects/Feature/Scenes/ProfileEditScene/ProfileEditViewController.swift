@@ -10,7 +10,7 @@ import UI
 import UIKit
 
 final class ProfileEditViewController: UIViewController {
-//    var currentUser: User
+    var currentUser: User
     
     // MARK: - View
     
@@ -102,14 +102,14 @@ final class ProfileEditViewController: UIViewController {
         return button
     }()
     
-//    init(currentUser: User) {
-//        self.currentUser = currentUser
-//        super.init(nibName: nil, bundle: nil)
-//    }
-//    
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
+    init(currentUser: User) {
+        self.currentUser = currentUser
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     
@@ -118,7 +118,7 @@ final class ProfileEditViewController: UIViewController {
         setupView()
         setupButtonActions()
         hideKeyboardWhenTappedAround()
-//        configure(with: currentUser)
+        configure(with: currentUser)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -148,9 +148,6 @@ final class ProfileEditViewController: UIViewController {
         
         addSubviews()
         setupConstraints()
-        
-        emailInfoView.updateInfo("yesle2005")
-        familyInfoView.updateInfo("hahaha")
     }
     
     private func addSubviews() {
@@ -215,12 +212,12 @@ final class ProfileEditViewController: UIViewController {
         ])
     }
     
-    // TODO: - 유저 정보 불러오기
-//    private func configure(with user: User) {
-//        nameTextField.text = user.email.components(separatedBy: "@").first
-//        emailInfoView.updateInfo(user.email)
-////        familyInfoView.updateInfo(user)
-//    }
+    private func configure(with user: User) {
+        nameTextField.text = user.email.components(separatedBy: "@").first
+        emailInfoView.updateInfo(user.email)
+        // TODO: - 가족 정보 업데이트
+//        familyInfoView.updateInfo(user)
+    }
     
     private func setupButtonActions() {
         profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)

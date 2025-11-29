@@ -220,8 +220,6 @@ public final class SettingViewController: UIViewController {
     }
     
     private func handleProfileEdit() {
-        // TODO: - 로그인 정보 확인하고 수정하기!!
-        
         // 로그인은 되어있지만 현재 사용자 정보 없는 경우
         if Auth.auth().currentUser != nil && currentUser == nil {
             showErrorAlert(message: "네트워크 상태를 확인하고 다시 시도해주세요.")
@@ -233,8 +231,7 @@ public final class SettingViewController: UIViewController {
         }
         
         // 사용자 정보 있는 경우
-        let profileEditViewController = ProfileEditViewController()
-//        let profileEditViewController = ProfileEditViewController(currentUser: user)
+        let profileEditViewController = ProfileEditViewController(currentUser: user)
         navigationItem.backButtonTitle = ""
         navigationController?.pushViewController(profileEditViewController, animated: true)
     }
