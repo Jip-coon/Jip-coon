@@ -74,6 +74,7 @@ public final class SignUpViewController: UIViewController {
         textField.leftPadding()
         textField.isSecureTextEntry = true
         textField.autocorrectionType = .no
+        textField.textContentType = .oneTimeCode
         textField.spellCheckingType = .no
         return textField
     }()

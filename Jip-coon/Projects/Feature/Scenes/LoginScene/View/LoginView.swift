@@ -196,6 +196,7 @@ final class LoginView: UIView {
         textField.leftPadding()
         textField.isSecureTextEntry = isSecure
         textField.keyboardType = keyboardType
+        textField.textContentType = placeholder == "이메일" ? .emailAddress : .oneTimeCode
         return textField
     }
     

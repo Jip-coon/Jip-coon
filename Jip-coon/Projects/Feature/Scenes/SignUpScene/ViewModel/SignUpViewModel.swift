@@ -67,13 +67,14 @@ final class SignUpViewModel: ObservableObject {
             }
             
             // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
+            // TODO: - 가족 역할 설정하기
             let emailPrefix = email.components(separatedBy: "@").first ?? "사용자"
             let user = User(
                 id: currentUser.uid,
                 name: emailPrefix,
                 email: email,
                 role: .child
-            ) // 기본적으로 자녀로 설정
+            )
             
             // Firestore에 사용자 정보 저장
             try await userService.createUser(user)

@@ -10,7 +10,7 @@ import Combine
 
 // MARK: - 사용자 서비스 프로토콜
 
-protocol UserServiceProtocol {
+public protocol UserServiceProtocol {
     /// 사용자 프로필 생성
     func createUser(_ user: User) async throws
     
@@ -25,6 +25,9 @@ protocol UserServiceProtocol {
     
     /// 현재 로그인한 사용자 정보 조회
     func getCurrentUser() async throws -> User?
+    
+    /// 사용자 정보가 없으면 사용자 생성
+    func syncCurrentUserDocument() async throws
     
     /// 사용자 포인트 업데이트
     func updateUserPoints(userId: String, points: Int) async throws

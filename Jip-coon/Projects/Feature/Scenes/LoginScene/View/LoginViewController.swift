@@ -58,10 +58,12 @@ public class LoginViewController: UIViewController {
     
     @objc private func findIdButtonTapped() {
         print("find id button tapped")
+        // TODO: - ID 찾기
     }
     
     @objc private func findPasswordButtonTapped() {
         print("find password button tapped")
+        // TODO: - 비밀번호 찾기
     }
     
     @objc private func loginButtonTapped() {
