@@ -15,6 +15,8 @@ public final class SignUpViewController: UIViewController {
     private var cancellables = Set<AnyCancellable>()
     private var activeField: UITextField?
     
+    // MARK: - View
+    
     private let signUpLabel: UILabel = {
         let label = UILabel()
         label.text = "Sign Up"
@@ -98,6 +100,8 @@ public final class SignUpViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Lifecycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -107,6 +111,8 @@ public final class SignUpViewController: UIViewController {
         hideKeyboardWhenTappedAround()
         setupKeyboardObservers()
     }
+    
+    // MARK: - Method
     
     private func setupView() {
         view.backgroundColor = .backgroundWhite
@@ -175,14 +181,14 @@ public final class SignUpViewController: UIViewController {
                 self?.emailInvalidLabel.isHidden = isValid
             }
             .store(in: &cancellables)
-
+        
         viewModel.$isPasswordValid
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isValid in
                 self?.passwordInvalidLabel.isHidden = isValid
             }
             .store(in: &cancellables)
-
+        
         viewModel.$isSignUpEnabled
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isEnabled in
@@ -190,7 +196,7 @@ public final class SignUpViewController: UIViewController {
                 self?.signUpButton.backgroundColor = isEnabled ? .mainOrange : .textFieldStroke
             }
             .store(in: &cancellables)
-
+        
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
@@ -203,14 +209,13 @@ public final class SignUpViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
-
+        
         viewModel.$errorMessage
             .receive(on: DispatchQueue.main)
             .sink { [weak self] errorMessage in
                 if let errorMessage = errorMessage {
-                    // 에러 메시지를 사용자에게 표시 (예: Alert)
+                    self?.showAlert(title: "회원가입 실패", message: errorMessage)
                     print("회원가입 에러: \(errorMessage)")
-                    // 실제 앱에서는 Alert이나 Toast 메시지로 표시
                 }
             }
             .store(in: &cancellables)
@@ -237,13 +242,15 @@ public final class SignUpViewController: UIViewController {
     
     @objc private func signUpTapped() {
         Task {
-            do {
-                try await viewModel.performSignUp()
-                navigationController?.popViewController(animated: true)
-            } catch {
-                print("회원가입 UI 처리 완료")
-            }
+            await viewModel.performSignUp()
+            navigationController?.popViewController(animated: true)
         }
+    }
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
     
     // MARK: - Keyboard

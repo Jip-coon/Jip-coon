@@ -21,16 +21,18 @@ final class SignUpViewModel: ObservableObject {
     @Published var isSignUpEnabled: Bool = false
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-
+    
     private let authService: AuthService
     private let userService: FirebaseUserService
     private var cancellables = Set<AnyCancellable>()
-
-    init(authService: AuthService = AuthService(),
-         userService: FirebaseUserService = FirebaseUserService()) {
+    
+    init(
+        authService: AuthService = AuthService(),
+        userService: FirebaseUserService = FirebaseUserService()
+    ) {
         self.authService = authService
         self.userService = userService
-
+        
         Publishers.CombineLatest($isEmailValid, $isPasswordValid)
             .map { $0 && $1 }
             .assign(to: \.isSignUpEnabled, on: self)
@@ -46,39 +48,40 @@ final class SignUpViewModel: ObservableObject {
     private func validatePassword() {
         isPasswordValid = password.count >= 6
     }
-
+    
     // MARK: - 회원가입
-
-    func performSignUp() async throws {
+    
+    func performSignUp() async {
         isLoading = true
         errorMessage = nil
-
+        
         defer { isLoading = false }
-
+        
         do {
             // Firebase Auth로 계정 생성
             try await authService.signUp(email: email, password: password)
-
+            
             // 현재 생성된 사용자의 UID 가져오기
             guard let currentUser = authService.currentUser else {
                 throw NSError(domain: "SignUp", code: -1, userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 가져올 수 없습니다."])
             }
-
+            
             // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
             let emailPrefix = email.components(separatedBy: "@").first ?? "사용자"
-            let user = User(id: currentUser.uid,
-                          name: emailPrefix,
-                          email: email,
-                          role: .child) // 기본적으로 자녀로 설정
-
+            let user = User(
+                id: currentUser.uid,
+                name: emailPrefix,
+                email: email,
+                role: .child
+            ) // 기본적으로 자녀로 설정
+            
             // Firestore에 사용자 정보 저장
             try await userService.createUser(user)
-
+            
             print("회원가입 및 Firestore 저장 성공")
         } catch {
-            print("회원가입 실패: \(error.localizedDescription)")
-            errorMessage = error.localizedDescription
-
+            errorMessage = authService.handleError(error)
+            
             // 회원가입 실패 시 Firebase Auth 계정 삭제
             do {
                 try await authService.deleteAccount()
@@ -86,8 +89,6 @@ final class SignUpViewModel: ObservableObject {
             } catch {
                 print("실패한 계정 정리 실패: \(error.localizedDescription)")
             }
-
-            throw error
         }
     }
 }
