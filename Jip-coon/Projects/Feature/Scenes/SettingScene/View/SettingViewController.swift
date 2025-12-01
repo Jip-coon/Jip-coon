@@ -231,7 +231,8 @@ public final class SettingViewController: UIViewController {
         }
         
         // 사용자 정보 있는 경우
-        let profileEditViewController = ProfileEditViewController(currentUser: user)
+        let profileEditViewModel = ProfileEditViewModel(user: user)
+        let profileEditViewController = ProfileEditViewController(currentUser: user, viewModel: profileEditViewModel)
         navigationItem.backButtonTitle = ""
         navigationController?.pushViewController(profileEditViewController, animated: true)
     }

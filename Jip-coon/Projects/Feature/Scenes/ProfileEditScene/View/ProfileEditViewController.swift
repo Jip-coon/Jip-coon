@@ -10,7 +10,8 @@ import UI
 import UIKit
 
 final class ProfileEditViewController: UIViewController {
-    var currentUser: User
+    private let currentUser: User
+    private let viewModel: ProfileEditViewModel
     
     // MARK: - View
     
@@ -102,8 +103,12 @@ final class ProfileEditViewController: UIViewController {
         return button
     }()
     
-    init(currentUser: User) {
+    init(
+        currentUser: User,
+        viewModel: ProfileEditViewModel
+    ) {
         self.currentUser = currentUser
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -215,8 +220,7 @@ final class ProfileEditViewController: UIViewController {
     private func configure(with user: User) {
         nameTextField.text = user.email.components(separatedBy: "@").first
         emailInfoView.updateInfo(user.email)
-        // TODO: - 가족 정보 업데이트
-//        familyInfoView.updateInfo(user)
+        familyInfoView.updateInfo(viewModel.familyName)
     }
     
     private func setupButtonActions() {

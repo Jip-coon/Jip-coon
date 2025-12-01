@@ -18,6 +18,8 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         return db.collection(FirestoreCollections.users).document(id)
     }
     
+    public init() {}
+    
     // MARK: - CRUD
     
     /// 가족 생성

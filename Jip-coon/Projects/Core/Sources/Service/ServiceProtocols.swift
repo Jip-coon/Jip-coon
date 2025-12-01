@@ -38,7 +38,7 @@ public protocol UserServiceProtocol {
 
 // MARK: - 가족 서비스 프로토콜
 
-protocol FamilyServiceProtocol {
+public protocol FamilyServiceProtocol {
     /// 가족 생성
     func createFamily(_ family: Family) async throws -> Family
     
