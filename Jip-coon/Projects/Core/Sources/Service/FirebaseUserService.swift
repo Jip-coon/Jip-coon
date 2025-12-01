@@ -92,4 +92,14 @@ public final class FirebaseUserService: UserServiceProtocol {
         return users
     }
     
+    /// 사용자 이름 업데이트
+    public func updateUserName(userId: String, newName: String) async throws {
+        let userDocRef = usersCollection.document(userId)
+        
+        try await userDocRef.updateData([
+            "name": newName,
+            "updatedAt": Timestamp(date: Date())
+        ])
+    }
+    
 }

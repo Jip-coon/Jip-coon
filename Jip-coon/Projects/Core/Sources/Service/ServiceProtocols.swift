@@ -34,6 +34,9 @@ public protocol UserServiceProtocol {
     
     /// 가족 구성원 목록 조회
     func getFamilyMembers(familyId: String) async throws -> [User]
+    
+    /// 사용자 이름 업데이트
+    func updateUserName(userId: String, newName: String) async throws
 }
 
 // MARK: - 가족 서비스 프로토콜
