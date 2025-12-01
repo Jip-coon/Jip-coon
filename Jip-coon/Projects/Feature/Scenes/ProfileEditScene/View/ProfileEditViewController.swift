@@ -49,7 +49,6 @@ final class ProfileEditViewController: UIViewController {
     
     private let starCountLabel: UILabel = {
         let label = UILabel()
-        label.text = "250"
         label.font = .systemFont(ofSize: 16, weight: .semibold)
         label.textColor = .black
         return label
@@ -231,7 +230,7 @@ final class ProfileEditViewController: UIViewController {
             .sink { [weak self] user in
                 self?.nameTextField.text = user.name
                 self?.emailInfoView.updateInfo(user.email)
-                // TODO: - Point
+                self?.starCountLabel.text = String(user.points)
             }
             .store(in: &cancellables)
     }
