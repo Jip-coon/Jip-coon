@@ -154,7 +154,7 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     
     /// 새로운 초대코드 생성
     public func generateNewInviteCode(familyId: String) async throws -> String {
-        guard var family = try await getFamily(by: familyId) else {
+        guard var _ = try await getFamily(by: familyId) else {
             throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."])
         }
         

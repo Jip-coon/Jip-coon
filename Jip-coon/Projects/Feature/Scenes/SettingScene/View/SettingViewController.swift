@@ -225,7 +225,7 @@ public final class SettingViewController: UIViewController {
             showErrorAlert(message: "네트워크 상태를 확인하고 다시 시도해주세요.")
         }
         
-        guard let user = currentUser else {
+        guard let _ = currentUser else {
             print("사용자 정보가 없습니다.")
             return
         }

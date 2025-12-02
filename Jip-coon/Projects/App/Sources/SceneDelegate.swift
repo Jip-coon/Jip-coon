@@ -12,6 +12,15 @@ import Core
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    
+    private let userService: UserServiceProtocol
+    private let authService: AuthServiceProtocol
+    
+    override init() {
+        self.userService = FirebaseUserService()
+        self.authService = AuthService()
+        super.init()
+    }
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
@@ -23,9 +32,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = splashViewController
         window.makeKeyAndVisible()
         self.window = window
-        
-        let userService = FirebaseUserService()
-        let authService = AuthService()
         
         let loginViewModel = LoginViewModel(authService: authService, userService: userService)
         let appleLoginViewModel = AppleLoginViewModel(userService: userService)
@@ -42,7 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             let authService = AuthService()
             if authService.isLoggedIn {
-                window.rootViewController = MainTabBarController()
+                window.rootViewController = MainTabBarController(userService: self.userService)
             } else {
                 window.rootViewController = navigationController
             }
@@ -95,15 +101,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     @objc private func handleLoginSuccess() {
         DispatchQueue.main.async { [weak self] in
-            self?.window?.rootViewController = MainTabBarController()
-            self?.window?.makeKeyAndVisible()
+            guard let self = self else { return }
+            
+            self.window?.rootViewController = MainTabBarController(userService: self.userService)
+            self.window?.makeKeyAndVisible()
         }
     }
     
     @objc private func handleLogoutSuccess() {
-        let userService = FirebaseUserService()
-        let authService = AuthService()
-        
         let loginViewModel = LoginViewModel(authService: authService, userService: userService)
         let appleLoginViewModel = AppleLoginViewModel(userService: userService)
         let googleLoginViewModel = GoogleLoginViewModel(userService: userService)

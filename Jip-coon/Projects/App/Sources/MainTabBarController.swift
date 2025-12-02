@@ -5,10 +5,21 @@
 //  Created by 심관혁 on 8/21/25.
 //
 
-import UIKit
+import Core
 import Feature
+import UIKit
 
-class MainTabBarController: UITabBarController {
+final class MainTabBarController: UITabBarController {
+    private let userService: UserServiceProtocol
+    
+    init(userService: UserServiceProtocol) {
+        self.userService = userService
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,8 +42,10 @@ class MainTabBarController: UITabBarController {
     private func setupViewControllers() {
         // 해당 부분에 다른 뷰컨트롤러 추가
         // (VC(), 탭이름, 미선택 이미지, 선택 이미지)
+        let mainViewModel = MainViewModel(userService: userService)
+        
         let navs: [UINavigationController] = [
-            (MainViewController(), "홈", "house", "house.fill"),
+            (MainViewController(viewModel: mainViewModel), "홈", "house", "house.fill"),
             (SettingViewController(), "설정", "gear", "gear.fill"),
         ]
             .enumerated()

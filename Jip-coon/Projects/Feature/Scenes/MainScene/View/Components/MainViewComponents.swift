@@ -73,7 +73,6 @@ public class MainViewComponents: NSObject {
 
     public lazy var userNameLabel: UILabel = {
         let label = UILabel()
-        label.text = "홍길동(부모)"
         label.font = .systemFont(ofSize: 18, weight: .bold)
         label.textColor = UIColor.textGray
         return label
