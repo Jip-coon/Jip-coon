@@ -5,14 +5,21 @@
 //  Created by 예슬 on 9/2/25.
 //
 
-import Foundation
+
 import Combine
+import Core
+import Foundation
 import FirebaseAuth
 import FirebaseCore
 import GoogleSignIn
 
-final class GoogleLoginViewModel {
+public final class GoogleLoginViewModel {
     public let loginSuccess = PassthroughSubject<Void, Never>()
+    private let userService: UserServiceProtocol
+    
+    public init(userService: UserServiceProtocol) {
+        self.userService = userService
+    }
     
     func signIn(presentingVC: UIViewController) {
         guard let clientID = FirebaseApp.app()?.options.clientID else { return }
@@ -24,14 +31,12 @@ final class GoogleLoginViewModel {
         // Start the sign in flow!
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
             guard error == nil else {
-                // ...
                 return
             }
             
             guard let user = result?.user,
                   let idToken = user.idToken?.tokenString
             else {
-                // ...
                 return
             }
             
@@ -39,11 +44,14 @@ final class GoogleLoginViewModel {
                                                            accessToken: user.accessToken.tokenString)
             
             Auth.auth().signIn(with: credential) { authResult, error in
-                if let error = error {
+                if let _ = error {
                     return
                 }
-                if let user = authResult?.user {
+                if let _ = authResult?.user {
                     self.loginSuccess.send()
+                    Task {
+                        try await self.userService.syncCurrentUserDocument()
+                    }
                 }
             }
         }

@@ -7,14 +7,20 @@
 
 import AuthenticationServices
 import Combine
+import Core
 import CryptoKit
 import Foundation
 import FirebaseAuth
 
-final class AppleLoginViewModel: NSObject {
+public final class AppleLoginViewModel: NSObject {
     // Unhashed nonce.
     fileprivate var currentNonce: String?
     public let loginSuccess = PassthroughSubject<Void, Never>()
+    private let userService: UserServiceProtocol
+    
+    public init(userService: UserServiceProtocol) {
+        self.userService = userService
+    }
     
     @available(iOS 13, *)
     func startSignInWithAppleFlow() {
@@ -68,7 +74,7 @@ final class AppleLoginViewModel: NSObject {
 
 extension AppleLoginViewModel: ASAuthorizationControllerDelegate {
     // 로그인 성공
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let nonce = currentNonce else {
                 fatalError("Invalid state: A login callback was received, but no login request was sent.")
@@ -96,18 +102,21 @@ extension AppleLoginViewModel: ASAuthorizationControllerDelegate {
                 }
                 // 로그인에 성공했을 시 실행할 메서드 추가
                 self.loginSuccess.send()
+                Task {
+                    try await self.userService.syncCurrentUserDocument()
+                }
             }
         }
     }
     
     // 로그인 실패
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: any Error) {
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: any Error) {
         print("로그인 실패", error.localizedDescription)
     }
 }
 
 extension AppleLoginViewModel: ASAuthorizationControllerPresentationContextProviding {
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         // 현재 애플리케이션에서 활성화된 첫 번째 윈도우
         guard let window = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })

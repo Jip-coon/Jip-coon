@@ -24,7 +24,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.makeKeyAndVisible()
         self.window = window
         
-        let loginViewController = LoginViewController()
+        let userService = FirebaseUserService()
+        let authService = AuthService()
+        
+        let loginViewModel = LoginViewModel(authService: authService, userService: userService)
+        let appleLoginViewModel = AppleLoginViewModel(userService: userService)
+        let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
+        
+        let loginViewController = LoginViewController(
+            viewModel: loginViewModel,
+            appleLoginViewModel: appleLoginViewModel,
+            googleLoginViewModel: googleLoginViewModel
+        )
         let navigationController = UINavigationController(rootViewController: loginViewController)
 
         // 로그인 상태 확인
@@ -90,8 +101,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     @objc private func handleLogoutSuccess() {
+        let userService = FirebaseUserService()
+        let authService = AuthService()
+        
+        let loginViewModel = LoginViewModel(authService: authService, userService: userService)
+        let appleLoginViewModel = AppleLoginViewModel(userService: userService)
+        let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
+        
         DispatchQueue.main.async { [weak self] in
-            let loginVC = LoginViewController()
+            let loginVC = LoginViewController(
+                viewModel: loginViewModel,
+                appleLoginViewModel: appleLoginViewModel,
+                googleLoginViewModel: googleLoginViewModel
+            )
             let nav = UINavigationController(rootViewController: loginVC)
             self?.window?.rootViewController = nav
             self?.window?.makeKeyAndVisible()

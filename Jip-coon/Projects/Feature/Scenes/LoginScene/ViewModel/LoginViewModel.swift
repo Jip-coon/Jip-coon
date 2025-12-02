@@ -5,9 +5,9 @@
 //  Created by 심관혁 on 8/27/25.
 //
 
-import Foundation
 import Combine
 import Core
+import Foundation
 
 public final class LoginViewModel: ObservableObject {
     @Published public var email = ""
@@ -21,8 +21,8 @@ public final class LoginViewModel: ObservableObject {
     private let userService: UserServiceProtocol
     
     public init(
-        authService: AuthServiceProtocol = AuthService(),
-        userService: UserServiceProtocol = FirebaseUserService()
+        authService: AuthServiceProtocol,
+        userService: UserServiceProtocol
     ) {
         self.authService = authService
         self.userService = userService
