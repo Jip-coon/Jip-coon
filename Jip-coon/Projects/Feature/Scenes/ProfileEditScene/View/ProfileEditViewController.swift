@@ -81,7 +81,6 @@ final class ProfileEditViewController: UIViewController {
         textField.placeholder = "이름"
         textField.font = .systemFont(ofSize: 16, weight: .regular)
         textField.textColor = .black
-        textField.isUserInteractionEnabled = false
         return textField
     }()
     
@@ -119,7 +118,7 @@ final class ProfileEditViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setupButtonActions()
+        setupAddTarget()
         hideKeyboardWhenTappedAround()
         dataBinding()
         nameTextField.delegate = self
@@ -233,11 +232,20 @@ final class ProfileEditViewController: UIViewController {
                 self?.starCountLabel.text = String(user.points)
             }
             .store(in: &cancellables)
+        
+        viewModel.$isNameChanged
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isChanged in
+                self?.profileInfoEditButton.isEnabled = isChanged
+                self?.profileInfoEditButton.backgroundColor = isChanged ? .mainOrange : .textFieldStroke
+            }
+            .store(in: &cancellables)
     }
     
-    private func setupButtonActions() {
+    private func setupAddTarget() {
         profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)
         profileInfoEditButton.addTarget(self, action: #selector(profileInfoEditButtonTapped), for: .touchUpInside)
+        nameTextField.addTarget(self, action: #selector(nameTextFieldDidChange(_:)), for: .editingChanged)
     }
     
     @objc private func profileImageEditButtonTapped() {
@@ -245,20 +253,16 @@ final class ProfileEditViewController: UIViewController {
     }
     
     @objc private func profileInfoEditButtonTapped() {
-        if profileInfoEditButton.titleLabel?.text == "수정 하기" {
-            nameTextField.isUserInteractionEnabled = true
-            nameTextField.becomeFirstResponder()
-            profileInfoEditButton.setTitle("수정 완료", for: .normal)
-        } else {
-            view.endEditing(true)
-            nameTextField.isUserInteractionEnabled = false
-            profileInfoEditButton.setTitle("수정 하기", for: .normal)
-            
-            let newName = nameTextField.text ?? viewModel.user?.name ?? ""
-            Task {
-                await viewModel.updateProfleName(newName: newName)
-            }
+        view.endEditing(true)
+        
+        let newName = nameTextField.text ?? viewModel.user?.name ?? ""
+        Task {
+            await viewModel.updateProfleName(newName: newName)
         }
+    }
+    
+    @objc private func nameTextFieldDidChange(_ textField: UITextField) {
+        viewModel.enteredName = textField.text ?? ""
     }
     
     private func presentPhotoPicker() {

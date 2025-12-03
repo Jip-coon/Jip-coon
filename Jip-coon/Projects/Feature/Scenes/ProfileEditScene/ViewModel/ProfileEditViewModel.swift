@@ -5,12 +5,15 @@
 //  Created by 예슬 on 11/30/25.
 //
 
+import Combine
 import Core
 import Foundation
 
 final class ProfileEditViewModel: ObservableObject {
     @Published var familyName: String = "우리 가족"
     @Published var user: User?
+    @Published var enteredName: String = ""
+    @Published var isNameChanged: Bool = false
     
     private let familyService: FamilyServiceProtocol
     private let userService: UserServiceProtocol
@@ -26,6 +29,15 @@ final class ProfileEditViewModel: ObservableObject {
             self.user = try await self.userService.getCurrentUser()
             await loadFamilyName()
         }
+        
+        Publishers.CombineLatest($user, $enteredName)
+            .map { user, enteredName in
+                guard let originalName = user?.name, !enteredName.isEmpty else {
+                    return false
+                }
+                return originalName != enteredName
+            }
+            .assign(to: &$isNameChanged)
     }
     
     private func loadFamilyName() async {
