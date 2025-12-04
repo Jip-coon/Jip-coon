@@ -14,9 +14,18 @@ public class MainViewController: UIViewController {
 
     private let components = MainViewComponents()
     private lazy var layoutManager = MainViewLayout(components: components)
-    private let viewModel = MainViewModel()
+    private let viewModel: MainViewModel
     private var cancellables = Set<AnyCancellable>()
-
+    
+    public init(viewModel: MainViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -309,8 +318,4 @@ extension MainViewController {
     private func handleCategoryStatTapped(_ category: QuestCategory, count: Int) {
         // TODO: - 해당 카테고리 할일 목록 화면으로 이동
     }
-}
-
-#Preview {
-    MainViewController()
 }

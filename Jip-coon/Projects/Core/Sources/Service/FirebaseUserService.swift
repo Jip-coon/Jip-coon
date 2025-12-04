@@ -52,6 +52,29 @@ public final class FirebaseUserService: UserServiceProtocol {
         return try await getUser(by: currentUser.uid)
     }
     
+    /// 사용자 정보가 없으면 사용자 생성
+    public func syncCurrentUserDocument() async throws {
+        guard let authUser = Auth.auth().currentUser else { return }
+        
+        // Firestore에 User 있는지 조회
+        if let existingUser = try await getUser(by: authUser.uid) {
+            var updatedUser = existingUser
+            updatedUser.updatedAt = Date()
+            try await updateUser(updatedUser)
+        } else {
+            // 사용자가 Firestore에 없을 경우
+            let displayName = authUser.displayName ?? (authUser.email?.split(separator: "@").first.map(String.init) ?? "사용자")
+            // TODO: - 역할 수정하기(일단 child로 설정)
+            let newUser = User(
+                id: authUser.uid,
+                name: displayName,
+                email: authUser.email ?? "",
+                role: .child
+            )
+            try await createUser(newUser)
+        }
+    }
+    
     /// 사용자 포인트 업데이트
     public func updateUserPoints(userId: String, points: Int) async throws {
         try await usersCollection.document(userId).updateData(["points": points])
@@ -67,6 +90,16 @@ public final class FirebaseUserService: UserServiceProtocol {
         }
         
         return users
+    }
+    
+    /// 사용자 이름 업데이트
+    public func updateUserName(userId: String, newName: String) async throws {
+        let userDocRef = usersCollection.document(userId)
+        
+        try await userDocRef.updateData([
+            "name": newName,
+            "updatedAt": Timestamp(date: Date())
+        ])
     }
     
 }

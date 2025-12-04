@@ -5,12 +5,14 @@
 //  Created by 예슬 on 11/25/25.
 //
 
+import Combine
 import Core
 import UI
 import UIKit
 
 final class ProfileEditViewController: UIViewController {
-//    var currentUser: User
+    private let viewModel: ProfileEditViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - View
     
@@ -47,7 +49,6 @@ final class ProfileEditViewController: UIViewController {
     
     private let starCountLabel: UILabel = {
         let label = UILabel()
-        label.text = "250"
         label.font = .systemFont(ofSize: 16, weight: .semibold)
         label.textColor = .black
         return label
@@ -80,7 +81,6 @@ final class ProfileEditViewController: UIViewController {
         textField.placeholder = "이름"
         textField.font = .systemFont(ofSize: 16, weight: .regular)
         textField.textColor = .black
-        textField.isUserInteractionEnabled = false
         return textField
     }()
     
@@ -102,23 +102,26 @@ final class ProfileEditViewController: UIViewController {
         return button
     }()
     
-//    init(currentUser: User) {
-//        self.currentUser = currentUser
-//        super.init(nibName: nil, bundle: nil)
-//    }
-//    
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
+    init(
+        viewModel: ProfileEditViewModel
+    ) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setupButtonActions()
+        setupAddTarget()
         hideKeyboardWhenTappedAround()
-//        configure(with: currentUser)
+        dataBinding()
+        nameTextField.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -148,9 +151,6 @@ final class ProfileEditViewController: UIViewController {
         
         addSubviews()
         setupConstraints()
-        
-        emailInfoView.updateInfo("yesle2005")
-        familyInfoView.updateInfo("hahaha")
     }
     
     private func addSubviews() {
@@ -215,16 +215,37 @@ final class ProfileEditViewController: UIViewController {
         ])
     }
     
-    // TODO: - 유저 정보 불러오기
-//    private func configure(with user: User) {
-//        nameTextField.text = user.email.components(separatedBy: "@").first
-//        emailInfoView.updateInfo(user.email)
-////        familyInfoView.updateInfo(user)
-//    }
+    private func dataBinding() {
+        viewModel.$familyName
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] name in
+                self?.familyInfoView.updateInfo(name)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$user
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] user in
+                self?.nameTextField.text = user.name
+                self?.emailInfoView.updateInfo(user.email)
+                self?.starCountLabel.text = String(user.points)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isNameChanged
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isChanged in
+                self?.profileInfoEditButton.isEnabled = isChanged
+                self?.profileInfoEditButton.backgroundColor = isChanged ? .mainOrange : .textFieldStroke
+            }
+            .store(in: &cancellables)
+    }
     
-    private func setupButtonActions() {
+    private func setupAddTarget() {
         profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)
         profileInfoEditButton.addTarget(self, action: #selector(profileInfoEditButtonTapped), for: .touchUpInside)
+        nameTextField.addTarget(self, action: #selector(nameTextFieldDidChange(_:)), for: .editingChanged)
     }
     
     @objc private func profileImageEditButtonTapped() {
@@ -232,16 +253,16 @@ final class ProfileEditViewController: UIViewController {
     }
     
     @objc private func profileInfoEditButtonTapped() {
-        if profileInfoEditButton.titleLabel?.text == "수정 하기" {
-            nameTextField.isUserInteractionEnabled = true
-            nameTextField.becomeFirstResponder()
-            profileInfoEditButton.setTitle("수정 완료", for: .normal)
-        } else {
-            view.endEditing(true)
-            nameTextField.isUserInteractionEnabled = false
-            profileInfoEditButton.setTitle("수정 하기", for: .normal)
-            // TODO: - 서버에 이름 저장
+        view.endEditing(true)
+        
+        let newName = nameTextField.text ?? viewModel.user?.name ?? ""
+        Task {
+            await viewModel.updateProfleName(newName: newName)
         }
+    }
+    
+    @objc private func nameTextFieldDidChange(_ textField: UITextField) {
+        viewModel.enteredName = textField.text ?? ""
     }
     
     private func presentPhotoPicker() {
@@ -272,5 +293,12 @@ extension ProfileEditViewController: UIImagePickerControllerDelegate, UINavigati
         profileImageView.contentMode = .scaleAspectFill
         
         // TODO: - 서버에 프로필 이미지 저장
+    }
+}
+
+extension ProfileEditViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }

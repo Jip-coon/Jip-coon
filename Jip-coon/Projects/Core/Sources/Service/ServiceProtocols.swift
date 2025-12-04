@@ -10,7 +10,7 @@ import Combine
 
 // MARK: - 사용자 서비스 프로토콜
 
-protocol UserServiceProtocol {
+public protocol UserServiceProtocol {
     /// 사용자 프로필 생성
     func createUser(_ user: User) async throws
     
@@ -26,16 +26,22 @@ protocol UserServiceProtocol {
     /// 현재 로그인한 사용자 정보 조회
     func getCurrentUser() async throws -> User?
     
+    /// 사용자 정보가 없으면 사용자 생성
+    func syncCurrentUserDocument() async throws
+    
     /// 사용자 포인트 업데이트
     func updateUserPoints(userId: String, points: Int) async throws
     
     /// 가족 구성원 목록 조회
     func getFamilyMembers(familyId: String) async throws -> [User]
+    
+    /// 사용자 이름 업데이트
+    func updateUserName(userId: String, newName: String) async throws
 }
 
 // MARK: - 가족 서비스 프로토콜
 
-protocol FamilyServiceProtocol {
+public protocol FamilyServiceProtocol {
     /// 가족 생성
     func createFamily(_ family: Family) async throws -> Family
     

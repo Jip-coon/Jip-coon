@@ -5,18 +5,38 @@
 //  Created by 예슬 on 8/21/25.
 //
 
-import UIKit
-import UI
 import Combine
+import UI
+import UIKit
 
 public class LoginViewController: UIViewController {
+    private let loginView = LoginView()
+    
     private var activeField: UIView?
     private var savedContentOffset: CGPoint?
-    private let loginView = LoginView()
-    private let viewModel = LoginViewModel()
-    private let appleLoginViewModel = AppleLoginViewModel()
-    private let googleLoginViewModel = GoogleLoginViewModel()
+    
+    private let viewModel: LoginViewModel
+    private let appleLoginViewModel: AppleLoginViewModel
+    private let googleLoginViewModel: GoogleLoginViewModel
+    
     private var cancellables = Set<AnyCancellable>()
+    
+    public init(
+        viewModel: LoginViewModel,
+        appleLoginViewModel: AppleLoginViewModel,
+        googleLoginViewModel: GoogleLoginViewModel
+    ) {
+        self.viewModel = viewModel
+        self.appleLoginViewModel = appleLoginViewModel
+        self.googleLoginViewModel = googleLoginViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Lifecycle
     
     override public func loadView() {
         view = loginView
@@ -41,6 +61,8 @@ public class LoginViewController: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
+    // MARK: - setup
+    
     private func setUpDelegate() {
         loginView.emailTextField.delegate = self
         loginView.passwordTextField.delegate = self
@@ -58,10 +80,12 @@ public class LoginViewController: UIViewController {
     
     @objc private func findIdButtonTapped() {
         print("find id button tapped")
+        // TODO: - ID 찾기
     }
     
     @objc private func findPasswordButtonTapped() {
         print("find password button tapped")
+        // TODO: - 비밀번호 찾기
     }
     
     @objc private func loginButtonTapped() {

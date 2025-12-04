@@ -12,6 +12,7 @@ import UI
 
 @MainActor
 public class MainViewModel: ObservableObject {
+    private let userService: UserServiceProtocol
 
     // MARK: - Published
 
@@ -33,7 +34,8 @@ public class MainViewModel: ObservableObject {
 
     // MARK: - 초기화
 
-    public init() {
+    public init(userService: UserServiceProtocol) {
+        self.userService = userService
         setupDataBindings()
         setupComputedProperties()
     }
@@ -87,7 +89,7 @@ public class MainViewModel: ObservableObject {
             .assign(to: &$urgentQuests)
 
         Publishers.CombineLatest($allQuests, $user)
-            .map { [weak self] quests, user in
+            .map { quests, user in
                 guard let currentUserId = user?.id else { return [] }
                 return Array(quests.filter { $0.assignedTo == currentUserId }.prefix(10))
             }
@@ -111,7 +113,7 @@ public class MainViewModel: ObservableObject {
 
         $weeklyStats
             .map { stats in
-                guard let stats = stats else { return [] }
+                guard let _ = stats else { return [] }
                 let categoryStats = [
                     CategoryStatistic(category: .cleaning, count: 3, emoji: "🧹"),
                     CategoryStatistic(category: .cooking, count: 2, emoji: "🍳"),
@@ -128,23 +130,11 @@ public class MainViewModel: ObservableObject {
     // MARK: - 데이터 로딩
 
     private func loadUserDataAsync() async throws -> User? {
-        try await Task.sleep(nanoseconds: 500_000_000)  // 0.5초 지연
-        return createDummyUser()
+        let currentUser = try await userService.getCurrentUser()
+        return currentUser
     }
-
-    private func createDummyUser() -> User {
-        var user = User(
-            id: "user1",
-            name: "심관혁",
-            email: "user@example.com",
-            role: .parent
-        )
-        user.familyId = "family1"
-        user.points = 245
-        user.profileImageURL = nil
-        return user
-    }
-
+    
+    // TODO: - 가족 정보 수정
     private func loadFamilyDataAsync() async throws -> Family? {
         try await Task.sleep(nanoseconds: 300_000_000)  // 0.3초 지연
         return createDummyFamily()
@@ -181,7 +171,7 @@ public class MainViewModel: ObservableObject {
              makeDate(daysFromNow: -1, hour: 16, minute: 00)),
         ]
 
-        var quests = questData.map { title, description, category, points, dueDate in
+        let quests = questData.map { title, description, category, points, dueDate in
             var quest = Quest(
                 title: title,
                 description: description,
