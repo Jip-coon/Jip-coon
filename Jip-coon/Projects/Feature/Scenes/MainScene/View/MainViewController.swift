@@ -36,7 +36,7 @@ public class MainViewController: UIViewController {
 
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        viewModel.refreshData()
+        viewModel.viewDidAppear()
     }
 
     public override func viewDidLayoutSubviews() {
@@ -52,6 +52,11 @@ public class MainViewController: UIViewController {
     public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+
+    public override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        viewModel.viewDidDisappear()
     }
 
     private func setupUI() {
@@ -180,7 +185,10 @@ public class MainViewController: UIViewController {
 
     private func markQuestAsCompleted(_ quest: Quest) {
         showCompletionAlert(for: quest)
-        viewModel.refreshData()
+        // 퀘스트 완료 후 캐시 무효화하여 다음 뷰 로드 시 최신 데이터 반영
+        viewModel.invalidateCache()
+        // 필요한 경우에만 데이터 리프레시
+        viewModel.refreshDataIfNeeded()
     }
 
     private func showQuestDetails(_ quest: Quest) {

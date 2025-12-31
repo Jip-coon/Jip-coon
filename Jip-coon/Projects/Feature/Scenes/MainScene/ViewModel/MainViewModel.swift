@@ -30,6 +30,13 @@ public class MainViewModel: ObservableObject {
     @Published public var progressText: String = "0%"
     @Published public var categoryStats: [CategoryStatistic] = []
 
+    // MARK: - 캐싱 데이터
+
+    private var isInitialDataLoaded = false
+    private var lastRefreshTime: Date?
+    private let refreshInterval: TimeInterval = 300 // 5분
+    private var isViewVisible = false
+
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - 초기화
@@ -41,8 +48,23 @@ public class MainViewModel: ObservableObject {
     }
 
     public func loadInitialData() {
+        // 초기 데이터가 이미 로드되었고, 캐시가 유효하면 스킵
+        if isInitialDataLoaded && !shouldRefreshData() {
+            return
+        }
+
         Task {
             await performDataLoad()
+        }
+    }
+
+    public func refreshDataIfNeeded() {
+        // 뷰가 보이는 상태에서만 리프레시 수행
+        guard isViewVisible else { return }
+
+        // 마지막 리프레시로부터 충분한 시간이 지났거나 초기 데이터가 로드되지 않은 경우에만 리프레시
+        if !isInitialDataLoaded || shouldRefreshData() {
+            loadInitialData()
         }
     }
 
@@ -68,6 +90,10 @@ public class MainViewModel: ObservableObject {
             self.weeklyStats = stats
             self.recentActivities = activities
 
+            // 초기 데이터 로드 완료 표시 및 타임스탬프 업데이트
+            isInitialDataLoaded = true
+            lastRefreshTime = Date()
+
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -76,7 +102,33 @@ public class MainViewModel: ObservableObject {
     }
 
     public func refreshData() {
+        // 강제 리프레시
+        isInitialDataLoaded = false
         loadInitialData()
+    }
+
+    // MARK: - View State Management
+
+    public func viewDidAppear() {
+        isViewVisible = true
+        refreshDataIfNeeded()
+    }
+
+    public func viewDidDisappear() {
+        isViewVisible = false
+    }
+
+    // MARK: - 캐시 관리
+
+    private func shouldRefreshData() -> Bool {
+        guard let lastRefresh = lastRefreshTime else { return true }
+        return Date().timeIntervalSince(lastRefresh) > refreshInterval
+    }
+
+    /// 캐시된 데이터를 무효화하고 다음 로드 시 강제 리프레시
+    public func invalidateCache() {
+        isInitialDataLoaded = false
+        lastRefreshTime = nil
     }
 
     private func setupDataBindings() {
