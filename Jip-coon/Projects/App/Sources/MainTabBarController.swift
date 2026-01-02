@@ -11,9 +11,13 @@ import UIKit
 
 final class MainTabBarController: UITabBarController {
     private let userService: UserServiceProtocol
-    
-    init(userService: UserServiceProtocol) {
+    private let familyService: FamilyServiceProtocol
+    private let questService: QuestServiceProtocol
+
+    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
         self.userService = userService
+        self.familyService = familyService
+        self.questService = questService
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -42,10 +46,11 @@ final class MainTabBarController: UITabBarController {
     private func setupViewControllers() {
         // 해당 부분에 다른 뷰컨트롤러 추가
         // (VC(), 탭이름, 미선택 이미지, 선택 이미지)
-        let mainViewModel = MainViewModel(userService: userService)
-        
+        let mainViewModel = MainViewModel(userService: userService, familyService: familyService, questService: questService)
+
         let navs: [UINavigationController] = [
-            (MainViewController(viewModel: mainViewModel), "홈", "house", "house.fill"),
+            (MainViewController(viewModel: mainViewModel, userService: userService, familyService: familyService, questService: questService), "홈", "house", "house.fill"),
+            (RankingViewController(userService: userService, familyService: familyService), "랭킹", "trophy", "trophy.fill"),
             (SettingViewController(), "설정", "gear", "gear.fill"),
         ]
             .enumerated()

@@ -15,6 +15,7 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: "dev.tuist.Jip-coon",
+            deploymentTargets: .iOS("18.0"),
             infoPlist: .extendingDefault(
                 with: [
                     "UILaunchStoryboardName": "Launch Screen.storyboard",
@@ -57,6 +58,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "dev.tuist.Jip-coonTests",
+            deploymentTargets: .iOS("18.0"),
             infoPlist: .default,
             sources: ["Tests/**"],
             resources: [],
