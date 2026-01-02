@@ -17,6 +17,7 @@ public class MainViewComponents: NSObject {
     public var onUrgentTaskTap: ((Quest) -> Void)?
 
     public var myTasks: [Quest] = []
+    public var familyMembers: [User] = []
     public var onMyTaskTap: ((Quest) -> Void)?
 
     public var categoryStats: [String: Int] = [:]

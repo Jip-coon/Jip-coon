@@ -8,10 +8,20 @@
 import UIKit
 import Combine
 import UI
+import Core
 
 final class AddQuestViewController: UIViewController {
-    private let viewModel = AddQuestViewModel()
+    private let viewModel: AddQuestViewModel
     private var cancellables = Set<AnyCancellable>()
+
+    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
+        self.viewModel = AddQuestViewModel(userService: userService, familyService: familyService, questService: questService)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - View
     
@@ -337,14 +347,39 @@ final class AddQuestViewController: UIViewController {
     // 퀘스트추가 버튼
     @objc private func missionAddButtonTapped() {
         view.endEditing(true)
-        
+
         // TODO: - 모든 정보 입력했는지 확인
-        
+
         viewModel.title = titleTextField.text ?? ""
         viewModel.description = memoTextField.text ?? ""
         viewModel.questCreateDate = Date()
-        
-        viewModel.saveMission()
+
+        // 비동기로 퀘스트 저장
+        Task {
+            do {
+                try await viewModel.saveMission()
+                // 퀘스트 생성 성공 알림 전송
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("QuestCreated"),
+                    object: nil
+                )
+                // 저장 성공 시 이전 화면으로 돌아가기
+                navigationController?.popViewController(animated: true)
+            } catch {
+                // 에러 처리
+                showErrorAlert(message: error.localizedDescription)
+            }
+        }
+    }
+
+    private func showErrorAlert(message: String) {
+        showAlert(title: "오류", message: message)
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
 }
 

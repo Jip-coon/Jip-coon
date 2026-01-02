@@ -28,7 +28,7 @@ public struct Quest: Codable, Identifiable {
     public var completedAt: Date?      // 완료일
     public var approvedAt: Date?       // 승인일
     
-    public init(title: String, description: String? = nil, category: QuestCategory, 
+    public init(title: String, description: String? = nil, category: QuestCategory,
                 createdBy: String, familyId: String, points: Int = 10) {
         self.id = UUID().uuidString
         self.title = title
@@ -43,6 +43,50 @@ public struct Quest: Codable, Identifiable {
         self.recurringType = .none
         self.recurringEndDate = nil
         self.createdAt = Date()
+        self.updatedAt = Date()
+        self.startedAt = nil
+        self.completedAt = nil
+        self.approvedAt = nil
+    }
+
+    /// Firebase document ID를 사용하는 생성자
+    public init(id: String, title: String, description: String? = nil, category: QuestCategory,
+                createdBy: String, familyId: String, points: Int = 10) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.category = category
+        self.status = .pending
+        self.assignedTo = nil
+        self.createdBy = createdBy
+        self.familyId = familyId
+        self.points = points
+        self.dueDate = nil
+        self.recurringType = .none
+        self.recurringEndDate = nil
+        self.createdAt = Date()
+        self.updatedAt = Date()
+        self.startedAt = nil
+        self.completedAt = nil
+        self.approvedAt = nil
+    }
+
+    /// 반복 퀘스트용 생성자 (createdAt 지정 가능)
+    public init(id: String, title: String, description: String? = nil, category: QuestCategory,
+                createdBy: String, familyId: String, points: Int = 10, createdAt: Date) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.category = category
+        self.status = .pending
+        self.assignedTo = nil
+        self.createdBy = createdBy
+        self.familyId = familyId
+        self.points = points
+        self.dueDate = nil
+        self.recurringType = .none
+        self.recurringEndDate = nil
+        self.createdAt = createdAt
         self.updatedAt = Date()
         self.startedAt = nil
         self.completedAt = nil

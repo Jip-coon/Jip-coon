@@ -15,22 +15,36 @@ public class MainViewController: UIViewController {
     private let components = MainViewComponents()
     private lazy var layoutManager = MainViewLayout(components: components)
     private let viewModel: MainViewModel
+    private let userService: UserServiceProtocol
+    private let familyService: FamilyServiceProtocol
+    private let questService: QuestServiceProtocol
     private var cancellables = Set<AnyCancellable>()
-    
-    public init(viewModel: MainViewModel) {
+
+    public init(viewModel: MainViewModel, userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
         self.viewModel = viewModel
+        self.userService = userService
+        self.familyService = familyService
+        self.questService = questService
         super.init(nibName: nil, bundle: nil)
+    }
+
+    // MARK: - Public Methods
+
+    /// 외부에서 데이터 리프레시를 요청할 때 사용
+    public func refreshData() {
+        viewModel.refreshDataIfNeeded()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public override func viewDidLoad() {
+    public     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupCombineBindings()
         setupActions()
+        setupNotifications()
         viewModel.loadInitialData()
     }
 
@@ -57,6 +71,24 @@ public class MainViewController: UIViewController {
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         viewModel.viewDidDisappear()
+    }
+
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleQuestCreated),
+            name: NSNotification.Name("QuestCreated"),
+            object: nil
+        )
+    }
+
+    @objc private func handleQuestCreated() {
+        // 퀘스트가 생성되었으므로 데이터를 강제 리프레시
+        viewModel.forceRefreshData()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     private func setupUI() {
@@ -107,10 +139,10 @@ public class MainViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        viewModel.$myTasks
+        Publishers.CombineLatest(viewModel.$myTasks, viewModel.$familyMembers)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] tasks in
-                self?.components.setupMyTasks(with: tasks) { task in
+            .sink { [weak self] tasks, members in
+                self?.components.setupMyTasks(with: tasks, familyMembers: members) { task in
                     self?.handleMyTaskTapped(task)
                 }
             }
@@ -164,6 +196,14 @@ public class MainViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] errorMessage in
                 self?.showErrorAlert(message: errorMessage)
+            }
+            .store(in: &cancellables)
+
+        // 승인 대기 카운트 (추후 승인 버튼에 배지로 표시 가능)
+        viewModel.$pendingApprovalCount
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] count in
+                // 추후 승인 버튼에 배지 표시 가능
             }
             .store(in: &cancellables)
     }
@@ -297,7 +337,7 @@ extension MainViewController {
         switch action.type {
             case .newQuest:
                 navigationItem.backButtonTitle = ""
-                let addQuestViewController = AddQuestViewController()
+                let addQuestViewController = AddQuestViewController(userService: userService, familyService: familyService, questService: questService)
                 navigationController?.pushViewController(addQuestViewController, animated: true)
                 break
             case .search:
@@ -307,14 +347,16 @@ extension MainViewController {
                 // TODO: - 초대 화면으로 이동
                 break
             case .approval:
-                // TODO: - 승인 대기 화면으로 이동
+                navigationItem.backButtonTitle = ""
+                let approvalViewController = ApprovalViewController(questService: questService, userService: userService)
+                navigationController?.pushViewController(approvalViewController, animated: true)
                 break
         }
     }
 
     private func handleMyTaskTapped(_ quest: Quest) {
         // TODO: - 할일 상세 화면으로 이동
-        let questDetailViewController = QuestDetailViewController(quest: quest)
+        let questDetailViewController = QuestDetailViewController(quest: quest, questService: questService, userService: userService)
         navigationItem.backButtonTitle = ""
         navigationController?.pushViewController(questDetailViewController, animated: true)
     }

@@ -43,6 +43,28 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
         return label
     }()
 
+    private let assigneeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = UIColor.textGray
+        return label
+    }()
+
+    private let dueDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = UIColor.mainOrange
+        return label
+    }()
+
+    private let pointsLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .semibold)
+        label.textColor = UIColor.mainOrange
+        label.textAlignment = .right
+        return label
+    }()
+
     // MARK: - 초기화
 
     override init(frame: CGRect) {
@@ -63,28 +85,46 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(titleLabel)
         contentView.addSubview(statusLabel)
         contentView.addSubview(descriptionLabel)
+        contentView.addSubview(assigneeLabel)
+        contentView.addSubview(dueDateLabel)
+        contentView.addSubview(pointsLabel)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        assigneeLabel.translatesAutoresizingMaskIntoConstraints = false
+        dueDateLabel.translatesAutoresizingMaskIntoConstraints = false
+        pointsLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor.constraint(equalTo: pointsLabel.leadingAnchor, constant: -8),
             titleLabel.heightAnchor.constraint(equalToConstant: 20),
 
+            pointsLabel.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            pointsLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            pointsLabel.widthAnchor.constraint(equalToConstant: 40),
+
             statusLabel.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            statusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            statusLabel.trailingAnchor.constraint(equalTo: pointsLabel.leadingAnchor, constant: -8),
             statusLabel.widthAnchor.constraint(equalToConstant: 60),
             statusLabel.heightAnchor.constraint(equalToConstant: 20),
-            statusLabel.leadingAnchor.constraint(
-                greaterThanOrEqualTo: titleLabel.trailingAnchor, constant: 8),
 
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
             descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            descriptionLabel.trailingAnchor.constraint(
-                equalTo: contentView.trailingAnchor, constant: -12),
-            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+
+            assigneeLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 4),
+            assigneeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            assigneeLabel.heightAnchor.constraint(equalToConstant: 16),
+
+            dueDateLabel.centerYAnchor.constraint(equalTo: assigneeLabel.centerYAnchor),
+            dueDateLabel.leadingAnchor.constraint(equalTo: assigneeLabel.trailingAnchor, constant: 12),
+            dueDateLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            dueDateLabel.heightAnchor.constraint(equalToConstant: 16),
+
+            dueDateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
     }
 
@@ -111,16 +151,48 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
 
     // MARK: - 구성
 
-    func configure(with quest: Quest, onTap: @escaping () -> Void) {
+    func configure(with quest: Quest, familyMembers: [User] = [], onTap: @escaping () -> Void) {
         self.onTap = onTap
 
         titleLabel.text = "\(quest.category.emoji) \(quest.title)"
-        descriptionLabel.text = quest.description ?? ""
+        descriptionLabel.text = quest.description ?? "설명 없음"
+
+        // 담당자 정보
+        if let assigneeId = quest.assignedTo {
+            let assigneeName = familyMembers.first(where: { $0.id == assigneeId })?.name ?? assigneeId
+            assigneeLabel.text = "담당자: \(assigneeName)"
+        } else {
+            assigneeLabel.text = "담당자: 미정"
+        }
+
+        // 마감일 정보
+        if let dueDate = quest.dueDate {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M/dd HH:mm"
+            dueDateLabel.text = "마감: \(formatter.string(from: dueDate))"
+        } else {
+            dueDateLabel.text = "마감일 없음"
+        }
+
+        // 포인트 정보
+        pointsLabel.text = "\(quest.points)P"
 
         // 상태에 따른 색상 설정
-        let statusColor = quest.status == .inProgress ? UIColor.mainOrange : UIColor.textGray
-        let statusText = quest.status.displayName
+        let statusColor: UIColor
+        switch quest.status {
+        case .pending:
+            statusColor = UIColor.textGray
+        case .inProgress:
+            statusColor = UIColor.mainOrange
+        case .completed:
+            statusColor = UIColor.systemGreen
+        case .approved:
+            statusColor = UIColor.systemBlue
+        case .rejected:
+            statusColor = UIColor.systemRed
+        }
 
+        let statusText = quest.status.displayName
         statusLabel.text = statusText
         statusLabel.backgroundColor = statusColor
 
