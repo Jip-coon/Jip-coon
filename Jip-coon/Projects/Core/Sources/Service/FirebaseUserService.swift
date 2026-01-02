@@ -48,10 +48,15 @@ public final class FirebaseUserService: UserServiceProtocol {
         if let currentUser = Auth.auth().currentUser {
             return try await getUser(by: currentUser.uid)
         } else {
-        // 개발용: 로그인한 사용자가 없으면 더미 사용자 반환
-        var dummyUser = User(id: "dummy_user_id", name: "개발자", email: "dev@example.com", role: .parent)
-        dummyUser.familyId = "dummy_family_id"  // 더미 가족 ID 설정
-        return dummyUser
+            // 개발용: 로그인한 사용자가 없으면 더미 사용자 반환
+            var dummyUser = User(
+                id: "dummy_user_id",
+                name: "개발자",
+                email: "dev@example.com",
+                role: .parent
+            )
+            dummyUser.familyId = "dummy_family_id"  // 더미 가족 ID 설정
+            return dummyUser
         }
     }
     
@@ -70,7 +75,11 @@ public final class FirebaseUserService: UserServiceProtocol {
             try await updateUser(updatedUser)
         } else {
             // 사용자가 Firestore에 없을 경우
-            let displayName = authUser.displayName ?? (authUser.email?.split(separator: "@").first.map(String.init) ?? "사용자")
+            let displayName = authUser.displayName ?? (
+                authUser.email?
+                    .split(separator: "@").first
+                    .map(String.init) ?? "사용자"
+            )
             // TODO: - 역할 수정하기(일단 child로 설정)
             var newUser = User(
                 id: authUser.uid,
@@ -86,7 +95,9 @@ public final class FirebaseUserService: UserServiceProtocol {
     
     /// 사용자 포인트 업데이트
     public func updateUserPoints(userId: String, points: Int) async throws {
-        try await usersCollection.document(userId).updateData(["points": points])
+        try await usersCollection
+            .document(userId)
+            .updateData(["points": points])
     }
     
     /// 가족 구성원 목록 조회
@@ -108,20 +119,40 @@ public final class FirebaseUserService: UserServiceProtocol {
 
     /// 개발용 더미 가족 구성원 생성
     private func createDummyFamilyMembers() -> [User] {
-        let parent = User(id: "dummy_parent_id", name: "아빠", email: "parent@example.com", role: .parent)
+        let parent = User(
+            id: "dummy_parent_id",
+            name: "아빠",
+            email: "parent@example.com",
+            role: .parent
+        )
         var parentWithFamily = parent
         parentWithFamily.familyId = "dummy_family_id"
         parentWithFamily.points = 150 // 포인트 예시
 
-        var child1 = User(id: "dummy_child1_id", name: "철수", email: "child1@example.com", role: .child)
+        var child1 = User(
+            id: "dummy_child1_id",
+            name: "철수",
+            email: "child1@example.com",
+            role: .child
+        )
         child1.familyId = "dummy_family_id"
         child1.points = 120
 
-        var child2 = User(id: "dummy_child2_id", name: "영희", email: "child2@example.com", role: .child)
+        var child2 = User(
+            id: "dummy_child2_id",
+            name: "영희",
+            email: "child2@example.com",
+            role: .child
+        )
         child2.familyId = "dummy_family_id"
         child2.points = 95
 
-        var child3 = User(id: "dummy_child3_id", name: "민수", email: "child3@example.com", role: .child)
+        var child3 = User(
+            id: "dummy_child3_id",
+            name: "민수",
+            email: "child3@example.com",
+            role: .child
+        )
         child3.familyId = "dummy_family_id"
         child3.points = 80
 

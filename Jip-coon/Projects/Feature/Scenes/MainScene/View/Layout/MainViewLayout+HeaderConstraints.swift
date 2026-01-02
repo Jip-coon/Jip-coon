@@ -13,11 +13,14 @@ import UIKit
 extension MainViewLayout {
 
     internal func setupHeaderConstraints(in view: UIView) {
-        NSLayoutConstraint.activate([
+        NSLayoutConstraint.activate(
+[
             // 헤더 제약조건
             components.headerView.topAnchor.constraint(equalTo: view.topAnchor),
-            components.headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            components.headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            components.headerView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor),
+            components.headerView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor),
             components.headerView.bottomAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 80),
 
@@ -31,12 +34,15 @@ extension MainViewLayout {
                 equalTo: components.userProfileView.leadingAnchor),
             components.profileImageView.topAnchor.constraint(
                 equalTo: components.userProfileView.topAnchor),
-            components.profileImageView.widthAnchor.constraint(equalToConstant: 50),
-            components.profileImageView.heightAnchor.constraint(equalToConstant: 50),
+            components.profileImageView.widthAnchor
+                .constraint(equalToConstant: 50),
+            components.profileImageView.heightAnchor
+                .constraint(equalToConstant: 50),
 
             components.userNameLabel.leadingAnchor.constraint(
                 equalTo: components.profileImageView.trailingAnchor, constant: 12),
-            components.userNameLabel.topAnchor.constraint(equalTo: components.userProfileView.topAnchor),
+            components.userNameLabel.topAnchor
+                .constraint(equalTo: components.userProfileView.topAnchor),
             components.userNameLabel.trailingAnchor.constraint(
                 equalTo: components.userProfileView.trailingAnchor),
 
@@ -55,7 +61,8 @@ extension MainViewLayout {
             components.familyInfoView.centerYAnchor.constraint(
                 equalTo: components.userProfileView.centerYAnchor),
 
-            components.familyNameLabel.topAnchor.constraint(equalTo: components.familyInfoView.topAnchor),
+            components.familyNameLabel.topAnchor
+                .constraint(equalTo: components.familyInfoView.topAnchor),
             components.familyNameLabel.leadingAnchor.constraint(
                 equalTo: components.familyInfoView.leadingAnchor),
             components.familyNameLabel.trailingAnchor.constraint(
@@ -67,27 +74,44 @@ extension MainViewLayout {
                 equalTo: components.familyInfoView.trailingAnchor),
             components.notificationButton.bottomAnchor.constraint(
                 equalTo: components.familyInfoView.bottomAnchor),
-            components.notificationButton.widthAnchor.constraint(equalToConstant: 50),
-            components.notificationButton.heightAnchor.constraint(equalToConstant: 24),
+            components.notificationButton.widthAnchor
+                .constraint(equalToConstant: 50),
+            components.notificationButton.heightAnchor
+                .constraint(equalToConstant: 24),
 
             // 스크롤뷰 제약조건
-            components.scrollView.topAnchor.constraint(equalTo: components.headerView.bottomAnchor),
-            components.scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            components.scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            components.scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            components.scrollView.topAnchor
+                .constraint(equalTo: components.headerView.bottomAnchor),
+            components.scrollView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor),
+            components.scrollView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor),
+            components.scrollView.bottomAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
             // 콘텐츠뷰 제약조건
             components.contentView.topAnchor
-                .constraint(equalTo:components.scrollView.contentLayoutGuide.topAnchor),
+                .constraint(
+                    equalTo:components.scrollView.contentLayoutGuide.topAnchor
+                ),
             components.contentView.leadingAnchor
-                .constraint(equalTo: components.scrollView.contentLayoutGuide.leadingAnchor),
+                .constraint(
+                    equalTo: components.scrollView.contentLayoutGuide.leadingAnchor
+                ),
             components.contentView.trailingAnchor
-                .constraint(equalTo: components.scrollView.contentLayoutGuide.trailingAnchor),
+                .constraint(
+                    equalTo: components.scrollView.contentLayoutGuide.trailingAnchor
+                ),
             components.contentView.bottomAnchor
-                .constraint(equalTo: components.scrollView.contentLayoutGuide.bottomAnchor),
+                .constraint(
+                    equalTo: components.scrollView.contentLayoutGuide.bottomAnchor
+                ),
             components.contentView.widthAnchor
-                .constraint(equalTo: components.scrollView.frameLayoutGuide.widthAnchor),
+                .constraint(
+                    equalTo: components.scrollView.frameLayoutGuide.widthAnchor
+                ),
 
-        ])
+]
+        )
     }
 }

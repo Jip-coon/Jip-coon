@@ -14,7 +14,11 @@ final class MainTabBarController: UITabBarController {
     private let familyService: FamilyServiceProtocol
     private let questService: QuestServiceProtocol
 
-    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
+    init(
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol,
+        questService: QuestServiceProtocol
+    ) {
         self.userService = userService
         self.familyService = familyService
         self.questService = questService
@@ -46,15 +50,40 @@ final class MainTabBarController: UITabBarController {
     private func setupViewControllers() {
         // 해당 부분에 다른 뷰컨트롤러 추가
         // (VC(), 탭이름, 미선택 이미지, 선택 이미지)
-        let mainViewModel = MainViewModel(userService: userService, familyService: familyService, questService: questService)
+        let mainViewModel = MainViewModel(
+            userService: userService,
+            familyService: familyService,
+            questService: questService
+        )
 
         let navs: [UINavigationController] = [
-            (MainViewController(viewModel: mainViewModel, userService: userService, familyService: familyService, questService: questService), "홈", "house", "house.fill"),
-            (RankingViewController(userService: userService, familyService: familyService), "랭킹", "trophy", "trophy.fill"),
+            (
+                MainViewController(
+                    viewModel: mainViewModel,
+                    userService: userService,
+                    familyService: familyService,
+                    questService: questService
+                ),
+                "홈",
+                "house",
+                "house.fill"
+            ),
+            (
+                RankingViewController(
+                    userService: userService,
+                    familyService: familyService
+                ),
+                "랭킹",
+                "trophy",
+                "trophy.fill"
+            ),
             (SettingViewController(), "설정", "gear", "gear.fill"),
         ]
             .enumerated()
-            .map { (index: Int, tab: (UIViewController, String, String, String)) in
+            .map { (
+                index: Int,
+                tab: (UIViewController, String, String, String)
+            ) in
                 createNavigationController(
                     viewController: tab.0,
                     title: tab.1,
@@ -73,7 +102,9 @@ final class MainTabBarController: UITabBarController {
         selectedImage: String,
         tag: Int
     ) -> UINavigationController {
-        let navigationController = UINavigationController(rootViewController: viewController)
+        let navigationController = UINavigationController(
+            rootViewController: viewController
+        )
         navigationController.tabBarItem = UITabBarItem(
             title: title,
             image: UIImage(systemName: image),
@@ -85,7 +116,10 @@ final class MainTabBarController: UITabBarController {
 }
 
 extension MainTabBarController: UITabBarControllerDelegate {
-    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+    func tabBarController(
+        _ tabBarController: UITabBarController,
+        didSelect viewController: UIViewController
+    ) {
         print("선택된 탭: \(viewController.tabBarItem.tag)")
     }
 }

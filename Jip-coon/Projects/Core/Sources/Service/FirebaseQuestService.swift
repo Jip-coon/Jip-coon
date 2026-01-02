@@ -48,7 +48,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
             return questToSave
         } catch {
-            throw FirebaseQuestServiceError.creationFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .creationFailed(error.localizedDescription)
         }
     }
 
@@ -63,7 +64,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 return nil
             }
         } catch {
-            throw FirebaseQuestServiceError.fetchFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .fetchFailed(error.localizedDescription)
         }
     }
 
@@ -72,7 +74,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         do {
             try questsCollection.document(quest.id).setData(from: quest)
         } catch {
-            throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .updateFailed(error.localizedDescription)
         }
     }
 
@@ -81,7 +84,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         do {
             try await questsCollection.document(id).delete()
         } catch {
-            throw FirebaseQuestServiceError.deletionFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .deletionFailed(error.localizedDescription)
         }
     }
 
@@ -102,7 +106,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 메모리에서 createdAt 내림차순 정렬
             return quests.sorted { $0.createdAt > $1.createdAt }
         } catch {
-            throw FirebaseQuestServiceError.queryFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .queryFailed(error.localizedDescription)
         }
     }
 
@@ -112,7 +117,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 임시: 정렬 없이 조회 (나중에 인덱스 생성 후 정렬 추가)
             let snapshot = try await questsCollection
                 .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
-                .whereField(FirestoreFields.Quest.status, isEqualTo: status.rawValue)
+                .whereField(
+                    FirestoreFields.Quest.status,
+                    isEqualTo: status.rawValue
+                )
                 .getDocuments()
 
             let quests = snapshot.documents.compactMap { document in
@@ -122,7 +130,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 메모리에서 createdAt 내림차순 정렬
             return quests.sorted { $0.createdAt > $1.createdAt }
         } catch {
-            throw FirebaseQuestServiceError.queryFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .queryFailed(error.localizedDescription)
         }
     }
 
@@ -132,7 +141,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 임시: 정렬 없이 조회 (나중에 인덱스 생성 후 정렬 추가)
             let snapshot = try await questsCollection
                 .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
-                .whereField(FirestoreFields.Quest.category, isEqualTo: category.rawValue)
+                .whereField(
+                    FirestoreFields.Quest.category,
+                    isEqualTo: category.rawValue
+                )
                 .getDocuments()
 
             let quests = snapshot.documents.compactMap { document in
@@ -142,7 +154,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 메모리에서 createdAt 내림차순 정렬
             return quests.sorted { $0.createdAt > $1.createdAt }
         } catch {
-            throw FirebaseQuestServiceError.queryFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .queryFailed(error.localizedDescription)
         }
     }
 
@@ -161,7 +174,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 메모리에서 createdAt 내림차순 정렬
             return quests.sorted { $0.createdAt > $1.createdAt }
         } catch {
-            throw FirebaseQuestServiceError.queryFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .queryFailed(error.localizedDescription)
         }
     }
 
@@ -178,11 +192,17 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // 상태별 추가 필드 설정
             switch status {
             case .inProgress:
-                updateData[FirestoreFields.Quest.startedAt] = Timestamp(date: Date())
+                updateData[FirestoreFields.Quest.startedAt] = Timestamp(
+                    date: Date()
+                )
             case .completed:
-                updateData[FirestoreFields.Quest.completedAt] = Timestamp(date: Date())
+                updateData[FirestoreFields.Quest.completedAt] = Timestamp(
+                    date: Date()
+                )
             case .approved:
-                updateData[FirestoreFields.Quest.approvedAt] = Timestamp(date: Date())
+                updateData[FirestoreFields.Quest.approvedAt] = Timestamp(
+                    date: Date()
+                )
             case .rejected:
                 break // 거절 시 추가 필드 없음
             case .pending:
@@ -191,7 +211,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
             try await questsCollection.document(questId).updateData(updateData)
         } catch {
-            throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .updateFailed(error.localizedDescription)
         }
     }
 
@@ -203,7 +224,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 FirestoreFields.Quest.updatedAt: Timestamp(date: Date())
             ])
         } catch {
-            throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .updateFailed(error.localizedDescription)
         }
     }
 
@@ -220,14 +242,16 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             }
 
             guard quest.status == .pending else {
-                throw FirebaseQuestServiceError.invalidStatus("대기중인 퀘스트만 시작할 수 있습니다")
+                throw FirebaseQuestServiceError
+                    .invalidStatus("대기중인 퀘스트만 시작할 수 있습니다")
             }
 
             try await updateQuestStatus(questId: questId, status: .inProgress)
         } catch let error as FirebaseQuestServiceError {
             throw error
         } catch {
-            throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .updateFailed(error.localizedDescription)
         }
     }
 
@@ -240,9 +264,12 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             try await updateQuestStatus(questId: questId, status: .completed)
 
             // 2. 제출 데이터 생성 (나중에 QuestSubmissionService로 분리 가능)
-            try submissionsCollection.document(submission.id).setData(from: submission)
+            try submissionsCollection
+                .document(submission.id)
+                .setData(from: submission)
         } catch {
-            throw FirebaseQuestServiceError.submissionFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .submissionFailed(error.localizedDescription)
         }
     }
 
@@ -260,7 +287,11 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
             // 3. 승인 시 포인트 지급
             if isApproved && quest.status == .completed {
-                try await userService.updateUserPoints(userId: quest.assignedTo ?? "", points: quest.points)
+                try await userService
+                    .updateUserPoints(
+                        userId: quest.assignedTo ?? "",
+                        points: quest.points
+                    )
             }
 
             // 2. 제출 데이터 업데이트 (해당 제출이 있다면)
@@ -284,7 +315,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 try await submissionDoc.reference.updateData(updateData)
             }
         } catch {
-            throw FirebaseQuestServiceError.reviewFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .reviewFailed(error.localizedDescription)
         }
     }
 
@@ -324,14 +356,19 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         let subject = PassthroughSubject<QuestStatus, Error>()
 
         let listener = questsCollection.document(questId)
-            .addSnapshotListener { document, error in
+            .addSnapshotListener {
+ document,
+ error in
                 if let error = error {
                     subject.send(completion: .failure(error))
                     return
                 }
 
-                guard let document = document, document.exists,
-                      let quest = try? document.data(as: Quest.self) else { return }
+                guard let document = document,
+                      document.exists,
+                      let quest = try? document.data(as: Quest.self) else {
+                    return
+                }
 
                 subject.send(quest.status)
             }
@@ -373,7 +410,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
             return finalQuest
         } catch {
-            throw FirebaseQuestServiceError.creationFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError
+                .creationFailed(error.localizedDescription)
         }
     }
 }

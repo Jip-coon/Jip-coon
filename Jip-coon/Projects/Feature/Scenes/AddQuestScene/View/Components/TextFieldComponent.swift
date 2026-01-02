@@ -53,7 +53,8 @@ final class TextFieldComponent: UIView {
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             
-            textField.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 13),
+            textField.leadingAnchor
+                .constraint(equalTo: titleLabel.trailingAnchor, constant: 13),
             textField.trailingAnchor.constraint(equalTo: trailingAnchor),
             textField.centerYAnchor.constraint(equalTo: centerYAnchor),
             textField.heightAnchor.constraint(equalToConstant: 35)

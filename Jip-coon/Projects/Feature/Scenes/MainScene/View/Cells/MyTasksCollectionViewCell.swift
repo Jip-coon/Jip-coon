@@ -96,40 +96,67 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
         dueDateLabel.translatesAutoresizingMaskIntoConstraints = false
         pointsLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            titleLabel.trailingAnchor.constraint(equalTo: pointsLabel.leadingAnchor, constant: -8),
+        NSLayoutConstraint.activate(
+[
+            titleLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
+            titleLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor
+                .constraint(equalTo: pointsLabel.leadingAnchor, constant: -8),
             titleLabel.heightAnchor.constraint(equalToConstant: 20),
 
-            pointsLabel.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            pointsLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            pointsLabel.centerYAnchor
+                .constraint(equalTo: titleLabel.centerYAnchor),
+            pointsLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -12),
             pointsLabel.widthAnchor.constraint(equalToConstant: 40),
 
-            statusLabel.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            statusLabel.trailingAnchor.constraint(equalTo: pointsLabel.leadingAnchor, constant: -8),
+            statusLabel.centerYAnchor
+                .constraint(equalTo: titleLabel.centerYAnchor),
+            statusLabel.trailingAnchor
+                .constraint(equalTo: pointsLabel.leadingAnchor, constant: -8),
             statusLabel.widthAnchor.constraint(equalToConstant: 60),
             statusLabel.heightAnchor.constraint(equalToConstant: 20),
 
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
-            descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            descriptionLabel.topAnchor
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
+            descriptionLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            descriptionLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -12),
 
-            assigneeLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 4),
-            assigneeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            assigneeLabel.topAnchor
+                .constraint(
+                    equalTo: descriptionLabel.bottomAnchor,
+                    constant: 4
+                ),
+            assigneeLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 12),
             assigneeLabel.heightAnchor.constraint(equalToConstant: 16),
 
-            dueDateLabel.centerYAnchor.constraint(equalTo: assigneeLabel.centerYAnchor),
-            dueDateLabel.leadingAnchor.constraint(equalTo: assigneeLabel.trailingAnchor, constant: 12),
-            dueDateLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            dueDateLabel.centerYAnchor
+                .constraint(equalTo: assigneeLabel.centerYAnchor),
+            dueDateLabel.leadingAnchor
+                .constraint(
+                    equalTo: assigneeLabel.trailingAnchor,
+                    constant: 12
+                ),
+            dueDateLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -12),
             dueDateLabel.heightAnchor.constraint(equalToConstant: 16),
 
-            dueDateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-        ])
+            dueDateLabel.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor, constant: -8),
+]
+        )
     }
 
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleTap)
+        )
         contentView.addGestureRecognizer(tapGesture)
         contentView.isUserInteractionEnabled = true
     }
@@ -151,7 +178,11 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
 
     // MARK: - 구성
 
-    func configure(with quest: Quest, familyMembers: [User] = [], onTap: @escaping () -> Void) {
+    func configure(
+        with quest: Quest,
+        familyMembers: [User] = [],
+        onTap: @escaping () -> Void
+    ) {
         self.onTap = onTap
 
         titleLabel.text = "\(quest.category.emoji) \(quest.title)"
@@ -159,7 +190,9 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
 
         // 담당자 정보
         if let assigneeId = quest.assignedTo {
-            let assigneeName = familyMembers.first(where: { $0.id == assigneeId })?.name ?? assigneeId
+            let assigneeName = familyMembers.first(
+                where: { $0.id == assigneeId
+                })?.name ?? assigneeId
             assigneeLabel.text = "담당자: \(assigneeName)"
         } else {
             assigneeLabel.text = "담당자: 미정"
@@ -199,7 +232,8 @@ public class MyTasksCollectionViewCell: UICollectionViewCell {
         // 배경색 설정
         contentView.backgroundColor = statusColor.withAlphaComponent(0.1)
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = statusColor.withAlphaComponent(0.3).cgColor
+        contentView.layer.borderColor = statusColor
+            .withAlphaComponent(0.3).cgColor
     }
 }
 
@@ -254,7 +288,8 @@ public class EmptyMyTasksCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
         contentView.layer.cornerRadius = 8
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor
+        contentView.layer.borderColor = UIColor.systemBlue
+            .withAlphaComponent(0.3).cgColor
 
         contentView.addSubview(iconLabel)
         contentView.addSubview(messageLabel)
@@ -265,15 +300,21 @@ public class EmptyMyTasksCollectionViewCell: UICollectionViewCell {
         subMessageLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            iconLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            iconLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
 
-            messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            messageLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 8),
+            messageLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            messageLabel.topAnchor
+                .constraint(equalTo: iconLabel.bottomAnchor, constant: 8),
             messageLabel.heightAnchor.constraint(equalToConstant: 20),
 
-            subMessageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            subMessageLabel.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 4),
+            subMessageLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            subMessageLabel.topAnchor
+                .constraint(equalTo: messageLabel.bottomAnchor, constant: 4),
             subMessageLabel.heightAnchor.constraint(equalToConstant: 14),
             subMessageLabel.bottomAnchor.constraint(
                 lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),

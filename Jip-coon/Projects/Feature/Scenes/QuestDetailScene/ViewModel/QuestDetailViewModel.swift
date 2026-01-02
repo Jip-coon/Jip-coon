@@ -27,7 +27,11 @@ final class QuestDetailViewModel: ObservableObject {
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
 
-    init(quest: Quest, questService: QuestServiceProtocol, userService: UserServiceProtocol) {
+    init(
+        quest: Quest,
+        questService: QuestServiceProtocol,
+        userService: UserServiceProtocol
+    ) {
         self.quest = quest
         self.questService = questService
         self.userService = userService
@@ -90,7 +94,10 @@ final class QuestDetailViewModel: ObservableObject {
     
     func combineDateAndTime() -> Date {
         let calendar = Calendar.current
-        let day = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+        let day = calendar.dateComponents(
+            [.year, .month, .day],
+            from: selectedDate
+        )
         let time = calendar.dateComponents([.hour, .minute], from: selectedTime)
         
         var merged = DateComponents()
@@ -120,7 +127,8 @@ final class QuestDetailViewModel: ObservableObject {
         }
 
         // 퀘스트 상태를 completed로 변경
-        try await questService.updateQuestStatus(questId: quest.id, status: .completed)
+        try await questService
+            .updateQuestStatus(questId: quest.id, status: .completed)
 
         // 담당자가 지정되지 않은 퀘스트였다면, 완료 시점에 담당자를 현재 사용자로 설정
         var questToUpdate = quest
@@ -132,7 +140,8 @@ final class QuestDetailViewModel: ObservableObject {
 
         // 포인트 부여: 퀘스트의 포인트만큼 사용자에게 추가
         let newPoints = currentUser.points + quest.points
-        try await userService.updateUserPoints(userId: currentUser.id, points: newPoints)
+        try await userService
+            .updateUserPoints(userId: currentUser.id, points: newPoints)
 
         // 로컬 quest 객체도 업데이트
         var updatedQuest = questToUpdate

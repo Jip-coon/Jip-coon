@@ -55,7 +55,8 @@ public class tempFirestoreView: UIViewController {
             textLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
 
             // UIColor 테스트
-            square.topAnchor.constraint(equalTo: textLabel.bottomAnchor, constant: 20),
+            square.topAnchor
+                .constraint(equalTo: textLabel.bottomAnchor, constant: 20),
             square.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             square.widthAnchor.constraint(equalToConstant: 100),
             square.heightAnchor.constraint(equalToConstant: 100)

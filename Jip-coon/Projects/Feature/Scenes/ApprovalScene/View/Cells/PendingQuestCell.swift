@@ -69,7 +69,12 @@ final class PendingQuestCell: UITableViewCell {
         button.titleLabel?.font = .pretendard(ofSize: 14, weight: .semibold)
         button.backgroundColor = .systemGreen
         button.layer.cornerRadius = 8
-        button.addTarget(self, action: #selector(approveButtonTapped), for: .touchUpInside)
+        button
+            .addTarget(
+                self,
+                action: #selector(approveButtonTapped),
+                for: .touchUpInside
+            )
         return button
     }()
 
@@ -80,7 +85,12 @@ final class PendingQuestCell: UITableViewCell {
         button.titleLabel?.font = .pretendard(ofSize: 14, weight: .semibold)
         button.backgroundColor = .systemRed
         button.layer.cornerRadius = 8
-        button.addTarget(self, action: #selector(rejectButtonTapped), for: .touchUpInside)
+        button
+            .addTarget(
+                self,
+                action: #selector(rejectButtonTapped),
+                for: .touchUpInside
+            )
         return button
     }()
 
@@ -120,41 +130,69 @@ final class PendingQuestCell: UITableViewCell {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
-        NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+        NSLayoutConstraint.activate(
+[
+            containerView.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
+            containerView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            containerView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            containerView.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor, constant: -8),
 
-            categoryIcon.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            categoryIcon.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            categoryIcon.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            categoryIcon.centerYAnchor
+                .constraint(equalTo: containerView.centerYAnchor),
             categoryIcon.widthAnchor.constraint(equalToConstant: 40),
             categoryIcon.heightAnchor.constraint(equalToConstant: 40),
 
-            titleLabel.leadingAnchor.constraint(equalTo: categoryIcon.trailingAnchor, constant: 12),
-            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
-            titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            titleLabel.leadingAnchor
+                .constraint(equalTo: categoryIcon.trailingAnchor, constant: 12),
+            titleLabel.topAnchor
+                .constraint(equalTo: containerView.topAnchor, constant: 12),
+            titleLabel.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -12
+                ),
 
-            assigneeLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            assigneeLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            assigneeLabel.leadingAnchor
+                .constraint(equalTo: titleLabel.leadingAnchor),
+            assigneeLabel.topAnchor
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
 
-            pointsLabel.leadingAnchor.constraint(equalTo: assigneeLabel.trailingAnchor, constant: 8),
-            pointsLabel.centerYAnchor.constraint(equalTo: assigneeLabel.centerYAnchor),
+            pointsLabel.leadingAnchor
+                .constraint(equalTo: assigneeLabel.trailingAnchor, constant: 8),
+            pointsLabel.centerYAnchor
+                .constraint(equalTo: assigneeLabel.centerYAnchor),
 
-            completedDateLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            completedDateLabel.topAnchor.constraint(equalTo: assigneeLabel.bottomAnchor, constant: 4),
-            completedDateLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
+            completedDateLabel.leadingAnchor
+                .constraint(equalTo: titleLabel.leadingAnchor),
+            completedDateLabel.topAnchor
+                .constraint(equalTo: assigneeLabel.bottomAnchor, constant: 4),
+            completedDateLabel.bottomAnchor
+                .constraint(equalTo: containerView.bottomAnchor, constant: -12),
 
-            rejectButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            rejectButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            rejectButton.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -16
+                ),
+            rejectButton.centerYAnchor
+                .constraint(equalTo: containerView.centerYAnchor),
             rejectButton.widthAnchor.constraint(equalToConstant: 60),
             rejectButton.heightAnchor.constraint(equalToConstant: 32),
 
-            approveButton.trailingAnchor.constraint(equalTo: rejectButton.leadingAnchor, constant: -8),
-            approveButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            approveButton.trailingAnchor
+                .constraint(equalTo: rejectButton.leadingAnchor, constant: -8),
+            approveButton.centerYAnchor
+                .constraint(equalTo: containerView.centerYAnchor),
             approveButton.widthAnchor.constraint(equalToConstant: 60),
             approveButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
+]
+        )
     }
 
     // MARK: - Configuration
@@ -168,7 +206,11 @@ final class PendingQuestCell: UITableViewCell {
 
         // 카테고리 이모지 및 색상 설정
         categoryIcon.text = quest.category.emoji
-        categoryIcon.backgroundColor = UIColor(named: quest.category.backgroundColor, in: uiBundle, compatibleWith: nil)
+        categoryIcon.backgroundColor = UIColor(
+            named: quest.category.backgroundColor,
+            in: uiBundle,
+            compatibleWith: nil
+        )
 
         // 완료 날짜 표시
         if let completedAt = quest.completedAt {

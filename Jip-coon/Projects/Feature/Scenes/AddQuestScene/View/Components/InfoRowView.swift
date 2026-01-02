@@ -17,7 +17,16 @@ enum InfoRowButtonStyle {
 
 final class InfoRowView: UIView {
     private var buttonStyle: InfoRowButtonStyle = .rightArrowAction
-    private let colors: [UIColor] = [.blue1, .blue2, .brown1, .green1, .orange3, .purple1, .red1, .yellow1]
+    private let colors: [UIColor] = [
+        .blue1,
+        .blue2,
+        .brown1,
+        .green1,
+        .orange3,
+        .purple1,
+        .red1,
+        .yellow1
+    ]
     var onTap: (() -> Void)?
     
     // 이모지 + 타이틀
@@ -57,7 +66,12 @@ final class InfoRowView: UIView {
         return actionButton.titleLabel?.text ?? ""
     }
     
-    init(leading: UIView, title: String, value: String, buttonStyle: InfoRowButtonStyle = .rightArrowAction) {
+    init(
+        leading: UIView,
+        title: String,
+        value: String,
+        buttonStyle: InfoRowButtonStyle = .rightArrowAction
+    ) {
         self.leadingView = leading
         self.buttonStyle = buttonStyle
         super.init(frame: .zero)
@@ -90,7 +104,10 @@ final class InfoRowView: UIView {
         ])
     }
     
-    private func setupButtonStyle(_ style: InfoRowButtonStyle, with text: String) {
+    private func setupButtonStyle(
+        _ style: InfoRowButtonStyle,
+        with text: String
+    ) {
         var config = UIButton.Configuration.plain()
         
         config.title = text
@@ -99,47 +116,63 @@ final class InfoRowView: UIView {
         config.baseForegroundColor = .black
         
         switch style {
-            case .rightArrowAction:    // (기본 스타일: Label + Chevron) + Action
-                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                    var outgoing = incoming
-                    outgoing.font = .pretendard(ofSize: 16, weight: .regular)
-                    return outgoing
-                }
-                config.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
-                config.contentInsets = .zero
+        case .rightArrowAction:    // (기본 스타일: Label + Chevron) + Action
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var outgoing = incoming
+                outgoing.font = .pretendard(ofSize: 16, weight: .regular)
+                return outgoing
+            }
+            config.image = UIImage(systemName: "chevron.right")?
+                .applyingSymbolConfiguration(
+                    .init(pointSize: 14, weight: .regular)
+                )
+            config.contentInsets = .zero
                 
-                actionButton.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
+            actionButton
+                .addTarget(
+                    self,
+                    action: #selector(tapButton),
+                    for: .touchUpInside
+                )
                 
-            case .capsuleMenu:  // 캡슐 + 메뉴
-                config.background.backgroundColor = colors.randomElement()
-                config.background.cornerRadius = 14
-                config.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 9, bottom: 5, trailing: 9)
-                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                    var outgoing = incoming
-                    outgoing.font = .pretendard(ofSize: 14, weight: .semibold)
-                    return outgoing
-                }
+        case .capsuleMenu:  // 캡슐 + 메뉴
+            config.background.backgroundColor = colors.randomElement()
+            config.background.cornerRadius = 14
+            config.contentInsets = NSDirectionalEdgeInsets(
+                top: 5,
+                leading: 9,
+                bottom: 5,
+                trailing: 9
+            )
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var outgoing = incoming
+                outgoing.font = .pretendard(ofSize: 14, weight: .semibold)
+                return outgoing
+            }
                 
-                actionButton.showsMenuAsPrimaryAction = true    // 메뉴를 기본 액션으로
+            actionButton.showsMenuAsPrimaryAction = true    // 메뉴를 기본 액션으로
                 
-            case .rightArrowMenu:    // 기본 + 메뉴
-                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                    var outgoing = incoming
-                    outgoing.font = .pretendard(ofSize: 16, weight: .regular)
-                    return outgoing
-                }
-                config.image = UIImage(systemName: "chevron.right")?.applyingSymbolConfiguration(.init(pointSize: 14, weight: .regular))
-                config.contentInsets = .zero
+        case .rightArrowMenu:    // 기본 + 메뉴
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var outgoing = incoming
+                outgoing.font = .pretendard(ofSize: 16, weight: .regular)
+                return outgoing
+            }
+            config.image = UIImage(systemName: "chevron.right")?
+                .applyingSymbolConfiguration(
+                    .init(pointSize: 14, weight: .regular)
+                )
+            config.contentInsets = .zero
                 
-                actionButton.showsMenuAsPrimaryAction = true
+            actionButton.showsMenuAsPrimaryAction = true
             
-            case .textOnly:
-                config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                    var outgoing = incoming
-                    outgoing.font = .pretendard(ofSize: 16, weight: .regular)
-                    return outgoing
-                }
-                config.contentInsets = .zero
+        case .textOnly:
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var outgoing = incoming
+                outgoing.font = .pretendard(ofSize: 16, weight: .regular)
+                return outgoing
+            }
+            config.contentInsets = .zero
         }
         
         actionButton.configuration = config

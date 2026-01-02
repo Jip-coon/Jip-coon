@@ -16,7 +16,11 @@ extension MainViewComponents {
     // MARK: - 데이터 설정 메서드들
 
     /// 내 담당 할일 데이터 설정
-    public func setupMyTasks(with quests: [Quest], familyMembers: [User] = [], onMyTaskTap: ((Quest) -> Void)? = nil) {
+    public func setupMyTasks(
+        with quests: [Quest],
+        familyMembers: [User] = [],
+        onMyTaskTap: ((Quest) -> Void)? = nil
+    ) {
         self.myTasks = Array(quests.prefix(10))  // 최대 10개
         self.familyMembers = familyMembers
         self.onMyTaskTap = onMyTaskTap
@@ -27,14 +31,19 @@ extension MainViewComponents {
     }
 
     /// 빠른 액션 데이터 설정
-    public func setupQuickActions(onQuickActionTap: ((QuickAction) -> Void)? = nil) {
+    public func setupQuickActions(
+        onQuickActionTap: ((QuickAction) -> Void)? = nil
+    ) {
         self.onQuickActionTap = onQuickActionTap
         quickActionsCollectionView.reloadData()
     }
 
     /// 최근 활동 데이터 설정
     public func setupRecentActivities(
-        with activities: [String], onRecentActivityTap: ((RecentActivity) -> Void)? = nil
+        with activities: [String],
+        onRecentActivityTap: (
+            (RecentActivity) -> Void
+        )? = nil
     ) {
         self.recentActivities = activities.enumerated().map { index, activity in
             let time = index == 0 ? "30분 전" : "1시간 전"
@@ -49,15 +58,24 @@ extension MainViewComponents {
 
     /// 카테고리 통계 데이터 설정
     public func setupCategoryStatsIcons(
-        with stats: [(QuestCategory, Int)], onCategoryStatTap: ((QuestCategory, Int) -> Void)? = nil
+        with stats: [(QuestCategory, Int)],
+        onCategoryStatTap: (
+            (QuestCategory, Int) -> Void
+        )? = nil
     ) {
-        let statsDict = Dictionary(uniqueKeysWithValues: stats.map { ($0.0.rawValue, $0.1) })
+        let statsDict = Dictionary(
+            uniqueKeysWithValues: stats.map { ($0.0.rawValue, $0.1)
+            })
         self.categoryStats = statsDict
 
         // 클로저 변환
-        self.onCategoryStatTap = { categoryRawValue, count in
+        self.onCategoryStatTap = {
+ categoryRawValue,
+ count in
             // rawValue를 QuestCategory로 다시 변환
-            let category = QuestCategory(rawValue: categoryRawValue) ?? .cleaning
+            let category = QuestCategory(
+                rawValue: categoryRawValue
+            ) ?? .cleaning
             onCategoryStatTap?(category, count)
         }
 
@@ -67,11 +85,15 @@ extension MainViewComponents {
     // MARK: - 긴급 할 일 관련 메서드들
 
     /// 긴급 할 일 데이터 설정
-    public func setupUrgentTasks(with quests: [Quest], onUrgentTaskTap: ((Quest) -> Void)? = nil) {
+    public func setupUrgentTasks(
+        with quests: [Quest],
+        onUrgentTaskTap: ((Quest) -> Void)? = nil
+    ) {
         let filteredQuests = quests.filter { $0.isDueToday || $0.isOverdue }
 
         // 우선순위별로 정렬 (마감시간이 가까운 순)
-        self.urgentQuests = QuestUrgencyCalculator.sortQuestsByUrgency(filteredQuests)
+        self.urgentQuests = QuestUrgencyCalculator
+            .sortQuestsByUrgency(filteredQuests)
 
         self.onUrgentTaskTap = onUrgentTaskTap
 
@@ -89,7 +111,12 @@ extension MainViewComponents {
 
         // 페이지 컨트롤 터치 이벤트 설정
         urgentPageControl.addTarget(
-            self, action: #selector(urgentPageControlTapped), for: .valueChanged)
+            self,
+            action: #selector(
+                urgentPageControlTapped
+            ),
+            for: .valueChanged
+        )
 
         // 컬렉션뷰 리로드
         urgentCollectionView.reloadData()
@@ -107,7 +134,8 @@ extension MainViewComponents {
         let pageWidth = cellWidth + lineSpacing
         let offsetX = CGFloat(page) * pageWidth
 
-        urgentCollectionView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: true)
+        urgentCollectionView
+            .setContentOffset(CGPoint(x: offsetX, y: 0), animated: true)
     }
 
 }

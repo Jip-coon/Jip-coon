@@ -21,7 +21,11 @@ final class ApprovalViewController: UIViewController {
         let tableView = UITableView()
         tableView.backgroundColor = .headerBeige
         tableView.separatorStyle = .none
-        tableView.register(PendingQuestCell.self, forCellReuseIdentifier: PendingQuestCell.identifier)
+        tableView
+            .register(
+                PendingQuestCell.self,
+                forCellReuseIdentifier: PendingQuestCell.identifier
+            )
         tableView.dataSource = self
         tableView.delegate = self
         return tableView
@@ -31,7 +35,9 @@ final class ApprovalViewController: UIViewController {
         let view = UIView()
         view.isHidden = true
 
-        let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle"))
+        let imageView = UIImageView(
+            image: UIImage(systemName: "checkmark.circle")
+        )
         imageView.tintColor = .gray
         imageView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -47,13 +53,17 @@ final class ApprovalViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
+            imageView.centerYAnchor
+                .constraint(equalTo: view.centerYAnchor, constant: -20),
             imageView.widthAnchor.constraint(equalToConstant: 48),
             imageView.heightAnchor.constraint(equalToConstant: 48),
 
-            label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 12),
-            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            label.topAnchor
+                .constraint(equalTo: imageView.bottomAnchor, constant: 12),
+            label.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            label.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
 
         return view
@@ -68,7 +78,10 @@ final class ApprovalViewController: UIViewController {
     // MARK: - Initialization
 
     init(questService: QuestServiceProtocol, userService: UserServiceProtocol) {
-        self.viewModel = ApprovalViewModel(questService: questService, userService: userService)
+        self.viewModel = ApprovalViewModel(
+            questService: questService,
+            userService: userService
+        )
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -100,18 +113,26 @@ final class ApprovalViewController: UIViewController {
         }
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.bottomAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
-            emptyStateView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            emptyStateView.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
+            emptyStateView.centerYAnchor
+                .constraint(equalTo: view.centerYAnchor),
+            emptyStateView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 40),
+            emptyStateView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -40),
 
-            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            loadingIndicator.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor
+                .constraint(equalTo: view.centerYAnchor)
         ])
     }
 
@@ -155,7 +176,11 @@ final class ApprovalViewController: UIViewController {
     }
 
     private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: "오류",
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
@@ -207,11 +232,13 @@ extension ApprovalViewController {
         )
 
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert.addAction(UIAlertAction(title: "승인", style: .default) { [weak self] _ in
-            Task {
-                await self?.viewModel.approveQuest(quest)
-            }
-        })
+        alert
+            .addAction(
+                UIAlertAction(title: "승인", style: .default) { [weak self] _ in
+                    Task {
+                        await self?.viewModel.approveQuest(quest)
+                    }
+                })
 
         present(alert, animated: true)
     }
@@ -228,12 +255,14 @@ extension ApprovalViewController {
         }
 
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert.addAction(UIAlertAction(title: "거절", style: .destructive) { [weak self] _ in
-            let reason = alert.textFields?.first?.text
-            Task {
-                await self?.viewModel.rejectQuest(quest, reason: reason)
-            }
-        })
+        alert
+            .addAction(
+                UIAlertAction(title: "거절", style: .destructive) { [weak self] _ in
+                    let reason = alert.textFields?.first?.text
+                    Task {
+                        await self?.viewModel.rejectQuest(quest, reason: reason)
+                    }
+                })
 
         present(alert, animated: true)
     }

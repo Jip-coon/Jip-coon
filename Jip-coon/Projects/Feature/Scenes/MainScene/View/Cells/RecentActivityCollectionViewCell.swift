@@ -66,26 +66,46 @@ public class RecentActivityCollectionViewCell: UICollectionViewCell {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            statusIconLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            statusIconLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+        NSLayoutConstraint.activate(
+[
+            statusIconLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            statusIconLabel.centerYAnchor
+                .constraint(equalTo: contentView.centerYAnchor),
             statusIconLabel.widthAnchor.constraint(equalToConstant: 20),
             statusIconLabel.heightAnchor.constraint(equalToConstant: 20),
 
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            titleLabel.leadingAnchor.constraint(equalTo: statusIconLabel.trailingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            titleLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 12),
+            titleLabel.leadingAnchor
+                .constraint(
+                    equalTo: statusIconLabel.trailingAnchor,
+                    constant: 8
+                ),
+            titleLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -16),
             titleLabel.heightAnchor.constraint(equalToConstant: 17.5),
 
-            timeLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            timeLabel.leadingAnchor.constraint(equalTo: statusIconLabel.trailingAnchor, constant: 8),
-            timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            timeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
-        ])
+            timeLabel.topAnchor
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            timeLabel.leadingAnchor
+                .constraint(
+                    equalTo: statusIconLabel.trailingAnchor,
+                    constant: 8
+                ),
+            timeLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            timeLabel.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor, constant: -12),
+]
+        )
     }
 
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleTap)
+        )
         contentView.addGestureRecognizer(tapGesture)
         contentView.isUserInteractionEnabled = true
     }
@@ -150,7 +170,8 @@ public class EmptyRecentActivityCollectionViewCell: UICollectionViewCell {
     // MARK: - 설정
 
     private func setupUI() {
-        contentView.backgroundColor = UIColor.systemGray6.withAlphaComponent(0.5)
+        contentView.backgroundColor = UIColor.systemGray6
+            .withAlphaComponent(0.5)
         contentView.layer.cornerRadius = 8
 
         contentView.addSubview(messageLabel)
@@ -158,8 +179,10 @@ public class EmptyRecentActivityCollectionViewCell: UICollectionViewCell {
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            messageLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            messageLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            messageLabel.centerYAnchor
+                .constraint(equalTo: contentView.centerYAnchor),
         ])
     }
 }

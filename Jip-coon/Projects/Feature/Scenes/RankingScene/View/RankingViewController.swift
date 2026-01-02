@@ -17,7 +17,11 @@ public final class RankingViewController: UIViewController {
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
-        tableView.register(RankingTableViewCell.self, forCellReuseIdentifier: RankingTableViewCell.identifier)
+        tableView
+            .register(
+                RankingTableViewCell.self,
+                forCellReuseIdentifier: RankingTableViewCell.identifier
+            )
         tableView.dataSource = self
         tableView.delegate = self
         tableView.rowHeight = 80
@@ -27,7 +31,8 @@ public final class RankingViewController: UIViewController {
 
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        refreshControl
+            .addTarget(self, action: #selector(refreshData), for: .valueChanged)
         return refreshControl
     }()
 
@@ -38,8 +43,14 @@ public final class RankingViewController: UIViewController {
     }()
 
     // MARK: - Initialization
-    public init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol) {
-        self.viewModel = RankingViewModel(userService: userService, familyService: familyService)
+    public init(
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol
+    ) {
+        self.viewModel = RankingViewModel(
+            userService: userService,
+            familyService: familyService
+        )
         self.userService = userService
         self.familyService = familyService
         super.init(nibName: nil, bundle: nil)
@@ -81,51 +92,48 @@ public final class RankingViewController: UIViewController {
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            loadingIndicator.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor
+                .constraint(equalTo: view.centerYAnchor)
         ])
     }
 
     private func setupBindings() {
         // ViewModel의 데이터 변경을 감지하여 UI 업데이트
-        Task {
-            await viewModel.$familyMembers
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] _ in
-                    self?.tableView.reloadData()
-                }
-                .store(in: &cancellables)
-        }
+        viewModel.$familyMembers
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
 
-        Task {
-            await viewModel.$isLoading
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] isLoading in
-                    if isLoading {
-                        self?.loadingIndicator.startAnimating()
-                    } else {
-                        self?.loadingIndicator.stopAnimating()
-                        self?.refreshControl.endRefreshing()
-                    }
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    self?.loadingIndicator.startAnimating()
+                } else {
+                    self?.loadingIndicator.stopAnimating()
+                    self?.refreshControl.endRefreshing()
                 }
-                .store(in: &cancellables)
-        }
+            }
+            .store(in: &cancellables)
 
-        Task {
-            await viewModel.$errorMessage
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] errorMessage in
-                    if let errorMessage = errorMessage {
-                        self?.showErrorAlert(message: errorMessage)
-                    }
+        viewModel.$errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let errorMessage = errorMessage {
+                    self?.showErrorAlert(message: errorMessage)
                 }
-                .store(in: &cancellables)
-        }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Data Loading
@@ -141,7 +149,11 @@ public final class RankingViewController: UIViewController {
 
     // MARK: - Helpers
     private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: "오류",
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
@@ -173,7 +185,10 @@ extension RankingViewController: UITableViewDataSource {
 
 // MARK: - UITableViewDelegate
 extension RankingViewController: UITableViewDelegate {
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    public func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         tableView.deselectRow(at: indexPath, animated: true)
         // 랭킹 항목 선택 시 추가 동작 (필요시 구현)
     }
@@ -231,18 +246,26 @@ private class RankingTableViewCell: UITableViewCell {
         contentView.addSubview(roleLabel)
 
         NSLayoutConstraint.activate([
-            rankLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            rankLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            rankLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            rankLabel.centerYAnchor
+                .constraint(equalTo: contentView.centerYAnchor),
             rankLabel.widthAnchor.constraint(equalToConstant: 40),
 
-            nameLabel.leadingAnchor.constraint(equalTo: rankLabel.trailingAnchor, constant: 16),
-            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            nameLabel.leadingAnchor
+                .constraint(equalTo: rankLabel.trailingAnchor, constant: 16),
+            nameLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 12),
 
-            roleLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            roleLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            roleLabel.leadingAnchor
+                .constraint(equalTo: nameLabel.leadingAnchor),
+            roleLabel.topAnchor
+                .constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
 
-            pointsLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            pointsLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            pointsLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            pointsLabel.centerYAnchor
+                .constraint(equalTo: contentView.centerYAnchor),
             pointsLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 60)
         ])
     }

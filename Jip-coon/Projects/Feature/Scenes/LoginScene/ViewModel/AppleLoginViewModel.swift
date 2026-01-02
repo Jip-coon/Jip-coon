@@ -32,7 +32,9 @@ public final class AppleLoginViewModel: NSObject {
         request.nonce = sha256(nonce)
         
         // 인증 요청을 처리할 컨트롤러를 생성
-        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        let authorizationController = ASAuthorizationController(
+            authorizationRequests: [request]
+        )
         authorizationController.delegate = self // 이 뷰 모델을 인증 컨트롤러의 delegate로 설정
         authorizationController.presentationContextProvider = self  // 이 뷰 모델을 인증 컨트롤러의 프레젠테이션 컨텍스트 제공자로 설정
         authorizationController.performRequests()   // 인증 요청을 수행
@@ -41,7 +43,11 @@ public final class AppleLoginViewModel: NSObject {
     private func randomNonceString(length: Int = 32) -> String {
         precondition(length > 0)
         var randomBytes = [UInt8](repeating: 0, count: length)
-        let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+        let errorCode = SecRandomCopyBytes(
+            kSecRandomDefault,
+            randomBytes.count,
+            &randomBytes
+        )
         if errorCode != errSecSuccess {
             fatalError(
                 "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
@@ -49,7 +55,9 @@ public final class AppleLoginViewModel: NSObject {
         }
         
         let charset: [Character] =
-        Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        Array(
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._"
+        )
         
         let nonce = randomBytes.map { byte in
             // Pick a random character from the set, wrapping around if needed.
@@ -74,17 +82,24 @@ public final class AppleLoginViewModel: NSObject {
 
 extension AppleLoginViewModel: ASAuthorizationControllerDelegate {
     // 로그인 성공
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+    public func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithAuthorization authorization: ASAuthorization
+    ) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let nonce = currentNonce else {
-                fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                fatalError(
+                    "Invalid state: A login callback was received, but no login request was sent."
+                )
             }
             guard let appleIDToken = appleIDCredential.identityToken else {
                 print("Unable to fetch identity token")
                 return
             }
             guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
+                print(
+                    "Unable to serialize token string from data: \(appleIDToken.debugDescription)"
+                )
                 return
             }
             // Initialize a Firebase credential, including the user's full name.
@@ -110,7 +125,10 @@ extension AppleLoginViewModel: ASAuthorizationControllerDelegate {
     }
     
     // 로그인 실패
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: any Error) {
+    public func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithError error: any Error
+    ) {
         print("로그인 실패", error.localizedDescription)
     }
 }

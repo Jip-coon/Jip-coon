@@ -142,37 +142,99 @@ public final class SignUpViewController: UIViewController {
             view.addSubview($0)
         }
         
-        NSLayoutConstraint.activate([
-            signUpLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 38),
+        NSLayoutConstraint.activate(
+[
+            signUpLabel.topAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.topAnchor,
+                    constant: 38
+                ),
             signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            emailEnterLabel.topAnchor.constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
-            emailEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            emailEnterLabel.topAnchor
+                .constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
+            emailEnterLabel.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
             
-            emailTextField.topAnchor.constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
-            emailTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            emailTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            emailTextField.topAnchor
+                .constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
+            emailTextField.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
+            emailTextField.trailingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -20
+                ),
             emailTextField.heightAnchor.constraint(equalToConstant: 56),
             
-            passwordEnterLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
-            passwordEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            passwordEnterLabel.topAnchor
+                .constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
+            passwordEnterLabel.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
             
-            passwordTextField.topAnchor.constraint(equalTo: passwordEnterLabel.bottomAnchor, constant: 4),
-            passwordTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            passwordTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            passwordTextField.topAnchor
+                .constraint(
+                    equalTo: passwordEnterLabel.bottomAnchor,
+                    constant: 4
+                ),
+            passwordTextField.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
+            passwordTextField.trailingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -20
+                ),
             passwordTextField.heightAnchor.constraint(equalToConstant: 56),
             
-            emailInvalidLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 4),
-            emailInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            emailInvalidLabel.topAnchor
+                .constraint(equalTo: emailTextField.bottomAnchor, constant: 4),
+            emailInvalidLabel.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
             
-            passwordInvalidLabel.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 4),
-            passwordInvalidLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            passwordInvalidLabel.topAnchor
+                .constraint(
+                    equalTo: passwordTextField.bottomAnchor,
+                    constant: 4
+                ),
+            passwordInvalidLabel.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
             
-            signUpButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 75),
-            signUpButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            signUpButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            signUpButton.topAnchor
+                .constraint(
+                    equalTo: passwordTextField.bottomAnchor,
+                    constant: 75
+                ),
+            signUpButton.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
+            signUpButton.trailingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -20
+                ),
             signUpButton.heightAnchor.constraint(equalToConstant: 56)
-        ])
+]
+        )
     }
     
     private func bindViewModel() {
@@ -223,9 +285,24 @@ public final class SignUpViewController: UIViewController {
     }
     
     private func setupTargets() {
-        emailTextField.addTarget(self, action: #selector(emailChanged), for: .editingChanged)
-        passwordTextField.addTarget(self, action: #selector(passwordChanged), for: .editingChanged)
-        signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
+        emailTextField
+            .addTarget(
+                self,
+                action: #selector(emailChanged),
+                for: .editingChanged
+            )
+        passwordTextField
+            .addTarget(
+                self,
+                action: #selector(passwordChanged),
+                for: .editingChanged
+            )
+        signUpButton
+            .addTarget(
+                self,
+                action: #selector(signUpTapped),
+                for: .touchUpInside
+            )
     }
     
     private func setupDelegate() {
@@ -249,7 +326,11 @@ public final class SignUpViewController: UIViewController {
     }
     
     private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
@@ -258,7 +339,10 @@ public final class SignUpViewController: UIViewController {
     
     // 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        let tap = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissKeyboard)
+        )
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
@@ -286,19 +370,27 @@ public final class SignUpViewController: UIViewController {
     @objc private func keyboardWillShow(_ notification: Notification) {
         guard
             let userInfo = notification.userInfo,
-            let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
+            let keyboardFrame = (
+                userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+            )?.cgRectValue,
             let activeField = activeField
         else { return }
         
         let keyboardMinY = keyboardFrame.minY   // 키보드의 상단 Y좌표
-        let activeFieldFrame = activeField.convert(activeField.bounds, to: view)    // 현재 텍스트필드의 화면(view 기준) 좌표
+        let activeFieldFrame = activeField.convert(
+            activeField.bounds,
+            to: view
+        )    // 현재 텍스트필드의 화면(view 기준) 좌표
         let minDistance = 50.0
         let activeFieldMaxY = activeFieldFrame.maxY + minDistance    // 텍스트필드의 맨 아래 좌표 + 여유 공간(50px)
         
         if activeFieldMaxY > keyboardMinY {
             let overlap = activeFieldMaxY - keyboardMinY
             UIView.animate(withDuration: 0.3) {
-                self.view.transform = CGAffineTransform(translationX: 0, y: -overlap)
+                self.view.transform = CGAffineTransform(
+                    translationX: 0,
+                    y: -overlap
+                )
             }
         }
     }

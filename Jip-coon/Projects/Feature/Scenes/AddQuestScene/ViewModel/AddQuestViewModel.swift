@@ -14,7 +14,11 @@ final class AddQuestViewModel: ObservableObject {
     private let familyService: FamilyServiceProtocol
     private let questService: QuestServiceProtocol
 
-    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
+    init(
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol,
+        questService: QuestServiceProtocol
+    ) {
         self.userService = userService
         self.familyService = familyService
         self.questService = questService
@@ -35,8 +39,18 @@ final class AddQuestViewModel: ObservableObject {
     // TODO: - Firebase에서 데이터 가져오기
     func fetchFamilyMembers(for currentFamilyId: String) {
         // Sample data
-        let user1 = User(id: "user123", name: "예슬", email: "yeseul@example.com", role: .parent)
-        let user2 = User(id: "user456", name: "관혁", email: "jipcoon@example.com", role: .child)
+        let user1 = User(
+            id: "user123",
+            name: "예슬",
+            email: "yeseul@example.com",
+            role: .parent
+        )
+        let user2 = User(
+            id: "user456",
+            name: "관혁",
+            email: "jipcoon@example.com",
+            role: .child
+        )
         
         self.familyMembers = [user1, user2]
     }
@@ -63,8 +77,14 @@ final class AddQuestViewModel: ObservableObject {
         let calendar = Calendar.current
         
         // 날짜와 시간 각각의 컴포넌트 추출
-        let dateComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
-        let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        let dateComponents = calendar.dateComponents(
+            [.year, .month, .day],
+            from: selectedDate
+        )
+        let timeComponents = calendar.dateComponents(
+            [.hour, .minute],
+            from: selectedTime
+        )
         
         // 합치기
         var mergedComponents = DateComponents()
@@ -90,7 +110,9 @@ final class AddQuestViewModel: ObservableObject {
         let familyId = currentUser.familyId ?? "dummy_family_id"
 
         // 선택된 담당자 ID 찾기
-        var assignedTo: String? = familyMembers.first(where: { $0.name == selectedWorkerName })?.id
+        var assignedTo: String? = familyMembers.first(
+            where: { $0.name == selectedWorkerName
+            })?.id
 
         // "선택해 주세요"인 경우 현재 사용자를 담당자로 설정
         if selectedWorkerName == "선택해 주세요" || assignedTo == nil {

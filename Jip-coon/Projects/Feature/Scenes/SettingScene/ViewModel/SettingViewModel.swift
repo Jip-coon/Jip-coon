@@ -48,7 +48,9 @@ final class SettingViewModel {
             }
         } catch {
             print("사용자 정보 로드 실패: \(error.localizedDescription)")
-            print("Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")")
+            print(
+                "Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")"
+            )
         }
     }
 

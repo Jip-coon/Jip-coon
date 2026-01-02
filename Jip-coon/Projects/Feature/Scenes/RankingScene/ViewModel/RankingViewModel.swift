@@ -18,7 +18,10 @@ public final class RankingViewModel: ObservableObject {
     private let userService: UserServiceProtocol
     private let familyService: FamilyServiceProtocol
 
-    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol) {
+    init(
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol
+    ) {
         self.userService = userService
         self.familyService = familyService
     }
@@ -62,7 +65,9 @@ public final class RankingViewModel: ObservableObject {
             }
 
             // 가족 구성원 목록 가져오기
-            let members = try await userService.getFamilyMembers(familyId: finalFamilyId)
+            let members = try await userService.getFamilyMembers(
+                familyId: finalFamilyId
+            )
 
             // 포인트 기준으로 내림차순 정렬 (포인트가 높은 순)
             let sortedMembers = members.sorted { $0.points > $1.points }
@@ -83,7 +88,9 @@ public final class RankingViewModel: ObservableObject {
     /// 현재 사용자의 랭킹 위치 계산
     var currentUserRank: Int? {
         guard let currentUser = currentUser else { return nil }
-        return familyMembers.firstIndex(where: { $0.id == currentUser.id })?.advanced(by: 1)
+        return familyMembers
+            .firstIndex(where: { $0.id == currentUser.id })?
+            .advanced(by: 1)
     }
 
     /// 랭킹 데이터 새로고침

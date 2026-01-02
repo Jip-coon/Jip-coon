@@ -37,7 +37,10 @@ final class ApprovalViewModel: ObservableObject {
             }
 
             // 상태가 'completed'인 퀘스트들 조회 (승인 대기 중)
-            let completedQuests = try await questService.getQuestsByStatus(familyId: familyId, status: .completed)
+            let completedQuests = try await questService.getQuestsByStatus(
+                familyId: familyId,
+                status: .completed
+            )
 
             // 현재 사용자가 생성자이고, 아직 승인되지 않은 퀘스트들만 필터링
             pendingQuests = completedQuests.filter { quest in

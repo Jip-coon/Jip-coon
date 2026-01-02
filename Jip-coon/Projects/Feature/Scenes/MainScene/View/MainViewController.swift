@@ -20,7 +20,12 @@ public class MainViewController: UIViewController {
     private let questService: QuestServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    public init(viewModel: MainViewModel, userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
+    public init(
+        viewModel: MainViewModel,
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol,
+        questService: QuestServiceProtocol
+    ) {
         self.viewModel = viewModel
         self.userService = userService
         self.familyService = familyService
@@ -100,7 +105,12 @@ public class MainViewController: UIViewController {
 
     private func setupActions() {
         components.notificationButton.addTarget(
-            self, action: #selector(notificationButtonTapped), for: .touchUpInside)
+            self,
+            action: #selector(
+                notificationButtonTapped
+            ),
+            for: .touchUpInside
+        )
     }
 
     // MARK: - 바인딩
@@ -142,9 +152,10 @@ public class MainViewController: UIViewController {
         Publishers.CombineLatest(viewModel.$myTasks, viewModel.$familyMembers)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] tasks, members in
-                self?.components.setupMyTasks(with: tasks, familyMembers: members) { task in
-                    self?.handleMyTaskTapped(task)
-                }
+                self?.components
+                    .setupMyTasks(with: tasks, familyMembers: members) { task in
+                        self?.handleMyTaskTapped(task)
+                    }
             }
             .store(in: &cancellables)
 
@@ -174,9 +185,10 @@ public class MainViewController: UIViewController {
         viewModel.$recentActivities
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activities in
-                self?.components.setupRecentActivities(with: activities) { activity in
-                    self?.handleRecentActivityTapped(activity)
-                }
+                self?.components
+                    .setupRecentActivities(with: activities) { activity in
+                        self?.handleRecentActivityTapped(activity)
+                    }
             }
             .store(in: &cancellables)
 
@@ -242,10 +254,15 @@ public class MainViewController: UIViewController {
     // MARK: - Helper Methods
 
     private func setupCategoryStats(_ stats: [CategoryStatistic]) {
-        let categoryStats: [(QuestCategory, Int)] = stats.map { ($0.category, $0.count) }
-        components.setupCategoryStatsIcons(with: categoryStats) { [weak self] category, count in
-            self?.handleCategoryStatTapped(category, count: count)
+        let categoryStats: [(QuestCategory, Int)] = stats.map {
+            ($0.category, $0.count)
         }
+        components
+            .setupCategoryStatsIcons(with: categoryStats) {
+                [weak self] category,
+                count in
+                self?.handleCategoryStatTapped(category, count: count)
+            }
     }
 
     // MARK: - UI 상태 관리
@@ -270,11 +287,14 @@ public class MainViewController: UIViewController {
     // MARK: - Alert Factory Methods
 
     private func createQuestActionAlert(for quest: Quest) -> UIAlertController {
-        let urgencyLevel = QuestUrgencyCalculator.determineUrgencyLevel(for: quest)
+        let urgencyLevel = QuestUrgencyCalculator.determineUrgencyLevel(
+            for: quest
+        )
 
         let alert = UIAlertController(
             title: "\(quest.category.emoji) \(quest.title)",
-            message: QuestUrgencyCalculator.getUrgentTaskMessage(for: quest, urgencyLevel: urgencyLevel),
+            message: QuestUrgencyCalculator
+                .getUrgentTaskMessage(for: quest, urgencyLevel: urgencyLevel),
             preferredStyle: .alert
         )
 
@@ -325,7 +345,11 @@ public class MainViewController: UIViewController {
     }
 
     private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
@@ -335,37 +359,54 @@ extension MainViewController {
 
     private func handleQuickActionTapped(_ action: QuickAction) {
         switch action.type {
-            case .newQuest:
-                navigationItem.backButtonTitle = ""
-                let addQuestViewController = AddQuestViewController(userService: userService, familyService: familyService, questService: questService)
-                navigationController?.pushViewController(addQuestViewController, animated: true)
-                break
-            case .search:
-                // TODO: - 검색 화면으로 이동
-                break
-            case .invite:
-                // TODO: - 초대 화면으로 이동
-                break
-            case .approval:
-                navigationItem.backButtonTitle = ""
-                let approvalViewController = ApprovalViewController(questService: questService, userService: userService)
-                navigationController?.pushViewController(approvalViewController, animated: true)
-                break
+        case .newQuest:
+            navigationItem.backButtonTitle = ""
+            let addQuestViewController = AddQuestViewController(
+                userService: userService,
+                familyService: familyService,
+                questService: questService
+            )
+            navigationController?
+                .pushViewController(addQuestViewController, animated: true)
+            break
+        case .search:
+            // TODO: - 검색 화면으로 이동
+            break
+        case .invite:
+            // TODO: - 초대 화면으로 이동
+            break
+        case .approval:
+            navigationItem.backButtonTitle = ""
+            let approvalViewController = ApprovalViewController(
+                questService: questService,
+                userService: userService
+            )
+            navigationController?
+                .pushViewController(approvalViewController, animated: true)
+            break
         }
     }
 
     private func handleMyTaskTapped(_ quest: Quest) {
         // TODO: - 할일 상세 화면으로 이동
-        let questDetailViewController = QuestDetailViewController(quest: quest, questService: questService, userService: userService)
+        let questDetailViewController = QuestDetailViewController(
+            quest: quest,
+            questService: questService,
+            userService: userService
+        )
         navigationItem.backButtonTitle = ""
-        navigationController?.pushViewController(questDetailViewController, animated: true)
+        navigationController?
+            .pushViewController(questDetailViewController, animated: true)
     }
 
     private func handleRecentActivityTapped(_ activity: RecentActivity) {
         // TODO: - 활동 상세 화면으로 이동
     }
 
-    private func handleCategoryStatTapped(_ category: QuestCategory, count: Int) {
+    private func handleCategoryStatTapped(
+        _ category: QuestCategory,
+        count: Int
+    ) {
         // TODO: - 해당 카테고리 할일 목록 화면으로 이동
     }
 }

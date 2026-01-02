@@ -14,8 +14,16 @@ final class AddQuestViewController: UIViewController {
     private let viewModel: AddQuestViewModel
     private var cancellables = Set<AnyCancellable>()
 
-    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
-        self.viewModel = AddQuestViewModel(userService: userService, familyService: familyService, questService: questService)
+    init(
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol,
+        questService: QuestServiceProtocol
+    ) {
+        self.viewModel = AddQuestViewModel(
+            userService: userService,
+            familyService: familyService,
+            questService: questService
+        )
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -86,7 +94,9 @@ final class AddQuestViewController: UIViewController {
     
     // 별
     private let starInfoRowView: InfoRowView = {
-        let imageView = UIImageView(image: UIImage(named: "Star", in: uiBundle, compatibleWith: nil))
+        let imageView = UIImageView(
+            image: UIImage(named: "Star", in: uiBundle, compatibleWith: nil)
+        )
         imageView.contentMode = .scaleAspectFit
         return InfoRowView(
             leading: imageView,
@@ -168,60 +178,147 @@ final class AddQuestViewController: UIViewController {
     }
     
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+        NSLayoutConstraint.activate(
+[
+            scrollView.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            containerView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            containerView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            containerView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            containerView.topAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            containerView.leadingAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.leadingAnchor
+                ),
+            containerView.trailingAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.trailingAnchor
+                ),
+            containerView.bottomAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.bottomAnchor
+                ),
+            containerView.widthAnchor
+                .constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
-            categoryCarouselView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 26),
-            categoryCarouselView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            categoryCarouselView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            categoryCarouselView.topAnchor
+                .constraint(equalTo: containerView.topAnchor, constant: 26),
+            categoryCarouselView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor),
+            categoryCarouselView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor),
             categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
             
-            titleTextField.topAnchor.constraint(equalTo: categoryCarouselView.bottomAnchor, constant: 36),
-            titleTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            titleTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            titleTextField.topAnchor
+                .constraint(
+                    equalTo: categoryCarouselView.bottomAnchor,
+                    constant: 36
+                ),
+            titleTextField.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            titleTextField.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             titleTextField.heightAnchor.constraint(equalToConstant: 35),
             
-            memoTextField.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 11),
-            memoTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            memoTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            memoTextField.topAnchor
+                .constraint(equalTo: titleTextField.bottomAnchor, constant: 11),
+            memoTextField.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            memoTextField.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             memoTextField.heightAnchor.constraint(equalToConstant: 35),
             
-            dateInfoRowView.topAnchor.constraint(equalTo: memoTextField.bottomAnchor, constant: 40),
-            dateInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            dateInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            dateInfoRowView.topAnchor
+                .constraint(equalTo: memoTextField.bottomAnchor, constant: 40),
+            dateInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            dateInfoRowView.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             
-            timeInfoRowView.topAnchor.constraint(equalTo: dateInfoRowView.bottomAnchor, constant: 31),
-            timeInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            timeInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            timeInfoRowView.topAnchor
+                .constraint(
+                    equalTo: dateInfoRowView.bottomAnchor,
+                    constant: 31
+                ),
+            timeInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            timeInfoRowView.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             
-            workerInfoRowView.topAnchor.constraint(equalTo: timeInfoRowView.bottomAnchor, constant: 31),
-            workerInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            workerInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            workerInfoRowView.topAnchor
+                .constraint(
+                    equalTo: timeInfoRowView.bottomAnchor,
+                    constant: 31
+                ),
+            workerInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            workerInfoRowView.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             
-            starInfoRowView.topAnchor.constraint(equalTo: workerInfoRowView.bottomAnchor, constant: 31),
-            starInfoRowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            starInfoRowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            starInfoRowView.topAnchor
+                .constraint(
+                    equalTo: workerInfoRowView.bottomAnchor,
+                    constant: 31
+                ),
+            starInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            starInfoRowView.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             
-            scheduleRepeatView.topAnchor.constraint(equalTo: starInfoRowView.bottomAnchor, constant: 42),
-            scheduleRepeatView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            scheduleRepeatView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            scheduleRepeatView.topAnchor
+                .constraint(
+                    equalTo: starInfoRowView.bottomAnchor,
+                    constant: 42
+                ),
+            scheduleRepeatView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            scheduleRepeatView.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
             scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
             
-            missionAddButton.topAnchor.constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 47),
-            missionAddButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            missionAddButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            missionAddButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -34),
+            missionAddButton.topAnchor
+                .constraint(
+                    equalTo: scheduleRepeatView.bottomAnchor,
+                    constant: 47
+                ),
+            missionAddButton.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            missionAddButton.trailingAnchor
+                .constraint(
+                    equalTo: containerView.trailingAnchor,
+                    constant: -20
+                ),
+            missionAddButton.bottomAnchor
+                .constraint(equalTo: containerView.bottomAnchor, constant: -34),
             missionAddButton.heightAnchor.constraint(equalToConstant: 47)
-        ])
+]
+        )
     }
     
     private func bindViewModel() {
@@ -234,7 +331,10 @@ final class AddQuestViewController: UIViewController {
     
     // 화면 탭하면 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        let tap = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissKeyboard)
+        )
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
@@ -270,12 +370,19 @@ final class AddQuestViewController: UIViewController {
             self?.viewModel.category = category
         }
         
-        missionAddButton.addTarget(self, action: #selector(missionAddButtonTapped), for: .touchUpInside)
+        missionAddButton
+            .addTarget(
+                self,
+                action: #selector(missionAddButtonTapped),
+                for: .touchUpInside
+            )
     }
     
     // 날짜 버튼 -> DatePicker
     private func presentDatePicker() {
-        let datePickerViewController = DatePickerViewController(datePickerMode: .date)
+        let datePickerViewController = DatePickerViewController(
+            datePickerMode: .date
+        )
         
         datePickerViewController.onDidTapDone = { [weak self] date in
             self?.dateInfoRowView.setValueText(date.yyyyMMdEE)
@@ -283,7 +390,9 @@ final class AddQuestViewController: UIViewController {
             self?.viewModel.combineDateAndTime()
         }
         
-        let navigationController = UINavigationController(rootViewController: datePickerViewController)
+        let navigationController = UINavigationController(
+            rootViewController: datePickerViewController
+        )
         
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium()]
@@ -295,7 +404,9 @@ final class AddQuestViewController: UIViewController {
     
     // 시간 버튼 -> TimePicker
     private func presentTimePicker() {
-        let timePickerViewController = DatePickerViewController(datePickerMode: .time)
+        let timePickerViewController = DatePickerViewController(
+            datePickerMode: .time
+        )
         
         timePickerViewController.onDidTapDone = { [weak self] date in
             self?.timeInfoRowView.setValueText(date.aHHmm)
@@ -303,7 +414,9 @@ final class AddQuestViewController: UIViewController {
             self?.viewModel.combineDateAndTime()
         }
         
-        let navigationController = UINavigationController(rootViewController: timePickerViewController)
+        let navigationController = UINavigationController(
+            rootViewController: timePickerViewController
+        )
         
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium()]
@@ -320,7 +433,8 @@ final class AddQuestViewController: UIViewController {
         
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
-                self?.viewModel.selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
+                self?.viewModel
+                    .selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
             }
         }
         
@@ -331,7 +445,11 @@ final class AddQuestViewController: UIViewController {
     
     // 별 개수 선택
     private func setupStarSelectionMenu() {
-        let menuActions = stride(from: 10, through: 50, by: 10).map { starCount in
+        let menuActions = stride(
+            from: 10,
+            through: 50,
+            by: 10
+        ).map { starCount in
             let title = "\(starCount) 개"
             return UIAction(title: title) { [weak self] _ in
                 self?.starInfoRowView.setValueText(title)
@@ -377,7 +495,11 @@ final class AddQuestViewController: UIViewController {
     }
 
     private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }

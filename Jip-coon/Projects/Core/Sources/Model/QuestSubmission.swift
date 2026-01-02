@@ -21,7 +21,12 @@ public struct QuestSubmission: Codable, Identifiable {
     public var reviewComment: String?  // 검토 코멘트
     public var isApproved: Bool?       // 승인 여부
     
-    public init(questId: String, userId: String, comment: String? = nil, imageURLs: [String] = []) {
+    public init(
+        questId: String,
+        userId: String,
+        comment: String? = nil,
+        imageURLs: [String] = []
+    ) {
         self.id = UUID().uuidString
         self.questId = questId
         self.userId = userId
@@ -197,7 +202,9 @@ public extension SubmissionStatistics {
     /// 승인율
     var approvalRate: Double {
         let reviewedSubmissions = approvedSubmissions + rejectedSubmissions
-        return reviewedSubmissions > 0 ? Double(approvedSubmissions) / Double(reviewedSubmissions) : 0.0
+        return reviewedSubmissions > 0 ? Double(approvedSubmissions) / Double(
+            reviewedSubmissions
+        ) : 0.0
     }
     
     /// 승인율 백분율 문자열
@@ -208,7 +215,9 @@ public extension SubmissionStatistics {
     /// 평균 검토 시간 문자열
     var averageReviewTimeString: String {
         let hours = Int(averageReviewTime / 3600)
-        let minutes = Int((averageReviewTime.truncatingRemainder(dividingBy: 3600)) / 60)
+        let minutes = Int(
+            (averageReviewTime.truncatingRemainder(dividingBy: 3600)) / 60
+        )
         
         if hours > 0 {
             return "\(hours)시간 \(minutes)분"

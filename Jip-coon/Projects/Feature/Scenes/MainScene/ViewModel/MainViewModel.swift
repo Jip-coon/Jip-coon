@@ -46,7 +46,11 @@ public class MainViewModel: ObservableObject {
 
     // MARK: - 초기화
 
-    public init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
+    public init(
+        userService: UserServiceProtocol,
+        familyService: FamilyServiceProtocol,
+        questService: QuestServiceProtocol
+    ) {
         self.userService = userService
         self.familyService = familyService
         self.questService = questService
@@ -101,7 +105,8 @@ public class MainViewModel: ObservableObject {
 
             // 가족 구성원 정보 로드
             if let familyId = family?.id ?? user?.familyId {
-                self.familyMembers = try await userService.getFamilyMembers(familyId: familyId)
+                self.familyMembers = try await userService
+                    .getFamilyMembers(familyId: familyId)
             }
 
             self.allQuests = quests
@@ -165,10 +170,15 @@ public class MainViewModel: ObservableObject {
             .assign(to: &$urgentQuests)
 
         Publishers.CombineLatest($allQuests, $user)
-            .map { quests, user in
+            .map {
+ quests,
+ user in
                 guard let currentUserId = user?.id else { return [] }
                 // assignedTo가 nil이거나 현재 사용자인 퀘스트를 표시
-                return Array(quests.filter { $0.assignedTo == nil || $0.assignedTo == currentUserId }.prefix(10))
+                return Array(
+                    quests
+                        .filter { $0.assignedTo == nil || $0.assignedTo == currentUserId
+                        }.prefix(10))
             }
             .assign(to: &$myTasks)
     }
@@ -181,16 +191,27 @@ public class MainViewModel: ObservableObject {
                 if let currentUser = try await userService.getCurrentUser(),
                    let familyId = currentUser.familyId {
                     // 정상적인 경우: 실시간 관찰 시작
-                    await self.startRealtimeObservation(with: currentUser, familyId: familyId)
+                    await self.startRealtimeObservation(
+                        with: currentUser,
+                        familyId: familyId
+                    )
                 } else {
                     print("실시간 관찰: 사용자 정보 또는 가족 ID가 없어 더미 데이터로 폴백합니다")
 
                     // 더미 데이터를 사용한 폴백
-                    let dummyUser = User(id: "dummy_user_id", name: "개발자", email: "dev@example.com", role: .parent)
+                    let dummyUser = User(
+                        id: "dummy_user_id",
+                        name: "개발자",
+                        email: "dev@example.com",
+                        role: .parent
+                    )
                     var dummyUserWithFamily = dummyUser
                     dummyUserWithFamily.familyId = "dummy_family_id"
 
-                    await self.startRealtimeObservation(with: dummyUserWithFamily, familyId: "dummy_family_id")
+                    await self.startRealtimeObservation(
+                        with: dummyUserWithFamily,
+                        familyId: "dummy_family_id"
+                    )
                 }
             } catch {
                 print("실시간 퀘스트 관찰 설정 실패: \(error.localizedDescription)")
@@ -203,7 +224,9 @@ public class MainViewModel: ObservableObject {
 
         do {
             // 가족 구성원 정보 로드
-            let members = try await userService.getFamilyMembers(familyId: familyId)
+            let members = try await userService.getFamilyMembers(
+                familyId: familyId
+            )
             await MainActor.run {
                 self.familyMembers = members
             }
@@ -214,7 +237,8 @@ public class MainViewModel: ObservableObject {
             }
 
             // 실시간 퀘스트 데이터 구독
-            questSubscription = questService.observeFamilyQuests(familyId: familyId)
+            questSubscription = questService
+                .observeFamilyQuests(familyId: familyId)
                 .receive(on: DispatchQueue.main)
                 .sink { completion in
                     switch completion {
@@ -251,10 +275,26 @@ public class MainViewModel: ObservableObject {
             .map { stats in
                 guard let _ = stats else { return [] }
                 let categoryStats = [
-                    CategoryStatistic(category: .cleaning, count: 3, emoji: "🧹"),
-                    CategoryStatistic(category: .cooking, count: 2, emoji: "🍳"),
-                    CategoryStatistic(category: .dishes, count: 1, emoji: "🍽️"),
-                    CategoryStatistic(category: .laundry, count: 2, emoji: "👕"),
+                    CategoryStatistic(
+                        category: .cleaning,
+                        count: 3,
+                        emoji: "🧹"
+                    ),
+                    CategoryStatistic(
+                        category: .cooking,
+                        count: 2,
+                        emoji: "🍳"
+                    ),
+                    CategoryStatistic(
+                        category: .dishes,
+                        count: 1,
+                        emoji: "🍽️"
+                    ),
+                    CategoryStatistic(
+                        category: .laundry,
+                        count: 2,
+                        emoji: "👕"
+                    ),
                     CategoryStatistic(category: .pet, count: 3, emoji: "🐶"),
                     CategoryStatistic(category: .trash, count: 1, emoji: "🗑️"),
                 ]
@@ -292,7 +332,9 @@ public class MainViewModel: ObservableObject {
         let familyId = currentUser.familyId ?? "dummy_family_id"
 
         do {
-            let quests = try await questService.getFamilyQuests(familyId: familyId)
+            let quests = try await questService.getFamilyQuests(
+                familyId: familyId
+            )
             // 실제 데이터가 있는 경우 반환, 없으면 더미 데이터 반환
             let finalQuests = quests.isEmpty ? createDummyQuests() : quests
 
@@ -344,13 +386,13 @@ public class MainViewModel: ObservableObject {
         }
 
         // 상태 및 마감일 설정
-//        quests[0].status = .inProgress
-//        quests[1].status = .inProgress
-//
-//        let now = Date()
-//        quests[3].dueDate = Calendar.current.date(byAdding: .hour, value: 6, to: now)
-//        quests[4].dueDate = Calendar.current.date(byAdding: .hour, value: 1, to: now)
-//        quests[5].dueDate = Calendar.current.date(byAdding: .hour, value: -2, to: now)
+        //        quests[0].status = .inProgress
+        //        quests[1].status = .inProgress
+        //
+        //        let now = Date()
+        //        quests[3].dueDate = Calendar.current.date(byAdding: .hour, value: 6, to: now)
+        //        quests[4].dueDate = Calendar.current.date(byAdding: .hour, value: 1, to: now)
+        //        quests[5].dueDate = Calendar.current.date(byAdding: .hour, value: -2, to: now)
 
         return quests
     }

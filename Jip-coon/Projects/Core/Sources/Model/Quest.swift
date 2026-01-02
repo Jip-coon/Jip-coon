@@ -209,7 +209,9 @@ public extension Quest {
         }
         
         let days = Int(timeInterval / 86400)
-        let hours = Int((timeInterval.truncatingRemainder(dividingBy: 86400)) / 3600)
+        let hours = Int(
+            (timeInterval.truncatingRemainder(dividingBy: 86400)) / 3600
+        )
         
         if days > 0 {
             return "\(days)일 남음"
@@ -228,7 +230,9 @@ public extension Quest {
         let timeInterval = now.timeIntervalSince(startedAt)
         
         let hours = Int(timeInterval / 3600)
-        let minutes = Int((timeInterval.truncatingRemainder(dividingBy: 3600)) / 60)
+        let minutes = Int(
+            (timeInterval.truncatingRemainder(dividingBy: 3600)) / 60
+        )
         
         if hours > 0 {
             return "\(hours)시간 \(minutes)분"

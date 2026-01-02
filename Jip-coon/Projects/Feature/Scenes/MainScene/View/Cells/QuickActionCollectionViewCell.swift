@@ -53,7 +53,8 @@ public class QuickActionCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = UIColor.mainOrange.withAlphaComponent(0.1)
         contentView.layer.cornerRadius = 8
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.mainOrange.withAlphaComponent(0.3).cgColor
+        contentView.layer.borderColor = UIColor.mainOrange
+            .withAlphaComponent(0.3).cgColor
 
         contentView.addSubview(iconLabel)
         contentView.addSubview(titleLabel)
@@ -61,19 +62,32 @@ public class QuickActionCollectionViewCell: UICollectionViewCell {
         iconLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+        NSLayoutConstraint.activate(
+[
+            iconLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            iconLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
 
-            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            titleLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 4),
+            titleLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            titleLabel.topAnchor
+                .constraint(equalTo: iconLabel.bottomAnchor, constant: 4),
             titleLabel.heightAnchor.constraint(equalToConstant: 18),
-            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
-        ])
+            titleLabel.bottomAnchor
+                .constraint(
+                    lessThanOrEqualTo: contentView.bottomAnchor,
+                    constant: -8
+                ),
+]
+        )
     }
 
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleTap)
+        )
         contentView.addGestureRecognizer(tapGesture)
         contentView.isUserInteractionEnabled = true
     }
