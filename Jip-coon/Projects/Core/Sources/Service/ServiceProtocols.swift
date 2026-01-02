@@ -72,7 +72,7 @@ public protocol FamilyServiceProtocol {
 
 // MARK: - 퀘스트 서비스 프로토콜
 
-protocol QuestServiceProtocol {
+public protocol QuestServiceProtocol {
     /// 퀘스트 생성
     func createQuest(_ quest: Quest) async throws -> Quest
     
@@ -110,7 +110,7 @@ protocol QuestServiceProtocol {
     func submitQuestCompletion(questId: String, submission: QuestSubmission) async throws
     
     /// 퀘스트 승인/거절
-    func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String) async throws
+    func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws
     
     /// 반복 퀘스트 생성
     func createRecurringQuest(baseQuest: Quest, targetDate: Date) async throws -> Quest
@@ -124,7 +124,7 @@ protocol QuestServiceProtocol {
 
 // MARK: - 퀘스트 제출 서비스 프로토콜
 
-protocol QuestSubmissionServiceProtocol {
+public protocol QuestSubmissionServiceProtocol {
     /// 제출 생성
     func createSubmission(_ submission: QuestSubmission) async throws
     
@@ -149,7 +149,7 @@ protocol QuestSubmissionServiceProtocol {
 
 // MARK: - Image Service Protocol
 
-protocol ImageServiceProtocol {
+public protocol ImageServiceProtocol {
     /// 이미지 업로드
     func uploadImage(_ imageData: Data, path: String) async throws -> String
     
@@ -165,7 +165,7 @@ protocol ImageServiceProtocol {
 
 // MARK: - 통계 서비스 프로토콜
 
-protocol StatisticsServiceProtocol {
+public protocol StatisticsServiceProtocol {
     /// 사용자 통계 조회
     func getUserStatistics(userId: String) async throws -> UserStatistics
     
