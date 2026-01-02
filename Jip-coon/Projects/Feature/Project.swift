@@ -15,6 +15,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticFramework,
             bundleId: "com.jipcoon.Feature",
+            deploymentTargets: .iOS("18.0"),
             infoPlist: .default,
             sources: "Scenes/**",
             dependencies: [
@@ -35,6 +36,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.jipcoon.featureTests",
+            deploymentTargets: .iOS("18.0"),
             infoPlist: .default,
             dependencies: [.target(name: "Feature")]
         )
