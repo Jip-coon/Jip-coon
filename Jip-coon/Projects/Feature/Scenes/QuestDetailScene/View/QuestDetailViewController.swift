@@ -142,9 +142,9 @@ final class QuestDetailViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    init(quest: Quest) {
+    init(quest: Quest, questService: QuestServiceProtocol, userService: UserServiceProtocol) {
         self.quest = quest
-        self.viewModel = QuestDetailViewModel(quest: quest)
+        self.viewModel = QuestDetailViewModel(quest: quest, questService: questService, userService: userService)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -259,28 +259,32 @@ final class QuestDetailViewController: UIViewController {
     
     private func setupBindings() {
         viewModel.$quest
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] updatedQuest in
                 self?.updateReadOnlyUI(with: updatedQuest)
             }
             .store(in: &cancellables)
-        
+
         // 카테고리 변경 구독
         viewModel.$category
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] category in
                 self?.categoryIcon.text = category.emoji
                 self?.categoryIcon.backgroundColor = UIColor(named: category.backgroundColor, in: uiBundle, compatibleWith: nil)
             }
             .store(in: &cancellables)
-        
+
         // 날짜 변경 구독
         viewModel.$selectedDate
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] date in
                 self?.dateRowView.setValueText(date.yyyyMMdEE)
             }
             .store(in: &cancellables)
-        
+
         // 시간 변경 구독
         viewModel.$selectedTime
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] time in
                 self?.timeRowView.setValueText(time.aHHmm)
             }
@@ -288,13 +292,15 @@ final class QuestDetailViewController: UIViewController {
         
         // 담당자 변경 구독
         viewModel.$selectedWorkerName
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] name in
                 self?.workerRowView.setValueText(name)
             }
             .store(in: &cancellables)
-        
+
         // 별 개수 변경 구독
         viewModel.$starCount
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] count in
                 self?.starRowView.setValueText("\(count) 개")
             }
@@ -373,7 +379,15 @@ final class QuestDetailViewController: UIViewController {
     }
     
     @objc private func completeQuestButtonTapped() {
-        // TODO: - 퀘스트 완료 처리
+        Task {
+            do {
+                try await viewModel.completeQuest()
+                // 성공 시 메인 화면으로 돌아가기
+                navigationController?.popViewController(animated: true)
+            } catch {
+                showErrorAlert(message: error.localizedDescription)
+            }
+        }
     }
     
     @objc private func titleTextFieldChanged() {
@@ -489,5 +503,11 @@ final class QuestDetailViewController: UIViewController {
         }
         
         present(navigationController, animated: true)
+    }
+
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
 }

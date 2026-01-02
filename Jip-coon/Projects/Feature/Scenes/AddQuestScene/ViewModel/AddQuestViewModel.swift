@@ -10,6 +10,15 @@ import Combine
 import Core
 
 final class AddQuestViewModel: ObservableObject {
+    private let userService: UserServiceProtocol
+    private let familyService: FamilyServiceProtocol
+    private let questService: QuestServiceProtocol
+
+    init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
+        self.userService = userService
+        self.familyService = familyService
+        self.questService = questService
+    }
     @Published var title: String = ""
     @Published var description: String = ""
     @Published var questCreateDate: Date = Date()
@@ -70,26 +79,61 @@ final class AddQuestViewModel: ObservableObject {
         questDueDate = calendar.date(from: mergedComponents)
     }
     
-    // TODO: - 퀘스트 데이터 저장
-    func saveMission() {
-        print("Save Mission:")
-        print("Title:", title)
-        print("Description:", description)
-        
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yyyy-MM-dd HH:mm"
-        formatter.timeZone = .current
-        
-        print("MissionDueDate (local):", formatter.string(from: questDueDate ?? Date()))
-        print("Date:", formatter.string(from: selectedDate))
-        print("Time:", formatter.string(from: selectedTime))
-        
-        print("Worker:", selectedWorkerName)
-        print("Star:", starCount)
-        print("Recurring:", recurringType)
-        print("Repeat Days:", selectedRepeatDays)
-        print("Category:", category)
+    // 퀘스트 데이터 저장
+    func saveMission() async throws {
+        // 현재 사용자 정보 가져오기
+        guard let currentUser = try await userService.getCurrentUser() else {
+            throw AddQuestError.userNotFound
+        }
+
+        // 가족 ID 가져오기 (없으면 더미 가족 ID 사용)
+        let familyId = currentUser.familyId ?? "dummy_family_id"
+
+        // 선택된 담당자 ID 찾기
+        var assignedTo: String? = familyMembers.first(where: { $0.name == selectedWorkerName })?.id
+
+        // "선택해 주세요"인 경우 현재 사용자를 담당자로 설정
+        if selectedWorkerName == "선택해 주세요" || assignedTo == nil {
+            assignedTo = currentUser.id
+        }
+
+        // Quest 객체 생성
+        let quest = Quest(
+            title: title,
+            description: description.isEmpty ? nil : description,
+            category: category,
+            createdBy: currentUser.id,
+            familyId: familyId,
+            points: starCount
+        )
+
+        // 마감일 설정
+        var questToSave = quest
+        questToSave.dueDate = questDueDate
+        questToSave.recurringType = recurringType
+        questToSave.assignedTo = assignedTo
+
+        // Firebase에 저장
+        _ = try await questService.createQuest(questToSave)
     }
-    
+
+}
+
+// MARK: - Error Types
+
+enum AddQuestError: LocalizedError {
+    case userNotFound
+    case familyNotFound
+    case saveFailed(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .userNotFound:
+            return "사용자 정보를 찾을 수 없습니다"
+        case .familyNotFound:
+            return "가족 정보를 찾을 수 없습니다"
+        case .saveFailed(let details):
+            return "퀘스트 저장에 실패했습니다: \(details)"
+        }
+    }
 }

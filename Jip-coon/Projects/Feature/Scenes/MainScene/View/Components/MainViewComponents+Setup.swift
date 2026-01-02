@@ -16,8 +16,9 @@ extension MainViewComponents {
     // MARK: - 데이터 설정 메서드들
 
     /// 내 담당 할일 데이터 설정
-    public func setupMyTasks(with quests: [Quest], onMyTaskTap: ((Quest) -> Void)? = nil) {
+    public func setupMyTasks(with quests: [Quest], familyMembers: [User] = [], onMyTaskTap: ((Quest) -> Void)? = nil) {
         self.myTasks = Array(quests.prefix(10))  // 최대 10개
+        self.familyMembers = familyMembers
         self.onMyTaskTap = onMyTaskTap
         myTasksCollectionView.reloadData()
 

@@ -93,7 +93,7 @@ extension MainViewComponents: UICollectionViewDataSource {
 
             let quest = myTasks[indexPath.item]
 
-            cell.configure(with: quest) { [weak self] in
+            cell.configure(with: quest, familyMembers: familyMembers) { [weak self] in
                 self?.onMyTaskTap?(quest)
             }
 

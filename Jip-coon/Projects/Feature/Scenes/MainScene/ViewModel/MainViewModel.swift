@@ -13,11 +13,14 @@ import UI
 @MainActor
 public class MainViewModel: ObservableObject {
     private let userService: UserServiceProtocol
+    private let familyService: FamilyServiceProtocol
+    private let questService: QuestServiceProtocol
 
     // MARK: - Published
 
     @Published public var user: User?
     @Published public var family: Family?
+    @Published public var familyMembers: [User] = []
     @Published public var allQuests: [Quest] = []
     @Published public var urgentQuests: [Quest] = []
     @Published public var myTasks: [Quest] = []
@@ -29,6 +32,7 @@ public class MainViewModel: ObservableObject {
     @Published public var urgentCount: String = ""
     @Published public var progressText: String = "0%"
     @Published public var categoryStats: [CategoryStatistic] = []
+    @Published public var pendingApprovalCount: Int = 0
 
     // MARK: - 캐싱 데이터
 
@@ -38,18 +42,21 @@ public class MainViewModel: ObservableObject {
     private var isViewVisible = false
 
     private var cancellables = Set<AnyCancellable>()
+    private var questSubscription: AnyCancellable?
 
     // MARK: - 초기화
 
-    public init(userService: UserServiceProtocol) {
+    public init(userService: UserServiceProtocol, familyService: FamilyServiceProtocol, questService: QuestServiceProtocol) {
         self.userService = userService
+        self.familyService = familyService
+        self.questService = questService
         setupDataBindings()
         setupComputedProperties()
     }
 
-    public func loadInitialData() {
-        // 초기 데이터가 이미 로드되었고, 캐시가 유효하면 스킵
-        if isInitialDataLoaded && !shouldRefreshData() {
+    public func loadInitialData(forceRefresh: Bool = false) {
+        // 강제 리프레시가 아니고, 초기 데이터가 이미 로드되었고, 캐시가 유효하면 스킵
+        if !forceRefresh && isInitialDataLoaded && !shouldRefreshData() {
             return
         }
 
@@ -66,6 +73,11 @@ public class MainViewModel: ObservableObject {
         if !isInitialDataLoaded || shouldRefreshData() {
             loadInitialData()
         }
+    }
+
+    /// 외부에서 강제 데이터 리프레시 요청 (예: 퀘스트 생성 후)
+    public func forceRefreshData() {
+        loadInitialData(forceRefresh: true) // 강제 리프레시
     }
 
     @MainActor
@@ -86,6 +98,12 @@ public class MainViewModel: ObservableObject {
 
             self.user = user
             self.family = family
+
+            // 가족 구성원 정보 로드
+            if let familyId = family?.id ?? user?.familyId {
+                self.familyMembers = try await userService.getFamilyMembers(familyId: familyId)
+            }
+
             self.allQuests = quests
             self.weeklyStats = stats
             self.recentActivities = activities
@@ -93,6 +111,9 @@ public class MainViewModel: ObservableObject {
             // 초기 데이터 로드 완료 표시 및 타임스탬프 업데이트
             isInitialDataLoaded = true
             lastRefreshTime = Date()
+
+            // 실시간 퀘스트 관찰 시작
+            setupRealtimeQuestObservation()
 
         } catch {
             self.errorMessage = error.localizedDescription
@@ -132,6 +153,9 @@ public class MainViewModel: ObservableObject {
     }
 
     private func setupDataBindings() {
+        // 실시간 퀘스트 데이터 관찰 설정
+        setupRealtimeQuestObservation()
+
         $allQuests
             .map { quests in
                 QuestUrgencyCalculator.sortQuestsByUrgency(
@@ -143,9 +167,69 @@ public class MainViewModel: ObservableObject {
         Publishers.CombineLatest($allQuests, $user)
             .map { quests, user in
                 guard let currentUserId = user?.id else { return [] }
-                return Array(quests.filter { $0.assignedTo == currentUserId }.prefix(10))
+                // assignedTo가 nil이거나 현재 사용자인 퀘스트를 표시
+                return Array(quests.filter { $0.assignedTo == nil || $0.assignedTo == currentUserId }.prefix(10))
             }
             .assign(to: &$myTasks)
+    }
+
+    private func setupRealtimeQuestObservation() {
+        // Task를 사용해서 비동기적으로 실시간 관찰 설정
+        Task {
+            do {
+                // 현재 사용자와 가족 정보를 가져옴
+                if let currentUser = try await userService.getCurrentUser(),
+                   let familyId = currentUser.familyId {
+                    // 정상적인 경우: 실시간 관찰 시작
+                    await self.startRealtimeObservation(with: currentUser, familyId: familyId)
+                } else {
+                    print("실시간 관찰: 사용자 정보 또는 가족 ID가 없어 더미 데이터로 폴백합니다")
+
+                    // 더미 데이터를 사용한 폴백
+                    let dummyUser = User(id: "dummy_user_id", name: "개발자", email: "dev@example.com", role: .parent)
+                    var dummyUserWithFamily = dummyUser
+                    dummyUserWithFamily.familyId = "dummy_family_id"
+
+                    await self.startRealtimeObservation(with: dummyUserWithFamily, familyId: "dummy_family_id")
+                }
+            } catch {
+                print("실시간 퀘스트 관찰 설정 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func startRealtimeObservation(with user: User, familyId: String) async {
+        print("실시간 퀘스트 관찰 시작: familyId = \(familyId)")
+
+        do {
+            // 가족 구성원 정보 로드
+            let members = try await userService.getFamilyMembers(familyId: familyId)
+            await MainActor.run {
+                self.familyMembers = members
+            }
+
+            // 기존 구독 취소
+            await MainActor.run {
+                questSubscription?.cancel()
+            }
+
+            // 실시간 퀘스트 데이터 구독
+            questSubscription = questService.observeFamilyQuests(familyId: familyId)
+                .receive(on: DispatchQueue.main)
+                .sink { completion in
+                    switch completion {
+                    case .finished:
+                        print("퀘스트 실시간 관찰 완료")
+                    case .failure(let error):
+                        print("퀘스트 실시간 관찰 에러: \(error.localizedDescription)")
+                    }
+                } receiveValue: { [weak self] quests in
+                    print("실시간 퀘스트 업데이트: \(quests.count)개")
+                    self?.allQuests = quests
+                }
+        } catch {
+            print("실시간 관찰 시작 실패: \(error.localizedDescription)")
+        }
     }
 
     private func setupComputedProperties() {
@@ -186,25 +270,47 @@ public class MainViewModel: ObservableObject {
         return currentUser
     }
     
-    // TODO: - 가족 정보 수정
+    // 가족 정보 로드
     private func loadFamilyDataAsync() async throws -> Family? {
-        try await Task.sleep(nanoseconds: 300_000_000)  // 0.3초 지연
-        return createDummyFamily()
-    }
+        // 현재 사용자의 가족 정보를 조회
+        guard let currentUser = try await userService.getCurrentUser() else {
+            // 사용자가 없는 경우 nil 반환
+            return nil
+        }
 
-    private func createDummyFamily() -> Family {
-        var family = Family(
-            id: "family1",
-            name: "우리 가족",
-            createdBy: "user1"
-        )
-        family.memberIds.append("user2")
-        return family
+        // FirebaseFamilyService에서 자동으로 더미 데이터를 처리함
+        return try await familyService.getUserFamily(userId: currentUser.id)
     }
 
     private func loadQuestsDataAsync() async throws -> [Quest] {
-        try await Task.sleep(nanoseconds: 700_000_000)  // 0.7초 지연
-        return createDummyQuests()
+        // 현재 사용자의 가족 ID를 가져와서 해당 가족의 퀘스트들을 조회
+        guard let currentUser = try await userService.getCurrentUser() else {
+            // 사용자가 없는 경우 더미 데이터 반환
+            return createDummyQuests()
+        }
+
+        let familyId = currentUser.familyId ?? "dummy_family_id"
+
+        do {
+            let quests = try await questService.getFamilyQuests(familyId: familyId)
+            // 실제 데이터가 있는 경우 반환, 없으면 더미 데이터 반환
+            let finalQuests = quests.isEmpty ? createDummyQuests() : quests
+
+            // 승인 대기 카운트 계산 (현재 사용자가 생성자이고, 완료 상태인 퀘스트들)
+            if let currentUser = try await userService.getCurrentUser() {
+                let pendingCount = finalQuests.filter { quest in
+                    quest.createdBy == currentUser.id && quest.status == .completed
+                }.count
+                await MainActor.run {
+                    self.pendingApprovalCount = pendingCount
+                }
+            }
+
+            return finalQuests
+        } catch {
+            // Firebase 연결 실패 시 더미 데이터로 폴백
+            return createDummyQuests()
+        }
     }
 
     private func createDummyQuests() -> [Quest] {
@@ -228,12 +334,12 @@ public class MainViewModel: ObservableObject {
                 title: title,
                 description: description,
                 category: category,
-                createdBy: "user1",
-                familyId: "family1",
+                createdBy: "dummy_user_id",
+                familyId: "dummy_family_id",
                 points: points
             )
             quest.dueDate = dueDate
-            quest.assignedTo = "user1"
+            quest.assignedTo = "dummy_user_id"
             return quest
         }
 
@@ -268,7 +374,7 @@ public class MainViewModel: ObservableObject {
     private func loadStatisticsDataAsync() async throws -> UserStatistics? {
         try await Task.sleep(nanoseconds: 400_000_000)  // 0.4초 지연
         return UserStatistics(
-            userId: "user1",
+            userId: "dummy_user_id",
             totalQuests: 16,
             completedQuests: 12,
             weeklyPoints: 245,
