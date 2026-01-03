@@ -9,6 +9,10 @@ import Core
 import UIKit
 import Combine
 
+/// 가족 구성원들의 포인트 기반 랭킹을 표시하는 뷰 컨트롤러
+/// - 가족 서비스와 사용자 서비스를 통해 랭킹 데이터를 조회하고 표시
+/// - 실시간 데이터 업데이트를 위한 리프레시 컨트롤 제공
+/// - 현재 사용자를 강조 표시하여 자신의 순위를 쉽게 확인할 수 있도록 함
 public final class RankingViewController: UIViewController {
     private let viewModel: RankingViewModel
     private let userService: UserServiceProtocol
@@ -43,10 +47,17 @@ public final class RankingViewController: UIViewController {
     }()
 
     // MARK: - Initialization
+
+    /// 의존성 주입을 통한 초기화
+    /// - Parameters:
+    ///   - userService: 사용자 데이터 관리를 위한 서비스
+    ///   - familyService: 가족 데이터 관리를 위한 서비스
+    /// - Note: ViewModel과 서비스들을 주입받아 의존성을 외부에서 관리하도록 설계
     public init(
         userService: UserServiceProtocol,
         familyService: FamilyServiceProtocol
     ) {
+        // ViewModel 생성 시 필요한 서비스들을 전달하여 의존성 주입
         self.viewModel = RankingViewModel(
             userService: userService,
             familyService: familyService
@@ -105,8 +116,14 @@ public final class RankingViewController: UIViewController {
         ])
     }
 
+    /// ViewModel의 상태 변경을 UI에 바인딩하는 메소드
+    /// - 가족 구성원 데이터 변경 시 테이블뷰 리로드
+    /// - 로딩 상태 변경 시 인디케이터 표시/숨김 처리
+    /// - 에러 발생 시 사용자에게 알림 표시
+    /// - Combine의 Publisher-Subscriber 패턴을 사용하여 반응형 UI 구현
     private func setupBindings() {
-        // ViewModel의 데이터 변경을 감지하여 UI 업데이트
+        // 가족 구성원 데이터가 변경될 때마다 테이블뷰를 새로고침
+        // 메인 스레드에서 UI 업데이트를 수행하도록 보장
         viewModel.$familyMembers
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -114,6 +131,7 @@ public final class RankingViewController: UIViewController {
             }
             .store(in: &cancellables)
 
+        // 로딩 상태에 따라 인디케이터 표시/숨김 및 리프레시 컨트롤 종료 처리
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
@@ -126,6 +144,7 @@ public final class RankingViewController: UIViewController {
             }
             .store(in: &cancellables)
 
+        // 에러 메시지가 발생하면 사용자에게 알림 표시
         viewModel.$errorMessage
             .receive(on: DispatchQueue.main)
             .sink { [weak self] errorMessage in
@@ -137,12 +156,19 @@ public final class RankingViewController: UIViewController {
     }
 
     // MARK: - Data Loading
+
+    /// 초기 데이터 로딩을 수행하는 메소드
+    /// - ViewModel의 loadRankingData()를 비동기로 호출하여 가족 랭킹 데이터 조회
+    /// - Task를 사용하여 Swift Concurrency 기반 비동기 처리
     private func loadData() {
         Task {
             await viewModel.loadRankingData()
         }
     }
 
+    /// 사용자 풀다운 제스처나 viewWillAppear 시 데이터 새로고침을 위한 메소드
+    /// - ViewModel의 refreshData()를 호출하여 캐시 무효화 및 최신 데이터 재조회
+    /// - UIRefreshControl의 타겟 액션으로 연결되어 있음
     @objc private func refreshData() {
         viewModel.refreshData()
     }
@@ -195,6 +221,10 @@ extension RankingViewController: UITableViewDelegate {
 }
 
 // MARK: - RankingTableViewCell
+
+/// 가족 랭킹을 표시하기 위한 커스텀 테이블뷰 셀
+/// - 순위, 이름, 포인트, 역할을 표시하는 컴포넌트들로 구성
+/// - 현재 사용자인 경우 배경색과 텍스트 색상을 변경하여 강조 표시
 private class RankingTableViewCell: UITableViewCell {
     static let identifier = "RankingTableViewCell"
 
@@ -270,13 +300,24 @@ private class RankingTableViewCell: UITableViewCell {
         ])
     }
 
+    /// 셀을 사용자 데이터로 설정하는 메소드
+    /// - Parameters:
+    ///   - user: 표시할 사용자 정보
+    ///   - rank: 사용자의 현재 랭킹 순위
+    ///   - isCurrentUser: 현재 앱 사용자인지를 나타내는 플래그
+    /// - Note: User 모델의 계산 속성들을 활용하여 포맷된 데이터 표시
+    ///        현재 사용자인 경우 시각적 강조를 통해 쉽게 구분 가능하도록 처리
     func configure(with user: User, rank: Int, isCurrentUser: Bool) {
+        // 순위에 따른 이모지 표시 (1위🏆, 2위🥈, 3위🥉, 그 외 등수 표시)
         rankLabel.text = user.rankEmoji(rank: rank)
+        // 사용자 이름 표시
         nameLabel.text = user.name
+        // 포인트를 읽기 쉽게 포맷하여 표시 (예: "1,250 P")
         pointsLabel.text = user.formattedPoints
+        // 사용자 역할 표시 (부모/자녀)
         roleLabel.text = user.role.displayName
 
-        // 현재 사용자 강조 표시
+        // 현재 로그인한 사용자를 시각적으로 강조 표시
         if isCurrentUser {
             contentView.backgroundColor = .systemBlue.withAlphaComponent(0.1)
             nameLabel.textColor = .systemBlue

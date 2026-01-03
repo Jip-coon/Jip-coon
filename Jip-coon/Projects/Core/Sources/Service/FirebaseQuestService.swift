@@ -10,6 +10,13 @@ import FirebaseFirestore
 import FirebaseAuth
 import Combine
 
+/// Firebase Firestore를 사용하여 퀘스트 데이터를 관리하는 서비스 클래스
+/// - CRUD 작업: 퀘스트 생성, 조회, 수정, 삭제 기능 제공
+/// - 쿼리 작업: 가족별, 상태별, 카테고리별, 담당자별 퀘스트 조회
+/// - 상태 관리: 퀘스트 진행 상태 변경 및 권한 검증
+/// - 실시간 관찰: Combine Publisher를 통한 실시간 데이터 동기화
+/// - 반복 퀘스트: 정기적인 퀘스트 자동 생성 기능
+/// - 제출 및 검토: 퀘스트 완료 제출 및 승인/거절 처리
 public final class FirebaseQuestService: QuestServiceProtocol {
     private let db = Firestore.firestore()
 
@@ -23,9 +30,13 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
     public init() { }
 
-    // MARK: - CRUD Operations
+    // MARK: - CRUD 작업
 
-    /// 퀘스트 생성
+    /// 새로운 퀘스트를 Firestore에 생성하는 메소드
+    /// - Parameter quest: 생성할 퀘스트 정보 (id는 자동 생성됨)
+    /// - Returns: 생성된 퀘스트 객체 (자동 생성된 ID 포함)
+    /// - Note: Firestore의 자동 ID 생성 기능을 활용하며,
+    ///         생성된 ID를 포함한 새로운 Quest 객체를 반환
     public func createQuest(_ quest: Quest) async throws -> Quest {
         do {
             // Firestore에서 자동 생성된 ID 사용
@@ -89,9 +100,13 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         }
     }
 
-    // MARK: - Query Operations
+    // MARK: - 쿼리 작업
 
-    /// 가족의 모든 퀘스트 조회
+    /// 특정 가족의 모든 퀘스트를 조회하는 메소드
+    /// - Parameter familyId: 조회할 가족의 ID
+    /// - Returns: 해당 가족의 모든 퀘스트 목록 (생성일 기준 내림차순 정렬)
+    /// - Note: Firestore의 whereField 쿼리를 사용하여 familyId 필터링 수행
+    ///         현재는 인덱스 최적화를 위해 메모리에서 정렬하지만 추후 DB 레벨 정렬로 개선 예정
     public func getFamilyQuests(familyId: String) async throws -> [Quest] {
         do {
             // 임시: 정렬 없이 조회 (나중에 인덱스 생성 후 정렬 추가)
@@ -179,9 +194,15 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         }
     }
 
-    // MARK: - State Management
+    // MARK: - 상태 관리
 
-    /// 퀘스트 상태 변경
+    /// 퀘스트의 진행 상태를 변경하는 메소드
+    /// - Parameters:
+    ///   - questId: 상태를 변경할 퀘스트의 ID
+    ///   - status: 변경할 새로운 상태
+    /// - Note: 상태별로 적절한 타임스탬프 필드 자동 업데이트
+    ///         (시작시간, 완료시간, 승인시간 등)
+    ///         updatedAt 필드는 항상 현재 시간으로 갱신
     public func updateQuestStatus(questId: String, status: QuestStatus) async throws {
         do {
             var updateData: [String: Any] = [
@@ -320,9 +341,14 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         }
     }
 
-    // MARK: - Real-time Observers
+    // MARK: - 실시간 데이터 관찰
 
-    /// 실시간 퀘스트 목록 구독
+    /// 가족의 퀘스트 목록을 실시간으로 관찰하는 메소드
+    /// - Parameter familyId: 관찰할 가족의 ID
+    /// - Returns: 퀘스트 배열을 방출하는 Combine Publisher
+    /// - Note: Firestore의 addSnapshotListener를 사용하여 실시간 업데이트 수신
+    ///         Publisher가 cancel되면 자동으로 리스너 제거
+    ///         메모리 누수 방지를 위해 handleEvents를 사용하여 리스너 정리
     public func observeFamilyQuests(familyId: String) -> AnyPublisher<[Quest], Error> {
         let subject = PassthroughSubject<[Quest], Error>()
 

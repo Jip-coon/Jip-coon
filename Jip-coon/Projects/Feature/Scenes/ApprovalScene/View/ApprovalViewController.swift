@@ -9,6 +9,10 @@ import UIKit
 import Core
 import Combine
 
+/// 승인 대기 중인 퀘스트들을 표시하고 승인/거절할 수 있는 화면을 담당하는 뷰 컨트롤러
+/// - 부모/관리자가 자녀들의 완료된 퀘스트를 검토하고 승인하거나 거절할 수 있는 인터페이스 제공
+/// - Combine을 활용한 반응형 UI로 실시간 데이터 업데이트
+/// - 빈 상태 표시와 로딩 상태 관리를 통해 사용자 경험 개선
 final class ApprovalViewController: UIViewController {
     // MARK: - Properties
 
@@ -75,8 +79,14 @@ final class ApprovalViewController: UIViewController {
         return indicator
     }()
 
-    // MARK: - Initialization
+    // MARK: - 초기화
 
+    /// 의존성 주입을 통한 초기화
+    /// - Parameters:
+    ///   - questService: 퀘스트 상태 변경 및 조회를 위한 서비스
+    ///   - userService: 사용자 정보 및 포인트 관리를 위한 서비스
+    /// - Note: ApprovalViewModel을 생성하여 승인 로직을 분리하고
+    ///         서비스들을 외부에서 주입받아 테스트 용이성을 확보
     init(questService: QuestServiceProtocol, userService: UserServiceProtocol) {
         self.viewModel = ApprovalViewModel(
             questService: questService,
@@ -136,7 +146,13 @@ final class ApprovalViewController: UIViewController {
         ])
     }
 
+    /// ViewModel의 데이터 변경을 UI에 바인딩하는 메소드
+    /// - 승인 대기 퀘스트 목록 변경 시 테이블뷰 리로드 및 빈 상태 표시
+    /// - 로딩 상태 변경 시 인디케이터 표시/숨김 처리
+    /// - 에러 발생 시 사용자에게 알림 표시
+    /// - Combine의 Publisher-Subscriber 패턴을 통해 반응형 UI 구현
     private func setupBindings() {
+        // 승인 대기 퀘스트 목록이 변경될 때 UI 업데이트
         viewModel.$pendingQuests
             .receive(on: DispatchQueue.main)
             .sink { [weak self] quests in
@@ -144,6 +160,7 @@ final class ApprovalViewController: UIViewController {
             }
             .store(in: &cancellables)
 
+        // 로딩 상태에 따라 인디케이터 표시/숨김
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
@@ -155,6 +172,7 @@ final class ApprovalViewController: UIViewController {
             }
             .store(in: &cancellables)
 
+        // 에러 메시지가 발생하면 사용자에게 알림 표시
         viewModel.$errorMessage
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
@@ -221,9 +239,13 @@ extension ApprovalViewController: UITableViewDelegate {
     }
 }
 
-// MARK: - Actions
+// MARK: - 승인/거절 액션 처리
 
 extension ApprovalViewController {
+    /// 퀘스트 승인 확인 다이얼로그를 표시하는 메소드
+    /// - Parameter quest: 승인할 퀘스트
+    /// - Note: 승인 시 지급될 포인트를 표시하여 사용자에게 확인 요청
+    ///         승인 후에는 ViewModel을 통해 실제 승인 처리 수행
     private func showApproveConfirmation(for quest: Quest) {
         let alert = UIAlertController(
             title: "퀘스트 승인",
@@ -243,6 +265,10 @@ extension ApprovalViewController {
         present(alert, animated: true)
     }
 
+    /// 퀘스트 거절 다이얼로그를 표시하는 메소드
+    /// - Parameter quest: 거절할 퀘스트
+    /// - Note: 선택적으로 거절 사유를 입력받을 수 있는 텍스트 필드 제공
+    ///         거절은 승인보다 엄격한 액션이므로 destructive 스타일 사용
     private func showRejectDialog(for quest: Quest) {
         let alert = UIAlertController(
             title: "퀘스트 거절",

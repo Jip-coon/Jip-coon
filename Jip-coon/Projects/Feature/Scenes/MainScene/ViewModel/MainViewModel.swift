@@ -10,6 +10,11 @@ import Core
 import Foundation
 import UI
 
+/// 메인 화면의 비즈니스 로직과 데이터 관리를 담당하는 뷰모델
+/// - MVVM 패턴 구현으로 뷰와 데이터 로직을 분리
+/// - Combine 프레임워크를 활용한 반응형 데이터 바인딩
+/// - 캐싱과 실시간 데이터 동기화를 통한 성능 최적화
+/// - Swift Concurrency를 활용한 비동기 데이터 처리
 @MainActor
 public class MainViewModel: ObservableObject {
     private let userService: UserServiceProtocol
@@ -46,6 +51,13 @@ public class MainViewModel: ObservableObject {
 
     // MARK: - 초기화
 
+    /// 의존성 주입을 통한 뷰모델 초기화
+    /// - Parameters:
+    ///   - userService: 사용자 데이터 관리를 위한 프로토콜 준수 객체
+    ///   - familyService: 가족 데이터 관리를 위한 프로토콜 준수 객체
+    ///   - questService: 퀘스트 데이터 관리를 위한 프로토콜 준수 객체
+    /// - Note: 초기화 시 데이터 바인딩과 계산 속성 설정을 자동으로 수행
+    ///         @MainActor를 통해 모든 작업을 메인 스레드에서 수행하도록 보장
     public init(
         userService: UserServiceProtocol,
         familyService: FamilyServiceProtocol,
@@ -58,8 +70,12 @@ public class MainViewModel: ObservableObject {
         setupComputedProperties()
     }
 
+    /// 초기 데이터 로딩을 수행하는 메소드
+    /// - Parameter forceRefresh: 캐시를 무시하고 강제 데이터 새로고침 여부
+    /// - Note: 캐싱 메커니즘을 활용하여 불필요한 네트워크 요청 방지
+    ///        Swift Concurrency의 Task를 사용하여 비동기 실행
     public func loadInitialData(forceRefresh: Bool = false) {
-        // 강제 리프레시가 아니고, 초기 데이터가 이미 로드되었고, 캐시가 유효하면 스킵
+        // 캐시 유효성 검사: 강제 리프레시가 아니고 이미 로드되었으며 캐시가 유효하면 중복 로딩 방지
         if !forceRefresh && isInitialDataLoaded && !shouldRefreshData() {
             return
         }
@@ -84,26 +100,35 @@ public class MainViewModel: ObservableObject {
         loadInitialData(forceRefresh: true) // 강제 리프레시
     }
 
+    /// 실제 데이터 로딩 작업을 수행하는 메소드
+    /// - 여러 데이터 소스를 동시에 로딩하여 성능 최적화 (async let 활용)
+    /// - 사용자, 가족, 퀘스트, 통계, 활동 데이터를 한 번에 조회
+    /// - 로딩 상태 관리 및 에러 핸들링 수행
+    /// - 실시간 데이터 관찰 설정으로 데이터 동기화 시작
     @MainActor
     private func performDataLoad() async {
         isLoading = true
         errorMessage = nil
 
         do {
+            // Swift Concurrency의 async let을 활용한 병렬 데이터 로딩
+            // 네트워크 지연 시간을 최소화하기 위해 동시에 모든 데이터 조회
             async let userTask = loadUserDataAsync()
             async let familyTask = loadFamilyDataAsync()
             async let questsTask = loadQuestsDataAsync()
             async let statsTask = loadStatisticsDataAsync()
             async let activitiesTask = loadRecentActivitiesAsync()
 
+            // 모든 비동기 작업의 결과를 동시에 기다림
             let (user, family, quests, stats, activities) = try await (
                 userTask, familyTask, questsTask, statsTask, activitiesTask
             )
 
+            // 로드된 데이터를 Published 속성에 할당하여 UI 자동 업데이트
             self.user = user
             self.family = family
 
-            // 가족 구성원 정보 로드
+            // 가족 ID를 통해 가족 구성원 정보 추가 로딩
             if let familyId = family?.id ?? user?.familyId {
                 self.familyMembers = try await userService
                     .getFamilyMembers(familyId: familyId)
@@ -113,14 +138,15 @@ public class MainViewModel: ObservableObject {
             self.weeklyStats = stats
             self.recentActivities = activities
 
-            // 초기 데이터 로드 완료 표시 및 타임스탬프 업데이트
+            // 캐시 유효성 관리: 초기 로드 완료 표시 및 타임스탬프 기록
             isInitialDataLoaded = true
             lastRefreshTime = Date()
 
-            // 실시간 퀘스트 관찰 시작
+            // Firebase 실시간 데이터베이스를 통한 실시간 업데이트 설정
             setupRealtimeQuestObservation()
 
         } catch {
+            // 로딩 실패 시 사용자에게 에러 메시지 표시
             self.errorMessage = error.localizedDescription
         }
 
@@ -157,10 +183,16 @@ public class MainViewModel: ObservableObject {
         lastRefreshTime = nil
     }
 
+    /// Combine을 활용한 데이터 바인딩 설정
+    /// - Published 속성들 간의 관계를 정의하여 자동 데이터 변환 구현
+    /// - 실시간 데이터 관찰 설정으로 Firebase 변경사항 즉시 반영
+    /// - 계산 속성들을 통해 복잡한 데이터 필터링 및 정렬 로직 처리
     private func setupDataBindings() {
-        // 실시간 퀘스트 데이터 관찰 설정
+        // Firebase 실시간 데이터베이스를 통한 퀘스트 변경사항 관찰 시작
         setupRealtimeQuestObservation()
 
+        // 긴급 퀘스트 필터링 및 긴급도 순 정렬
+        // 오늘 마감이거나 기한이 지난 퀘스트들을 긴급도로 정렬하여 표시
         $allQuests
             .map { quests in
                 QuestUrgencyCalculator.sortQuestsByUrgency(
@@ -169,12 +201,14 @@ public class MainViewModel: ObservableObject {
             }
             .assign(to: &$urgentQuests)
 
+        // 내 작업 필터링: 현재 사용자에게 할당된 작업들 (최대 10개)
+        // CombineLatest를 사용하여 퀘스트 목록과 사용자 정보의 변경사항을 동시에 관찰
         Publishers.CombineLatest($allQuests, $user)
             .map {
  quests,
  user in
                 guard let currentUserId = user?.id else { return [] }
-                // assignedTo가 nil이거나 현재 사용자인 퀘스트를 표시
+                // 할당자가 없거나 현재 사용자에게 할당된 퀘스트만 필터링
                 return Array(
                     quests
                         .filter { $0.assignedTo == nil || $0.assignedTo == currentUserId
@@ -256,13 +290,19 @@ public class MainViewModel: ObservableObject {
         }
     }
 
+    /// 계산 속성 설정 - 데이터 모델을 UI 표시용 값으로 변환
+    /// - 긴급 퀘스트 개수를 사용자 친화적인 문자열로 변환
+    /// - 주간 통계의 완료율을 퍼센트 표시로 변환
+    /// - 카테고리별 통계를 시각화용 데이터로 가공
     private func setupComputedProperties() {
+        // 긴급 퀘스트 개수를 표시용 문자열로 변환
         $urgentQuests
             .map { quests in
                 quests.isEmpty ? "" : "\(quests.count)개"
             }
             .assign(to: &$urgentCount)
 
+        // 주간 완료율을 퍼센트 문자열로 변환하여 프로그레스 텍스트로 표시
         $weeklyStats
             .map { stats in
                 guard let stats = stats else { return "0%" }

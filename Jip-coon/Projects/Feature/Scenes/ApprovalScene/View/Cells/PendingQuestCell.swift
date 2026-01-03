@@ -9,6 +9,10 @@ import UIKit
 import Core
 import UI
 
+/// 승인 대기 중인 퀘스트를 표시하는 커스텀 테이블뷰 셀
+/// - 카테고리 아이콘, 제목, 담당자, 포인트, 완료 시간 정보 표시
+/// - 승인과 거절 버튼을 통해 부모/관리자의 빠른 의사결정 지원
+/// - 클로저 기반 콜백을 통해 승인/거절 액션 처리
 final class PendingQuestCell: UITableViewCell {
     static let identifier = "PendingQuestCell"
 
@@ -195,11 +199,17 @@ final class PendingQuestCell: UITableViewCell {
         )
     }
 
-    // MARK: - Configuration
+    // MARK: - 셀 설정
 
+    /// 퀘스트 데이터로 셀을 설정하는 메소드
+    /// - Parameter quest: 표시할 퀘스트 정보
+    /// - Note: 퀘스트의 모든 필수 정보를 UI 컴포넌트에 매핑
+    ///         카테고리에 따른 색상과 이모지 설정
+    ///         완료 시간을 상대적 시간으로 표시 (몇 분 전, 몇 시간 전 등)
     func configure(with quest: Quest) {
         self.quest = quest
 
+        // 퀘스트 기본 정보 표시
         titleLabel.text = quest.title
         assigneeLabel.text = "담당자: \(quest.assignedTo ?? "미정")"
         pointsLabel.text = "\(quest.points)P"
@@ -212,7 +222,7 @@ final class PendingQuestCell: UITableViewCell {
             compatibleWith: nil
         )
 
-        // 완료 날짜 표시
+        // 완료 시점 표시: 상대적 시간으로 사용자 친화적 표현
         if let completedAt = quest.completedAt {
             completedDateLabel.text = "완료: \(completedAt.timeAgoString)"
         } else {
@@ -220,13 +230,19 @@ final class PendingQuestCell: UITableViewCell {
         }
     }
 
-    // MARK: - Actions
+    // MARK: - 버튼 액션 처리
 
+    /// 승인 버튼 탭 시 호출되는 메소드
+    /// - 퀘스트 객체를 클로저를 통해 부모 뷰 컨트롤러에 전달
+    /// - 안전성을 위해 quest 객체 존재 여부 확인
     @objc private func approveButtonTapped() {
         guard let quest = quest else { return }
         onApprove?(quest)
     }
 
+    /// 거절 버튼 탭 시 호출되는 메소드
+    /// - 퀘스트 객체를 클로저를 통해 부모 뷰 컨트롤러에 전달
+    /// - 안전성을 위해 quest 객체 존재 여부 확인
     @objc private func rejectButtonTapped() {
         guard let quest = quest else { return }
         onReject?(quest)
