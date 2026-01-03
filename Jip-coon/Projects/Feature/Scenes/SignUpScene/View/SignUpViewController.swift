@@ -196,10 +196,23 @@ public final class SignUpViewController: UIViewController {
     }
     
     private func bindViewModel() {
-        viewModel.$isEmailValid
+        viewModel.$isEmailFormatValid
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isValid in
                 self?.emailInvalidLabel.isHidden = isValid
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isEmailVerified
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] verified in
+                self?.emailInvalidLabel.isHidden = false
+                self?.emailInvalidLabel.text = verified
+                ? "이메일 인증이 완료 되었습니다."
+                : "이메일 인증이 필요합니다."
+                self?.emailInvalidLabel.textColor = verified
+                ? .systemGreen
+                : .textRed
             }
             .store(in: &cancellables)
         
@@ -246,6 +259,7 @@ public final class SignUpViewController: UIViewController {
         emailTextField.addTarget(self, action: #selector(emailChanged), for: .editingChanged)
         passwordTextField.addTarget(self, action: #selector(passwordChanged), for: .editingChanged)
         signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
+        emailVerificationButton.addTarget(self, action: #selector(emailVerificationButtonTapped), for: .touchUpInside)
     }
     
     private func setupDelegate() {
@@ -265,6 +279,31 @@ public final class SignUpViewController: UIViewController {
         Task {
             await viewModel.performSignUp()
             navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    @objc private func emailVerificationButtonTapped() {
+        Task {
+            await handleEmailVerificationTap()
+        }
+    }
+    
+    private func handleEmailVerificationTap() async {
+        let currentTitle = emailVerificationButton.configuration?.title ?? ""
+        
+        if currentTitle == "인증하기" {
+            do {
+                try await viewModel.sendVerificationEmail(email: emailTextField.text ?? "")
+                showAlert(title: "이메일 인증", message: "입력하신 이메일로 인증 메일을 발송했습니다.")
+                emailVerificationButton.configuration?.title = "인증완료"
+            } catch {
+                showAlert(title: "오류", message: "이메일 인증 요청 실패")
+            }
+        } else {
+            let isValid = await viewModel.checkVerifiedEmail()
+            await MainActor.run {
+                viewModel.isEmailVerified = isValid
+            }
         }
     }
     
