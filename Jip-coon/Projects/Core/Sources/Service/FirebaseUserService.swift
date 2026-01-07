@@ -14,6 +14,9 @@ public final class FirebaseUserService: UserServiceProtocol {
     private var usersCollection: CollectionReference {
         return db.collection(FirestoreCollections.users)
     }
+    private var usersTempCollection: CollectionReference {
+        db.collection(FirestoreCollections.usersTemp)
+    }
     
     public init() { }
     
@@ -102,4 +105,28 @@ public final class FirebaseUserService: UserServiceProtocol {
         ])
     }
     
+    // MARK: - 임시 회원 관리(이메일 인증시 사용)
+    
+    /// 임시 사용자 생성
+    public func createTempUser(uid: String, email: String) async throws {
+        let tempUser = TempUser(
+            id: uid,
+            email: email,
+            state: "verification_sent",
+            createdAt: Date()
+        )
+
+        try usersTempCollection.document(uid).setData(from: tempUser)
+    }
+    
+    /// 임시 사용자 조회
+    public func getTempUser(by uid: String) async throws -> TempUser? {
+        let document = try await usersTempCollection.document(uid).getDocument()
+        return try document.data(as: TempUser.self)
+    }
+    
+    /// 임시 사용자 삭제
+    public func deleteTempUser(uid: String) async throws {
+        try await usersTempCollection.document(uid).delete()
+    }
 }

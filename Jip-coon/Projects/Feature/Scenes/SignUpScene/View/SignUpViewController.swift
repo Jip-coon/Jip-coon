@@ -276,9 +276,13 @@ public final class SignUpViewController: UIViewController {
     }
     
     @objc private func signUpTapped() {
-        Task {
-            await viewModel.performSignUp()
-            navigationController?.popViewController(animated: true)
+        if viewModel.isEmailVerified {
+            Task {
+                await viewModel.performSignUp()
+                navigationController?.popViewController(animated: true)
+            }
+        } else {
+            showAlert(title: "인증 오류", message: "이메일 인증을 완료해주세요")
         }
     }
     

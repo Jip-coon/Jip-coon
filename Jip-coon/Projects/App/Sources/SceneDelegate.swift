@@ -10,7 +10,7 @@ import Feature
 import Core
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+    
     var window: UIWindow?
     
     private let userService: UserServiceProtocol
@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.authService = AuthService()
         super.init()
     }
-
+    
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
@@ -43,14 +43,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             googleLoginViewModel: googleLoginViewModel
         )
         let navigationController = UINavigationController(rootViewController: loginViewController)
-
+        
         // 로그인 상태 확인
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            let authService = AuthService()
-            if authService.isLoggedIn {
-                window.rootViewController = MainTabBarController(userService: self.userService)
-            } else {
-                window.rootViewController = navigationController
+            Task {
+                // 앱 시작시 임시 계정 정리
+                await self.cleanupTempAccountOnAppLaunch()
+                
+                if self.authService.isLoggedIn {
+                    window.rootViewController = MainTabBarController(userService: self.userService)
+                } else {
+                    window.rootViewController = navigationController
+                }
             }
         }
         
@@ -70,29 +74,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             object: nil
         )
     }
-
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
         // Release any resources associated with this scene that can be re-created the next time the scene connects.
         // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
     }
-
+    
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
     }
-
+    
     func sceneWillResignActive(_ scene: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
     }
-
+    
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
     }
-
+    
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
@@ -122,6 +126,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let nav = UINavigationController(rootViewController: loginVC)
             self?.window?.rootViewController = nav
             self?.window?.makeKeyAndVisible()
+        }
+    }
+    
+    private func cleanupTempAccountOnAppLaunch() async {
+        guard let user = authService.currentUser else { return }
+        
+        // 정식 회원 확인
+        let member = try? await userService.getUser(by: user.uid)
+        
+        if member != nil {
+            try? await userService.deleteTempUser(uid: user.uid)
+            return
+        }
+        
+        // 정식 회원이 아니면 로그아웃
+        print("⚠️ 미완료 계정 - 로그아웃 처리")
+        do {
+            try await userService.deleteTempUser(uid: user.uid)
+            try await authService.deleteAccount()
+        } catch {
+            print("계정 삭제 실패:", error.localizedDescription)
         }
     }
     
