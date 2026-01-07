@@ -50,18 +50,25 @@ final class SignUpViewModel: ObservableObject {
         isPasswordValid = password.count >= 6
     }
     
-    func sendVerificationEmail(email: String) async throws {
+    func sendVerificationEmail(email: String) async -> Bool {
         let tempPassword = UUID().uuidString
         
-        try await authService.signUp(email: email, password: tempPassword)
-        
-        guard let user = authService.currentUser else {
-            throw NSError(domain: "AuthService", code: -1, userInfo: nil)
+        do {
+            try await authService.signUp(email: email, password: tempPassword)
+            
+            guard let user = authService.currentUser else {
+                throw NSError(domain: "AuthService", code: -1, userInfo: nil)
+            }
+            
+            try await user.sendEmailVerification()
+            try await userService.createTempUser(uid: user.uid, email: email)
+            print("✅ 인증 메일 발송 성공")
+            
+            return true
+        } catch {
+            errorMessage = authService.handleError(error)
+            return false
         }
-        
-        try await user.sendEmailVerification()
-        try await userService.createTempUser(uid: user.uid, email: email)
-        print("✅ 인증 메일 발송 성공")
     }
     
     func checkVerifiedEmail() async -> Bool {

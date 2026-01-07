@@ -296,12 +296,11 @@ public final class SignUpViewController: UIViewController {
         let currentTitle = emailVerificationButton.configuration?.title ?? ""
         
         if currentTitle == "인증하기" {
-            do {
-                try await viewModel.sendVerificationEmail(email: emailTextField.text ?? "")
+            let success = await viewModel.sendVerificationEmail(email: emailTextField.text ?? "")
+            
+            if success {
                 showAlert(title: "이메일 인증", message: "입력하신 이메일로 인증 메일을 발송했습니다.")
                 emailVerificationButton.configuration?.title = "인증완료"
-            } catch {
-                showAlert(title: "오류", message: "이메일 인증 요청 실패")
             }
         } else {
             let isValid = await viewModel.checkVerifiedEmail()
