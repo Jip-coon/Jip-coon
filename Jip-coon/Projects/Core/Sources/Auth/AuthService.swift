@@ -63,6 +63,14 @@ public final class AuthService: AuthServiceProtocol {
         }
     }
     
+    /// 비밀번호 변경
+    public func updatePassword(_ newPassword: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "로그인된 사용자가 없습니다."])
+        }
+        try await user.updatePassword(to: newPassword)
+    }
+    
     /// Firebase Auth 에러 처리
     public func handleError(_ error: Error) -> String {
         let nsError = error as NSError

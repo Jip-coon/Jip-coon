@@ -56,6 +56,20 @@ public final class SignUpViewController: UIViewController {
         return textField
     }()
     
+    private let emailVerificationButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        var title = AttributedString("인증하기")
+        title.font = .systemFont(ofSize: 17, weight: .semibold)
+        title.foregroundColor = .white
+        config.background.cornerRadius = 15
+        config.attributedTitle = title
+        
+        let button = UIButton(configuration: config)
+        button.setTitleColor(.white, for: .normal)
+        button.tintColor = .mainOrange
+        return button
+    }()
+    
     private let passwordEnterLabel: UILabel = {
         let label = UILabel()
         label.text = "비밀번호를 입력해 주세요"
@@ -125,7 +139,8 @@ public final class SignUpViewController: UIViewController {
          passwordTextField,
          emailInvalidLabel,
          passwordInvalidLabel,
-         signUpButton
+         signUpButton,
+         emailVerificationButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -137,7 +152,8 @@ public final class SignUpViewController: UIViewController {
          passwordTextField,
          emailInvalidLabel,
          passwordInvalidLabel,
-         signUpButton
+         signUpButton,
+         emailVerificationButton
         ].forEach {
             view.addSubview($0)
         }
@@ -151,8 +167,12 @@ public final class SignUpViewController: UIViewController {
             
             emailTextField.topAnchor.constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
             emailTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            emailTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             emailTextField.heightAnchor.constraint(equalToConstant: 56),
+            
+            emailVerificationButton.centerYAnchor.constraint(equalTo: emailTextField.centerYAnchor),
+            emailVerificationButton.leadingAnchor.constraint(equalTo: emailTextField.trailingAnchor, constant: 15),
+            emailVerificationButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            emailVerificationButton.heightAnchor.constraint(equalToConstant: 56),
             
             passwordEnterLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
             passwordEnterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
@@ -176,10 +196,23 @@ public final class SignUpViewController: UIViewController {
     }
     
     private func bindViewModel() {
-        viewModel.$isEmailValid
+        viewModel.$isEmailFormatValid
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isValid in
                 self?.emailInvalidLabel.isHidden = isValid
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isEmailVerified
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] verified in
+                self?.emailInvalidLabel.isHidden = false
+                self?.emailInvalidLabel.text = verified
+                ? "이메일 인증이 완료 되었습니다."
+                : "이메일 인증이 필요합니다."
+                self?.emailInvalidLabel.textColor = verified
+                ? .systemGreen
+                : .textRed
             }
             .store(in: &cancellables)
         
@@ -226,6 +259,7 @@ public final class SignUpViewController: UIViewController {
         emailTextField.addTarget(self, action: #selector(emailChanged), for: .editingChanged)
         passwordTextField.addTarget(self, action: #selector(passwordChanged), for: .editingChanged)
         signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
+        emailVerificationButton.addTarget(self, action: #selector(emailVerificationButtonTapped), for: .touchUpInside)
     }
     
     private func setupDelegate() {
@@ -242,9 +276,37 @@ public final class SignUpViewController: UIViewController {
     }
     
     @objc private func signUpTapped() {
+        if viewModel.isEmailVerified {
+            Task {
+                await viewModel.performSignUp()
+                navigationController?.popViewController(animated: true)
+            }
+        } else {
+            showAlert(title: "인증 오류", message: "이메일 인증을 완료해주세요")
+        }
+    }
+    
+    @objc private func emailVerificationButtonTapped() {
         Task {
-            await viewModel.performSignUp()
-            navigationController?.popViewController(animated: true)
+            await handleEmailVerificationTap()
+        }
+    }
+    
+    private func handleEmailVerificationTap() async {
+        let currentTitle = emailVerificationButton.configuration?.title ?? ""
+        
+        if currentTitle == "인증하기" {
+            let success = await viewModel.sendVerificationEmail(email: emailTextField.text ?? "")
+            
+            if success {
+                showAlert(title: "이메일 인증", message: "입력하신 이메일로 인증 메일을 발송했습니다.")
+                emailVerificationButton.configuration?.title = "인증완료"
+            }
+        } else {
+            let isValid = await viewModel.checkVerifiedEmail()
+            await MainActor.run {
+                viewModel.isEmailVerified = isValid
+            }
         }
     }
     

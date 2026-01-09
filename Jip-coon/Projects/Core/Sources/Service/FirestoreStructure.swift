@@ -10,6 +10,7 @@ import Foundation
 // MARK: - Firestore 컬렉션 이름
 public struct FirestoreCollections {
     public static let users = "users"
+    public static let usersTemp = "users_temp" 
     public static let families = "families"
     public static let quests = "quests"
     public static let questSubmissions = "quest_submissions"
@@ -32,6 +33,11 @@ public struct FirestoreFields {
         static let points = "points"
         static let createdAt = "createdAt"
         static let updatedAt = "updatedAt"
+    }
+    
+    struct TempUser {
+        static let id = "id"
+        static let createdAt = "createdAt"
     }
     
     struct Family {

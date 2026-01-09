@@ -61,3 +61,19 @@ public extension User {
         return "\(name) (\(role.displayName))"
     }
 }
+
+// MARK: - 임시 사용자
+
+public struct TempUser: Codable {
+    public let id: String
+    public let email: String
+    public let state: String
+    public let createdAt: Date
+
+    public init(id: String, email: String, state: String, createdAt: Date) {
+        self.id = id
+        self.email = email
+        self.state = state
+        self.createdAt = createdAt
+    }
+}
