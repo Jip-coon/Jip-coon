@@ -16,7 +16,8 @@ final class SignUpViewModel: ObservableObject {
     @Published var password: String = "" {
         didSet { validatePassword() }
     }
-    @Published var isEmailValid: Bool = true
+    @Published var isEmailFormatValid: Bool = true
+    @Published var isEmailVerified: Bool = false
     @Published var isPasswordValid: Bool = true
     @Published var isSignUpEnabled: Bool = false
     @Published var isLoading: Bool = false
@@ -33,7 +34,7 @@ final class SignUpViewModel: ObservableObject {
         self.authService = authService
         self.userService = userService
         
-        Publishers.CombineLatest($isEmailValid, $isPasswordValid)
+        Publishers.CombineLatest($isEmailFormatValid, $isPasswordValid)
             .map { $0 && $1 }
             .assign(to: \.isSignUpEnabled, on: self)
             .store(in: &cancellables)
@@ -42,11 +43,44 @@ final class SignUpViewModel: ObservableObject {
     private func validateEmail() {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"    // (영문,숫자) + 골뱅이 + (영문,숫자) + . + 영문
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
-        isEmailValid = emailTest.evaluate(with: email)
+        isEmailFormatValid = emailTest.evaluate(with: email)
     }
     
     private func validatePassword() {
         isPasswordValid = password.count >= 6
+    }
+    
+    func sendVerificationEmail(email: String) async -> Bool {
+        let tempPassword = UUID().uuidString
+        
+        do {
+            try await authService.signUp(email: email, password: tempPassword)
+            
+            guard let user = authService.currentUser else {
+                throw NSError(domain: "AuthService", code: -1, userInfo: nil)
+            }
+            
+            try await user.sendEmailVerification()
+            try await userService.createTempUser(uid: user.uid, email: email)
+            print("✅ 인증 메일 발송 성공")
+            
+            return true
+        } catch {
+            errorMessage = authService.handleError(error)
+            return false
+        }
+    }
+    
+    func checkVerifiedEmail() async -> Bool {
+        guard let user = authService.currentUser else { return false }
+        
+        do {
+            try await user.reload()
+            return user.isEmailVerified
+        } catch {
+            print(error.localizedDescription)
+            return false
+        }
     }
     
     // MARK: - 회원가입
@@ -58,9 +92,6 @@ final class SignUpViewModel: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Firebase Auth로 계정 생성
-            try await authService.signUp(email: email, password: password)
-            
             // 현재 생성된 사용자의 UID 가져오기
             guard let currentUser = authService.currentUser else {
                 throw NSError(
@@ -69,6 +100,8 @@ final class SignUpViewModel: ObservableObject {
                     userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 가져올 수 없습니다."]
                 )
             }
+            
+            try await authService.updatePassword(password)
             
             // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
             // TODO: - 가족 역할 설정하기
@@ -82,6 +115,7 @@ final class SignUpViewModel: ObservableObject {
             
             // Firestore에 사용자 정보 저장
             try await userService.createUser(user)
+            try await userService.deleteTempUser(uid: currentUser.uid)
             
             print("회원가입 및 Firestore 저장 성공")
         } catch {

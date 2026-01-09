@@ -53,6 +53,15 @@ public protocol UserServiceProtocol {
     
     /// 사용자 이름 업데이트
     func updateUserName(userId: String, newName: String) async throws
+    
+    /// 임시 사용자 생성
+    func createTempUser(uid: String, email: String) async throws
+    
+    /// 임시 사용자 조회
+    func getTempUser(by uid: String) async throws -> TempUser?
+    
+    /// 임시 사용자 삭제
+    func deleteTempUser(uid: String) async throws
 }
 
 // MARK: - 가족 서비스 프로토콜
