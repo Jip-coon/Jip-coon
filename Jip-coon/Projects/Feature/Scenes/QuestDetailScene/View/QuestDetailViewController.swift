@@ -10,7 +10,7 @@ import Combine
 import UI
 import UIKit
 
-public final class QuestDetailViewController: UIViewController {
+final class QuestDetailViewController: UIViewController {
     
     private var quest: Quest
     private let viewModel: QuestDetailViewModel
@@ -464,13 +464,13 @@ public final class QuestDetailViewController: UIViewController {
         categoryIcon.isHidden = true
         titleLabel.isHidden = true
         completeQuestButton.isHidden = true
-
+        
         categoryCarouselView.isHidden = false
         titleEditTextField.isHidden = false
-
+        
         memoTextView.isEditable = true
         memoTextView.isSelectable = true
-
+        
         titleEditTextField.text = viewModel.title
         categoryCarouselView.setInitialCategory(viewModel.category)
     }
@@ -502,14 +502,14 @@ public final class QuestDetailViewController: UIViewController {
         categoryIcon.isHidden = false
         titleLabel.isHidden = false
         completeQuestButton.isHidden = false
-
+        
         categoryCarouselView.isHidden = true
         titleEditTextField.isHidden = true
-
+        
         memoTextView.isEditable = false
         memoTextView.isSelectable = true
         memoTextView.isUserInteractionEnabled = true
-
+        
         titleLabel.text = viewModel.title
         categoryIcon.text = viewModel.category.emoji
         categoryIcon.backgroundColor = UIColor(
@@ -523,11 +523,11 @@ public final class QuestDetailViewController: UIViewController {
 // MARK: - UITextViewDelegate
 
 extension QuestDetailViewController: UITextViewDelegate {
-    public func textViewDidChange(_ textView: UITextView) {
+    func textViewDidChange(_ textView: UITextView) {
         viewModel.updateDescription(textView.text)
     }
     
-    public func textViewDidBeginEditing(_ textView: UITextView) {
+    func textViewDidBeginEditing(_ textView: UITextView) {
         memoTextViewPlaceholder.isHidden = true
     }
 }
