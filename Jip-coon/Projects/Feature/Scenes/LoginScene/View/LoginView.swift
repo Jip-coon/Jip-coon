@@ -20,10 +20,18 @@ final class LoginView: UIView {
         return label
     }()
     
-    lazy var emailTextField: UITextField = makeTextField(placeholder: "이메일", keyboardType: .emailAddress)
-    lazy var passwordTextField: UITextField = makeTextField(placeholder: "비밀번호", isSecure: true)
+    lazy var emailTextField: UITextField = makeTextField(
+        placeholder: "이메일",
+        keyboardType: .emailAddress
+    )
+    lazy var passwordTextField: UITextField = makeTextField(
+        placeholder: "비밀번호",
+        isSecure: true
+    )
     lazy var findIdButton: UIButton = makeUnderlineButton(title: "아이디 찾기")
-    lazy var findPasswordButton: UIButton = makeUnderlineButton(title: "비밀번호 찾기")
+    lazy var findPasswordButton: UIButton = makeUnderlineButton(
+        title: "비밀번호 찾기"
+    )
     
     let loginButton: UIButton = {
         let button = UIButton()
@@ -70,13 +78,25 @@ final class LoginView: UIView {
     
     let googleLoginButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "GoogleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
+        button
+            .setImage(
+                UIImage(
+                    named: "GoogleLogin",
+                    in: uiBundle,
+                    compatibleWith: nil
+                ),
+                for: .normal
+            )
         return button
     }()
     
     let appleLoginButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil), for: .normal)
+        button
+            .setImage(
+                UIImage(named: "AppleLogin", in: uiBundle, compatibleWith: nil),
+                for: .normal
+            )
         return button
     }()
     
@@ -128,58 +148,110 @@ final class LoginView: UIView {
     }
     
     private func setUpConstraints() {
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor),
+        NSLayoutConstraint.activate(
+[
+            scrollView.topAnchor
+                .constraint(equalTo: self.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor
+                .constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor
+                .constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor
+                .constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor),
             
-            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentView.topAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.leadingAnchor
+                ),
+            contentView.trailingAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.trailingAnchor
+                ),
+            contentView.bottomAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.bottomAnchor
+                ),
+            contentView.widthAnchor
+                .constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
-            loginTitle.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            loginTitle.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 91),
+            loginTitle.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            loginTitle.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 91),
             
-            emailTextField.topAnchor.constraint(equalTo: loginTitle.bottomAnchor, constant: 80),
-            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            emailTextField.topAnchor
+                .constraint(equalTo: loginTitle.bottomAnchor, constant: 80),
+            emailTextField.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            emailTextField.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             emailTextField.heightAnchor.constraint(equalToConstant: 56),
             
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
-            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            passwordTextField.topAnchor
+                .constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
+            passwordTextField.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            passwordTextField.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             passwordTextField.heightAnchor.constraint(equalToConstant: 56),
             
-            findIdButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
-            findIdButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -14),
+            findIdButton.topAnchor
+                .constraint(
+                    equalTo: passwordTextField.bottomAnchor,
+                    constant: 16
+                ),
+            findIdButton.trailingAnchor
+                .constraint(equalTo: contentView.centerXAnchor, constant: -14),
             
-            findPasswordButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 16),
-            findPasswordButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 14),
+            findPasswordButton.topAnchor
+                .constraint(
+                    equalTo: passwordTextField.bottomAnchor,
+                    constant: 16
+                ),
+            findPasswordButton.leadingAnchor
+                .constraint(equalTo: contentView.centerXAnchor, constant: 14),
             
-            loginButton.topAnchor.constraint(equalTo: findIdButton.bottomAnchor, constant: 44),
-            loginButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            loginButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            loginButton.topAnchor
+                .constraint(equalTo: findIdButton.bottomAnchor, constant: 44),
+            loginButton.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            loginButton.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             loginButton.heightAnchor.constraint(equalToConstant: 56),
             
-            noAccountLabel.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 17),
-            noAccountLabel.leadingAnchor.constraint(equalTo: findIdButton.leadingAnchor, constant: -10),
+            noAccountLabel.topAnchor
+                .constraint(equalTo: loginButton.bottomAnchor, constant: 17),
+            noAccountLabel.leadingAnchor
+                .constraint(equalTo: findIdButton.leadingAnchor, constant: -10),
             
-            signUpButton.topAnchor.constraint(equalTo: noAccountLabel.topAnchor),
-            signUpButton.leadingAnchor.constraint(equalTo: noAccountLabel.trailingAnchor, constant: 18),
+            signUpButton.topAnchor
+                .constraint(equalTo: noAccountLabel.topAnchor),
+            signUpButton.leadingAnchor
+                .constraint(
+                    equalTo: noAccountLabel.trailingAnchor,
+                    constant: 18
+                ),
             
-            loginWithLabel.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 70),
-            loginWithLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            loginWithLabel.topAnchor
+                .constraint(equalTo: signUpButton.bottomAnchor, constant: 70),
+            loginWithLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
             
-            googleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
-            googleLoginButton.trailingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: -26),
-            googleLoginButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
+            googleLoginButton.topAnchor
+                .constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
+            googleLoginButton.trailingAnchor
+                .constraint(equalTo: contentView.centerXAnchor, constant: -26),
+            googleLoginButton.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor, constant: -40),
             
-            appleLoginButton.topAnchor.constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
-            appleLoginButton.leadingAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 26)
-        ])
+            appleLoginButton.topAnchor
+                .constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
+            appleLoginButton.leadingAnchor
+                .constraint(equalTo: contentView.centerXAnchor, constant: 26)
+]
+        )
     }
     
     private func makeTextField(
@@ -207,7 +279,10 @@ final class LoginView: UIView {
             .foregroundColor: UIColor.textGray,
             .font: UIFont.systemFont(ofSize: 14)
         ]
-        let attributedTitle = NSAttributedString(string: title, attributes: attributes)
+        let attributedTitle = NSAttributedString(
+            string: title,
+            attributes: attributes
+        )
         button.setAttributedTitle(attributedTitle, for: .normal)
         return button
     }

@@ -50,18 +50,26 @@ final class ScheduleRepeatView: UIView {
     
     private func setupView() {
         [repeatLabel, dayStackView].forEach { addSubview($0) }
-        [repeatLabel, dayStackView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        [repeatLabel, dayStackView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
         
         dayButtons.allButtons.forEach { dayButton in
             dayStackView.addArrangedSubview(dayButton)
-            dayButton.addTarget(self, action: #selector(dayButtonTapped), for: .touchUpInside)
+            dayButton
+                .addTarget(
+                    self,
+                    action: #selector(dayButtonTapped),
+                    for: .touchUpInside
+                )
         }
         
         NSLayoutConstraint.activate([
             repeatLabel.topAnchor.constraint(equalTo: topAnchor),
             repeatLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             
-            dayStackView.topAnchor.constraint(equalTo: repeatLabel.bottomAnchor, constant: 10),
+            dayStackView.topAnchor
+                .constraint(equalTo: repeatLabel.bottomAnchor, constant: 10),
             dayStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             dayStackView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])

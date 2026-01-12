@@ -48,25 +48,32 @@ final class CategoryCarouselViewCell: UICollectionViewCell {
         categoryIcon.translatesAutoresizingMaskIntoConstraints = false
         categoryLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        categoryIconWidthConstraint = categoryIcon.widthAnchor.constraint(equalToConstant: 63)
-        categoryIconHeightConstraint = categoryIcon.heightAnchor.constraint(equalToConstant: 63)
-        categoryLabelTopConstraint = categoryLabel.topAnchor.constraint(equalTo: categoryIcon.bottomAnchor, constant: 18)
+        categoryIconWidthConstraint = categoryIcon.widthAnchor
+            .constraint(equalToConstant: 63)
+        categoryIconHeightConstraint = categoryIcon.heightAnchor
+            .constraint(equalToConstant: 63)
+        categoryLabelTopConstraint = categoryLabel.topAnchor
+            .constraint(equalTo: categoryIcon.bottomAnchor, constant: 18)
         
         NSLayoutConstraint.activate([
             categoryIcon.topAnchor.constraint(equalTo: contentView.topAnchor),
-            categoryIcon.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            categoryIcon.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
             categoryIconWidthConstraint,
             categoryIconHeightConstraint,
             
             categoryLabelTopConstraint,
-            categoryLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            categoryLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            categoryLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            categoryLabel.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor)
         ])
     }
     
     func configure(with category: QuestCategory) {
         categoryIcon.text = category.emoji
-        categoryIcon.backgroundColor = UIColor.questCategoryColor(for: category.backgroundColor)
+        categoryIcon.backgroundColor = UIColor
+            .questCategoryColor(for: category.backgroundColor)
         categoryLabel.text = category.displayName
     }
     

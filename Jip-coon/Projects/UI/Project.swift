@@ -15,6 +15,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.jipcoon.UI",
+            deploymentTargets: .iOS("18.0"),
             infoPlist: .default,
             sources: "Sources/**",
             resources: "Resources/**",
@@ -30,6 +31,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.jipcoon.uiTests",
+            deploymentTargets: .iOS("18.0"),
             infoPlist: .default,
             dependencies: [.target(name: "UI")]
         )

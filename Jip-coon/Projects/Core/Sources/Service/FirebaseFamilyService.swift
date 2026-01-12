@@ -31,7 +31,11 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         if existingFamily != nil {
             // 초대코드가 중복되면 새로 생성
             var newFamily = family
-            newFamily = Family(id: family.id, name: family.name, createdBy: family.createdBy)
+            newFamily = Family(
+                id: family.id,
+                name: family.name,
+                createdBy: family.createdBy
+            )
             try docRef.setData(from: newFamily)
             return newFamily
         }
@@ -39,7 +43,10 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         try docRef.setData(from: family)
         
         // 생성자의 familyId 업데이트
-        try await updateUserFamilyId(userId: family.createdBy, familyId: family.id)
+        try await updateUserFamilyId(
+            userId: family.createdBy,
+            familyId: family.id
+        )
         
         return family
     }
@@ -62,7 +69,11 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     public func deleteFamily(id: String) async throws {
         // 가족 정보 조회
         guard let family = try await getFamily(by: id) else {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."]
+            )
         }
         
         // 모든 구성원의 familyId 제거
@@ -94,17 +105,46 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     
     /// 사용자의 가족 정보 조회
     public func getUserFamily(userId: String) async throws -> Family? {
+        // 개발용 더미 사용자 처리
+        if userId == "dummy_user_id" || userId.hasPrefix("dummy_") {
+            return createDummyFamily()
+        }
+
         // 사용자 정보 조회
         let userSnapshot = try await userDocument(id: userId).getDocument()
-        
+
         guard userSnapshot.exists,
               let user = try? userSnapshot.data(as: User.self),
               let familyId = user.familyId else {
             return nil
         }
-        
+
+        // 개발용 더미 가족 처리
+        if familyId == "dummy_family_id" {
+            return createDummyFamily()
+        }
+
         // 가족 정보 조회
         return try await getFamily(by: familyId)
+    }
+
+    /// 개발용 더미 가족 생성
+    private func createDummyFamily() -> Family {
+        var dummyFamily = Family(
+            id: "dummy_family_id",
+            name: "우리 가족",
+            createdBy: "dummy_parent_id"
+        )
+        // 구성원 추가
+        dummyFamily.memberIds
+            .append(
+                contentsOf: [
+                    "dummy_child1_id",
+                    "dummy_child2_id",
+                    "dummy_child3_id"
+                ]
+            )
+        return dummyFamily
     }
     
     // MARK: - 구성원 및 초대코드 관리
@@ -112,12 +152,20 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     /// 가족에 구성원 추가
     public func addMemberToFamily(familyId: String, userId: String) async throws {
         guard var family = try await getFamily(by: familyId) else {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."]
+            )
         }
         
         // 이미 구성원인지 확인
         if family.isMember(userId) {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "이미 가족 구성원입니다."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "이미 가족 구성원입니다."]
+            )
         }
         
         // 가족에 구성원 추가
@@ -131,17 +179,29 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     /// 가족에서 구성원 제거
     public func removeMemberFromFamily(familyId: String, userId: String) async throws {
         guard var family = try await getFamily(by: familyId) else {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."]
+            )
         }
         
         // 생성자는 제거할 수 없음
         if family.isCreator(userId) {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 생성자는 제거할 수 없습니다. 가족을 삭제해주세요."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 생성자는 제거할 수 없습니다. 가족을 삭제해주세요."]
+            )
         }
         
         // 구성원이 아닌 경우
         if !family.isMember(userId) {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 구성원이 아닙니다."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 구성원이 아닙니다."]
+            )
         }
         
         // 가족에서 구성원 제거
@@ -155,7 +215,11 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     /// 새로운 초대코드 생성
     public func generateNewInviteCode(familyId: String) async throws -> String {
         guard var _ = try await getFamily(by: familyId) else {
-            throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."])
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."]
+            )
         }
         
         // 중복되지 않는 초대코드 생성
@@ -173,7 +237,11 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
             
             attempts += 1
             if attempts >= maxAttempts {
-                throw NSError(domain: "FamilyService", code: -1, userInfo: [NSLocalizedDescriptionKey: "초대코드 생성에 실패했습니다. 다시 시도해주세요."])
+                throw NSError(
+                    domain: "FamilyService",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "초대코드 생성에 실패했습니다. 다시 시도해주세요."]
+                )
             }
         } while true
         

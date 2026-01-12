@@ -17,6 +17,7 @@ public class MainViewComponents: NSObject {
     public var onUrgentTaskTap: ((Quest) -> Void)?
 
     public var myTasks: [Quest] = []
+    public var familyMembers: [User] = []
     public var onMyTaskTap: ((Quest) -> Void)?
 
     public var categoryStats: [String: Int] = [:]
@@ -245,9 +246,17 @@ public class MainViewComponents: NSObject {
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 0  // 셀 간 간격 제거
         layout.minimumLineSpacing = 12  // 페이지 간 간격
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        layout.sectionInset = UIEdgeInsets(
+            top: 0,
+            left: 16,
+            bottom: 0,
+            right: 16
+        )
 
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
 
@@ -270,7 +279,8 @@ public class MainViewComponents: NSObject {
         let pageControl = UIPageControl()
         pageControl.numberOfPages = 0  // 동적으로 설정
         pageControl.currentPage = 0
-        pageControl.pageIndicatorTintColor = UIColor.textGray.withAlphaComponent(0.3)
+        pageControl.pageIndicatorTintColor = UIColor.textGray
+            .withAlphaComponent(0.3)
         pageControl.currentPageIndicatorTintColor = UIColor.mainOrange
         pageControl.hidesForSinglePage = true
         pageControl.isUserInteractionEnabled = true
@@ -284,7 +294,10 @@ public class MainViewComponents: NSObject {
         layout.minimumLineSpacing = 12
         layout.sectionInset = UIEdgeInsets.zero
 
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
         collectionView.backgroundColor = .clear
         collectionView.showsVerticalScrollIndicator = false
         collectionView.isScrollEnabled = true
@@ -306,7 +319,10 @@ public class MainViewComponents: NSObject {
         layout.minimumInteritemSpacing = 8
         layout.minimumLineSpacing = 8
 
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.isScrollEnabled = true  // 스크롤 활성화
@@ -328,7 +344,10 @@ public class MainViewComponents: NSObject {
         layout.minimumLineSpacing = 8
         layout.sectionInset = UIEdgeInsets.zero
 
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.isScrollEnabled = true
@@ -347,7 +366,10 @@ public class MainViewComponents: NSObject {
         layout.minimumLineSpacing = 12
         layout.sectionInset = UIEdgeInsets.zero
 
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
         collectionView.backgroundColor = .clear
         collectionView.showsVerticalScrollIndicator = false
         collectionView.isScrollEnabled = false
@@ -411,7 +433,9 @@ public class MainViewComponents: NSObject {
         // 최소 1개, 최대 3개까지 표시되도록 계산
         let visibleCells = min(max(taskCount, 1), 3)
         let calculatedHeight =
-        CGFloat(visibleCells) * cellHeight + CGFloat(visibleCells - 1) * lineSpacing + sectionInset
+        CGFloat(visibleCells) * cellHeight + CGFloat(
+            visibleCells - 1
+        ) * lineSpacing + sectionInset
 
         // 80~340 범위로 제한
         let finalHeight = min(max(calculatedHeight, 80), 340)
@@ -434,7 +458,9 @@ public class MainViewComponents: NSObject {
         // 최소 1개, 최대 3개까지 표시되도록 계산
         let visibleCells = min(max(activityCount, 1), 3)
         let calculatedHeight =
-        CGFloat(visibleCells) * cellHeight + CGFloat(max(visibleCells - 1, 0)) * lineSpacing
+        CGFloat(visibleCells) * cellHeight + CGFloat(
+            max(visibleCells - 1, 0)
+        ) * lineSpacing
         + sectionInset
 
         let finalHeight = min(max(calculatedHeight, 68), 200)

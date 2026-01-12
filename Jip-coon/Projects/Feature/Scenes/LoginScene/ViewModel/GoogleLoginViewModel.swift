@@ -29,31 +29,32 @@ public final class GoogleLoginViewModel {
         GIDSignIn.sharedInstance.configuration = config
         
         // Start the sign in flow!
-        GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
-            guard error == nil else {
-                return
-            }
-            
-            guard let user = result?.user,
-                  let idToken = user.idToken?.tokenString
-            else {
-                return
-            }
-            
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken,
-                                                           accessToken: user.accessToken.tokenString)
-            
-            Auth.auth().signIn(with: credential) { authResult, error in
-                if let _ = error {
+        GIDSignIn.sharedInstance
+            .signIn(withPresenting: presentingVC) { result, error in
+                guard error == nil else {
                     return
                 }
-                if let _ = authResult?.user {
-                    self.loginSuccess.send()
-                    Task {
-                        try await self.userService.syncCurrentUserDocument()
+            
+                guard let user = result?.user,
+                      let idToken = user.idToken?.tokenString
+                else {
+                    return
+                }
+            
+                let credential = GoogleAuthProvider.credential(withIDToken: idToken,
+                                                               accessToken: user.accessToken.tokenString)
+            
+                Auth.auth().signIn(with: credential) { authResult, error in
+                    if let _ = error {
+                        return
+                    }
+                    if let _ = authResult?.user {
+                        self.loginSuccess.send()
+                        Task {
+                            try await self.userService.syncCurrentUserDocument()
+                        }
                     }
                 }
             }
-        }
     }
 }

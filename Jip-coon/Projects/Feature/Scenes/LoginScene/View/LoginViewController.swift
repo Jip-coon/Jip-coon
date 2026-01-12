@@ -69,12 +69,42 @@ public class LoginViewController: UIViewController {
     }
     
     private func setUpButtonAction() {
-        loginView.findIdButton.addTarget(self, action: #selector(findIdButtonTapped), for: .touchUpInside)
-        loginView.findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
-        loginView.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-        loginView.signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
-        loginView.googleLoginButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
-        loginView.appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
+        loginView.findIdButton
+            .addTarget(
+                self,
+                action: #selector(findIdButtonTapped),
+                for: .touchUpInside
+            )
+        loginView.findPasswordButton
+            .addTarget(
+                self,
+                action: #selector(findPasswordButtonTapped),
+                for: .touchUpInside
+            )
+        loginView.loginButton
+            .addTarget(
+                self,
+                action: #selector(loginButtonTapped),
+                for: .touchUpInside
+            )
+        loginView.signUpButton
+            .addTarget(
+                self,
+                action: #selector(signUpButtonTapped),
+                for: .touchUpInside
+            )
+        loginView.googleLoginButton
+            .addTarget(
+                self,
+                action: #selector(googleLoginTapped),
+                for: .touchUpInside
+            )
+        loginView.appleLoginButton
+            .addTarget(
+                self,
+                action: #selector(appleLoginTapped),
+                for: .touchUpInside
+            )
     }
     // MARK: - Button Action
     
@@ -101,7 +131,8 @@ public class LoginViewController: UIViewController {
     
     @objc private func signUpButtonTapped() {
         let signUpViewController = SignUpViewController()
-        navigationController?.pushViewController(signUpViewController, animated: true)
+        navigationController?
+            .pushViewController(signUpViewController, animated: true)
     }
     
     @objc private func googleLoginTapped() {
@@ -117,7 +148,10 @@ public class LoginViewController: UIViewController {
     
     // 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        let tap = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissKeyboard)
+        )
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
@@ -151,17 +185,27 @@ public class LoginViewController: UIViewController {
         
         guard
             let userInfo = notification.userInfo,   // 키보드가 나타날 때 최종 위치와 크기(frame) 를 userInfo에 담아줌
-            let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue    // 최종적으로 나타나는 키보드의 frame (화면 좌표계)
+            let keyboardFrame = (
+                userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+            )?.cgRectValue    // 최종적으로 나타나는 키보드의 frame (화면 좌표계)
         else { return }
         
         let keyboardHeight = keyboardFrame.height
         let minDistance = 50.0
-        let insets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight + minDistance, right: 0)
+        let insets = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: keyboardHeight + minDistance,
+            right: 0
+        )
         loginView.scrollView.contentInset = insets
         loginView.scrollView.scrollIndicatorInsets = insets
         
         if let activeField = activeField {
-            let rect = activeField.convert(activeField.bounds, to: loginView.scrollView)
+            let rect = activeField.convert(
+                activeField.bounds,
+                to: loginView.scrollView
+            )
             loginView.scrollView.scrollRectToVisible(rect, animated: true)
         }
     }
@@ -223,18 +267,24 @@ public class LoginViewController: UIViewController {
     
     private func navigateToMainScreen() {
         // 로그인 성공 알림 전송
-        NotificationCenter.default.post(name: NSNotification.Name("LoginSuccess"), object: nil)
+        NotificationCenter.default
+            .post(name: NSNotification.Name("LoginSuccess"), object: nil)
     }
     
     private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "로그인 실패", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: "로그인 실패",
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
     
     private func updateLoadingState(_ isLoading: Bool) {
         loginView.loginButton.isEnabled = !isLoading
-        loginView.loginButton.setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
+        loginView.loginButton
+            .setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
     }
 }
 

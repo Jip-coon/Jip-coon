@@ -18,10 +18,17 @@ public struct Family: Codable, Identifiable {
     public let createdAt: Date         // 생성일
     public var updatedAt: Date         // 수정일
     
-    public init(id: String = UUID().uuidString, name: String, createdBy: String) {
+    public init(
+        id: String = UUID().uuidString,
+        name: String,
+        createdBy: String
+    ) {
         self.id = id
         self.name = name
-        self.inviteCode = String(format: "%06d", Int.random(in: 100000...999999)) // 임시로 만들어 놓음
+        self.inviteCode = String(
+            format: "%06d",
+            Int.random(in: 100000...999999)
+        ) // 임시로 만들어 놓음
         self.memberIds = [createdBy]
         self.createdBy = createdBy
         self.createdAt = Date()
@@ -103,7 +110,9 @@ public struct FamilyStatistics {
 public extension FamilyStatistics {
     /// 전체 완료율
     var overallCompletionRate: Double {
-        return totalQuests > 0 ? Double(completedQuests) / Double(totalQuests) : 0.0
+        return totalQuests > 0 ? Double(completedQuests) / Double(
+            totalQuests
+        ) : 0.0
     }
     
     /// 완료율 백분율 문자열

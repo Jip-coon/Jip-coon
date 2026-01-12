@@ -21,7 +21,8 @@ extension MainViewLayout {
                 equalTo: components.contentView.leadingAnchor, constant: 20),
             components.urgentSectionView.trailingAnchor.constraint(
                 equalTo: components.contentView.trailingAnchor, constant: -20),
-            components.urgentSectionView.heightAnchor.constraint(equalToConstant: 150),
+            components.urgentSectionView.heightAnchor
+                .constraint(equalToConstant: 150),
 
             // 긴급 할일 타이틀과 개수
             components.urgentTitleLabel.topAnchor.constraint(
@@ -43,14 +44,16 @@ extension MainViewLayout {
                 equalTo: components.urgentSectionView.leadingAnchor, constant: 16),
             components.urgentCollectionView.trailingAnchor.constraint(
                 equalTo: components.urgentSectionView.trailingAnchor, constant: -16),
-            components.urgentCollectionView.heightAnchor.constraint(equalToConstant: 60),
+            components.urgentCollectionView.heightAnchor
+                .constraint(equalToConstant: 60),
 
             // 긴급 할일 페이지 인디케이터
             components.urgentPageControl.topAnchor.constraint(
                 equalTo: components.urgentCollectionView.bottomAnchor, constant: 8),
             components.urgentPageControl.centerXAnchor.constraint(
                 equalTo: components.urgentSectionView.centerXAnchor),
-            components.urgentPageControl.heightAnchor.constraint(equalToConstant: 20),
+            components.urgentPageControl.heightAnchor
+                .constraint(equalToConstant: 20),
             components.urgentPageControl.bottomAnchor.constraint(
                 equalTo: components.urgentSectionView.bottomAnchor, constant: -12),
 
@@ -85,7 +88,8 @@ extension MainViewLayout {
                 equalTo: components.contentView.leadingAnchor, constant: 20),
             components.statsSectionView.trailingAnchor.constraint(
                 equalTo: components.contentView.trailingAnchor, constant: -20),
-            components.statsSectionView.heightAnchor.constraint(equalToConstant: 172),
+            components.statsSectionView.heightAnchor
+                .constraint(equalToConstant: 172),
 
             components.statsTitleLabel.topAnchor.constraint(
                 equalTo: components.statsSectionView.topAnchor, constant: 16),
@@ -106,7 +110,8 @@ extension MainViewLayout {
                 equalTo: components.progressView.centerYAnchor),
             components.progressLabel.trailingAnchor.constraint(
                 equalTo: components.statsSectionView.trailingAnchor, constant: -16),
-            components.progressLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 40),
+            components.progressLabel.widthAnchor
+                .constraint(greaterThanOrEqualToConstant: 40),
 
             components.categoryStatsCollectionView.topAnchor.constraint(
                 equalTo: components.progressView.bottomAnchor, constant: 16),
@@ -126,7 +131,8 @@ extension MainViewLayout {
                 equalTo: components.contentView.leadingAnchor, constant: 20),
             components.quickActionsSectionView.trailingAnchor.constraint(
                 equalTo: components.contentView.trailingAnchor, constant: -20),
-            components.quickActionsSectionView.heightAnchor.constraint(equalToConstant: 126),
+            components.quickActionsSectionView.heightAnchor
+                .constraint(equalToConstant: 126),
 
             components.quickActionsTitleLabel.topAnchor.constraint(
                 equalTo: components.quickActionsSectionView.topAnchor, constant: 16),
