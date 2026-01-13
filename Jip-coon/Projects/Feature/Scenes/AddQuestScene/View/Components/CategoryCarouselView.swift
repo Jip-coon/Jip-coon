@@ -21,12 +21,24 @@ final class CategoryCarouselView: UIView {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 63, height: 100)
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        layout.sectionInset = UIEdgeInsets(
+            top: 0,
+            left: 16,
+            bottom: 0,
+            right: 16
+        )
         
-        let uICollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let uICollectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: layout
+        )
         uICollectionView.showsHorizontalScrollIndicator = false
         uICollectionView.translatesAutoresizingMaskIntoConstraints = false
-        uICollectionView.register(CategoryCarouselViewCell.self, forCellWithReuseIdentifier: CategoryCarouselViewCell.identifier)
+        uICollectionView
+            .register(
+                CategoryCarouselViewCell.self,
+                forCellWithReuseIdentifier: CategoryCarouselViewCell.identifier
+            )
         return uICollectionView
     }()
     
@@ -43,7 +55,12 @@ final class CategoryCarouselView: UIView {
         let insetX = (collectionView.bounds.width - focusedCellWidth) / 2
         
         if collectionView.contentInset.left != insetX {
-            collectionView.contentInset = UIEdgeInsets(top: 0, left: insetX, bottom: 0, right: insetX)
+            collectionView.contentInset = UIEdgeInsets(
+                top: 0,
+                left: insetX,
+                bottom: 0,
+                right: insetX
+            )
             collectionView.decelerationRate = .fast
         }
         
@@ -52,7 +69,10 @@ final class CategoryCarouselView: UIView {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 
-                self.scrollToCenterOffset(for: self.focusedIndex, animated: false)
+                self.scrollToCenterOffset(
+                    for: self.focusedIndex,
+                    animated: false
+                )
                 self.collectionView.collectionViewLayout.invalidateLayout()
                 self.didInitialScroll = true
                 
@@ -95,7 +115,12 @@ final class CategoryCarouselView: UIView {
         guard index < collectionView.numberOfItems(inSection: 0) else { return }
         
         guard let attributes = collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath) else {
-            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
+            collectionView
+                .scrollToItem(
+                    at: indexPath,
+                    at: .centeredHorizontally,
+                    animated: animated
+                )
             return
         }
         
@@ -105,9 +130,13 @@ final class CategoryCarouselView: UIView {
         let targetOffset = cellCenter - halfWidth
         
         let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - collectionView.bounds.width
-        let finalOffset = max(min(targetOffset, maxOffset), -collectionView.contentInset.left)
+        let finalOffset = max(
+            min(targetOffset, maxOffset),
+            -collectionView.contentInset.left
+        )
         
-        collectionView.setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
+        collectionView
+            .setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
     }
     
     private func updateFocusedCell() {
@@ -157,7 +186,10 @@ extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDele
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
         scrollToCenterOffset(for: indexPath.item, animated: true)
         
         if focusedIndex != indexPath.item {
@@ -222,11 +254,17 @@ extension CategoryCarouselView: UIScrollViewDelegate {
             height: collectionView.bounds.height
         )
         
-        guard let attributesArray = collectionView.collectionViewLayout.layoutAttributesForElements(in: searchRect),
+        guard let attributesArray = collectionView.collectionViewLayout.layoutAttributesForElements(
+            in: searchRect
+        ),
               !attributesArray.isEmpty else { return }
         
-        let nearest = attributesArray.min { a, b in
-            abs(a.center.x - proposedCenterX) < abs(b.center.x - proposedCenterX)
+        let nearest = attributesArray.min {
+ a,
+            b in
+            abs(a.center.x - proposedCenterX) < abs(
+                b.center.x - proposedCenterX
+            )
         }
         
         guard let itemCenterX = nearest?.center.x else { return }
@@ -237,7 +275,10 @@ extension CategoryCarouselView: UIScrollViewDelegate {
         targetContentOffset.pointee = CGPoint(x: newX, y: 0)
     }
     
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    func scrollViewDidEndDragging(
+        _ scrollView: UIScrollView,
+        willDecelerate decelerate: Bool
+    ) {
         if !decelerate {
             scrollToCenterOffset(for: focusedIndex, animated: true)
         }

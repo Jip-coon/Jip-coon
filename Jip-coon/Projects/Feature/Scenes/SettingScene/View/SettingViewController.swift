@@ -22,31 +22,31 @@ private enum SettingSection: Int, CaseIterable {
     
     var title: String {
         switch self {
-            case .profile:
-                return "프로필"
-            case .familyManage:
-                return "가족 관리"
-            case .appSettings:
-                return "앱 설정"
-            case .support:
-                return "고객지원"
-            case .account:
-                return "계정 관리"
+        case .profile:
+            return "프로필"
+        case .familyManage:
+            return "가족 관리"
+        case .appSettings:
+            return "앱 설정"
+        case .support:
+            return "고객지원"
+        case .account:
+            return "계정 관리"
         }
     }
     
     var items: [SettingItem] {
         switch self {
-            case .profile:
-                return [.editProfile]
-            case .familyManage:
-                return [.manageFamily]
-            case .appSettings:
-                return [.notifications]
-            case .support:
-                return [.termsOfService, .privacyPolicy, .appVersion]
-            case .account:
-                return [.logout, .deleteAccount]
+        case .profile:
+            return [.editProfile]
+        case .familyManage:
+            return [.manageFamily]
+        case .appSettings:
+            return [.notifications]
+        case .support:
+            return [.termsOfService, .privacyPolicy, .appVersion]
+        case .account:
+            return [.logout, .deleteAccount]
         }
     }
 }
@@ -63,14 +63,14 @@ private enum SettingItem {
     
     var title: String {
         switch self {
-            case .editProfile: return "프로필 수정"
-            case .manageFamily: return "가족 관리"
-            case .notifications: return "알림 설정"
-            case .termsOfService: return "서비스 이용약관"
-            case .privacyPolicy: return "개인정보 처리방침"
-            case .appVersion: return "앱 버전"
-            case .logout: return "로그아웃"
-            case .deleteAccount: return "회원 탈퇴"
+        case .editProfile: return "프로필 수정"
+        case .manageFamily: return "가족 관리"
+        case .notifications: return "알림 설정"
+        case .termsOfService: return "서비스 이용약관"
+        case .privacyPolicy: return "개인정보 처리방침"
+        case .appVersion: return "앱 버전"
+        case .logout: return "로그아웃"
+        case .deleteAccount: return "회원 탈퇴"
         }
     }
 }
@@ -232,9 +232,12 @@ public final class SettingViewController: UIViewController {
         
         // 사용자 정보 있는 경우
         let profileEditViewModel = ProfileEditViewModel()
-        let profileEditViewController = ProfileEditViewController(viewModel: profileEditViewModel)
+        let profileEditViewController = ProfileEditViewController(
+            viewModel: profileEditViewModel
+        )
         navigationItem.backButtonTitle = ""
-        navigationController?.pushViewController(profileEditViewController, animated: true)
+        navigationController?
+            .pushViewController(profileEditViewController, animated: true)
     }
     
     private func showErrorAlert(message: String) {
@@ -296,15 +299,15 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         content.text = item.title
         
         switch item {
-            case .appVersion:
-                content.secondaryText = viewModel.fullVersionString
-                cell.accessoryType = .none
-                cell.selectionStyle = .none
-            case .logout, .deleteAccount:
-                content.textProperties.color = .systemRed
-                cell.accessoryType = .none
-            default:
-                cell.accessoryType = .disclosureIndicator
+        case .appVersion:
+            content.secondaryText = viewModel.fullVersionString
+            cell.accessoryType = .none
+            cell.selectionStyle = .none
+        case .logout, .deleteAccount:
+            content.textProperties.color = .systemRed
+            cell.accessoryType = .none
+        default:
+            cell.accessoryType = .disclosureIndicator
         }
         
         cell.contentConfiguration = content
@@ -320,14 +323,14 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         let item = actualSection.items[indexPath.row]
         
         switch item {
-            case .editProfile:
-                handleProfileEdit()
-            case .logout:
-                handleLogout()
-            case .deleteAccount:
-                handleDeleteAccount()
-            default:
-                print("\(item.title) 선택됨")
+        case .editProfile:
+            handleProfileEdit()
+        case .logout:
+            handleLogout()
+        case .deleteAccount:
+            handleDeleteAccount()
+        default:
+            print("\(item.title) 선택됨")
         }
     }
 }

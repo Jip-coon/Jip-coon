@@ -44,14 +44,21 @@ final class ProfileInfoView: UIView {
         infoLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 9),
-            titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 14),
-            titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -14),
+            titleLabel.topAnchor
+                .constraint(equalTo: self.topAnchor, constant: 9),
+            titleLabel.leadingAnchor
+                .constraint(equalTo: self.leadingAnchor, constant: 14),
+            titleLabel.trailingAnchor
+                .constraint(equalTo: self.trailingAnchor, constant: -14),
             
-            infoLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3),
-            infoLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            infoLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-            infoLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -9),
+            infoLabel.topAnchor
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 3),
+            infoLabel.leadingAnchor
+                .constraint(equalTo: titleLabel.leadingAnchor),
+            infoLabel.trailingAnchor
+                .constraint(equalTo: titleLabel.trailingAnchor),
+            infoLabel.bottomAnchor
+                .constraint(equalTo: self.bottomAnchor, constant: -9),
         ])
     }
     

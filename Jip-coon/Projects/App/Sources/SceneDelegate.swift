@@ -12,12 +12,16 @@ import Core
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
-    
+
     private let userService: UserServiceProtocol
+    private let familyService: FamilyServiceProtocol
+    private let questService: QuestServiceProtocol
     private let authService: AuthServiceProtocol
-    
+
     override init() {
         self.userService = FirebaseUserService()
+        self.familyService = FirebaseFamilyService()
+        self.questService = FirebaseQuestService()
         self.authService = AuthService()
         super.init()
     }
@@ -33,16 +37,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.makeKeyAndVisible()
         self.window = window
         
-        let loginViewModel = LoginViewModel(authService: authService, userService: userService)
+        let loginViewModel = LoginViewModel(
+            authService: authService,
+            userService: userService
+        )
         let appleLoginViewModel = AppleLoginViewModel(userService: userService)
-        let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
+        let googleLoginViewModel = GoogleLoginViewModel(
+            userService: userService
+        )
         
         let loginViewController = LoginViewController(
             viewModel: loginViewModel,
             appleLoginViewModel: appleLoginViewModel,
             googleLoginViewModel: googleLoginViewModel
         )
-        let navigationController = UINavigationController(rootViewController: loginViewController)
+      
+        let navigationController = UINavigationController(
+            rootViewController: loginViewController
+        )
         
         // 로그인 상태 확인
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
@@ -51,7 +63,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 await self.cleanupTempAccountOnAppLaunch()
                 
                 if self.authService.isLoggedIn {
-                    window.rootViewController = MainTabBarController(userService: self.userService)
+                    // 동기화 완료 후 메인 화면으로 전환
+                    await MainActor.run {
+                        window.rootViewController = MainTabBarController(
+                            userService: self.userService,
+                            familyService: self.familyService,
+                            questService: self.questService
+                        )
+                    }
                 } else {
                     window.rootViewController = navigationController
                 }
@@ -104,18 +123,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     @objc private func handleLoginSuccess() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            
-            self.window?.rootViewController = MainTabBarController(userService: self.userService)
-            self.window?.makeKeyAndVisible()
+        // 로그인 성공 시 사용자 정보 동기화
+        Task {
+            do {
+                try await self.userService.syncCurrentUserDocument()
+                print("로그인 후 사용자 정보 동기화 완료")
+            } catch {
+                print("로그인 후 사용자 정보 동기화 실패: \(error.localizedDescription)")
+            }
+
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
+
+                self.window?.rootViewController = MainTabBarController(
+                    userService: self.userService,
+                    familyService: self.familyService,
+                    questService: self.questService
+                )
+                self.window?.makeKeyAndVisible()
+            }
         }
     }
     
     @objc private func handleLogoutSuccess() {
-        let loginViewModel = LoginViewModel(authService: authService, userService: userService)
+        let loginViewModel = LoginViewModel(
+            authService: authService,
+            userService: userService
+        )
         let appleLoginViewModel = AppleLoginViewModel(userService: userService)
-        let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
+        let googleLoginViewModel = GoogleLoginViewModel(
+            userService: userService
+        )
         
         DispatchQueue.main.async { [weak self] in
             let loginVC = LoginViewController(

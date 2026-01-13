@@ -57,8 +57,13 @@ public struct QuestUrgencyCalculator {
     /// - Parameter quests: 정렬할 퀘스트 배열
     /// - Returns: 마감시간 순으로 정렬된 퀘스트 배열
     public static func sortQuestsByUrgency(_ quests: [Quest]) -> [Quest] {
-        return quests.sorted { quest1, quest2 in
-            guard let date1 = quest1.dueDate, let date2 = quest2.dueDate else { return false }
+        return quests.sorted {
+ quest1,
+            quest2 in
+            guard let date1 = quest1.dueDate,
+                  let date2 = quest2.dueDate else {
+                return false
+            }
             return date1 < date2
         }
     }

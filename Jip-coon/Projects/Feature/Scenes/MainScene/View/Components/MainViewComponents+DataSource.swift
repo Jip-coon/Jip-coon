@@ -42,11 +42,17 @@ extension MainViewComponents: UICollectionViewDataSource {
         case myTasksCollectionView:
             return configureMyTasksCell(for: collectionView, at: indexPath)
         case categoryStatsCollectionView:
-            return configureCategoryStatsCell(for: collectionView, at: indexPath)
+            return configureCategoryStatsCell(
+                for: collectionView,
+                at: indexPath
+            )
         case quickActionsCollectionView:
             return configureQuickActionCell(for: collectionView, at: indexPath)
         case recentActivityCollectionView:
-            return configureRecentActivityCell(for: collectionView, at: indexPath)
+            return configureRecentActivityCell(
+                for: collectionView,
+                at: indexPath
+            )
         default:
             return UICollectionViewCell()
         }
@@ -68,11 +74,14 @@ extension MainViewComponents: UICollectionViewDataSource {
             as! UrgentTaskCollectionViewCell
 
             let quest = urgentQuests[indexPath.item]
-            let urgencyLevel = QuestUrgencyCalculator.determineUrgencyLevel(for: quest)
+            let urgencyLevel = QuestUrgencyCalculator.determineUrgencyLevel(
+                for: quest
+            )
 
-            cell.configure(with: quest, urgencyLevel: urgencyLevel) { [weak self] in
-                self?.onUrgentTaskTap?(quest)
-            }
+            cell
+                .configure(with: quest, urgencyLevel: urgencyLevel) { [weak self] in
+                    self?.onUrgentTaskTap?(quest)
+                }
 
             return cell
         }
@@ -93,9 +102,10 @@ extension MainViewComponents: UICollectionViewDataSource {
 
             let quest = myTasks[indexPath.item]
 
-            cell.configure(with: quest) { [weak self] in
-                self?.onMyTaskTap?(quest)
-            }
+            cell
+                .configure(with: quest, familyMembers: familyMembers) { [weak self] in
+                    self?.onMyTaskTap?(quest)
+                }
 
             return cell
         }
@@ -104,7 +114,9 @@ extension MainViewComponents: UICollectionViewDataSource {
     private func configureCategoryStatsCell(
         for collectionView: UICollectionView, at indexPath: IndexPath
     ) -> UICollectionViewCell {
-        let validStats = categoryStats.filter { $0.value > 0 }.sorted { $0.value > $1.value }
+        let validStats = categoryStats.filter { $0.value > 0 }.sorted {
+            $0.value > $1.value
+        }
 
         if validStats.isEmpty {
             let cell = collectionView.dequeueReusableCell(
@@ -118,10 +130,16 @@ extension MainViewComponents: UICollectionViewDataSource {
 
             let (key, count) = validStats[indexPath.item]
             if let info = CategoryInfo.categoryMapping[key] {
-                cell.configure(emoji: info.emoji, name: info.name, count: count, color: info.color) {
-                    [weak self] in
-                    self?.onCategoryStatTap?(key, count)
-                }
+                cell
+                    .configure(
+                        emoji: info.emoji,
+                        name: info.name,
+                        count: count,
+                        color: info.color
+                    ) {
+                        [weak self] in
+                        self?.onCategoryStatTap?(key, count)
+                    }
             }
 
             return cell

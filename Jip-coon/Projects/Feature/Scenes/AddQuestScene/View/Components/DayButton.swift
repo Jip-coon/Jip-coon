@@ -40,7 +40,12 @@ final class DayButton: UIButton {
         let verticalInset: CGFloat = isSmallDevice ? 10 : 13
         let horizontalInset: CGFloat = verticalInset + 2
         
-        config.contentInsets = .init(top: verticalInset, leading: horizontalInset, bottom: verticalInset, trailing: horizontalInset)
+        config.contentInsets = .init(
+            top: verticalInset,
+            leading: horizontalInset,
+            bottom: verticalInset,
+            trailing: horizontalInset
+        )
         
         self.configuration = config
         

@@ -59,7 +59,8 @@ public class CategoryStatsCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = UIColor.white.withAlphaComponent(0.9)
         contentView.layer.cornerRadius = 12
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.textGray.withAlphaComponent(0.3).cgColor
+        contentView.layer.borderColor = UIColor.textGray
+            .withAlphaComponent(0.3).cgColor
 
         contentView.addSubview(emojiLabel)
         contentView.addSubview(countLabel)
@@ -70,22 +71,32 @@ public class CategoryStatsCollectionViewCell: UICollectionViewCell {
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            emojiLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            emojiLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            emojiLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
+            emojiLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
 
-            countLabel.topAnchor.constraint(equalTo: emojiLabel.bottomAnchor, constant: 2),
-            countLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            countLabel.topAnchor
+                .constraint(equalTo: emojiLabel.bottomAnchor, constant: 2),
+            countLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
             countLabel.heightAnchor.constraint(equalToConstant: 18),
 
-            nameLabel.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: 2),
-            nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            nameLabel.topAnchor
+                .constraint(equalTo: countLabel.bottomAnchor, constant: 2),
+            nameLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
             nameLabel.heightAnchor.constraint(equalToConstant: 12),
-            nameLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            nameLabel.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
     }
 
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleTap)
+        )
         contentView.addGestureRecognizer(tapGesture)
         contentView.isUserInteractionEnabled = true
     }
@@ -108,7 +119,11 @@ public class CategoryStatsCollectionViewCell: UICollectionViewCell {
     // MARK: - 구성
 
     func configure(
-        emoji: String, name: String, count: Int, color: UIColor, onTap: @escaping () -> Void
+        emoji: String,
+        name: String,
+        count: Int,
+        color: UIColor,
+        onTap: @escaping () -> Void
     ) {
         self.onTap = onTap
 
@@ -158,7 +173,8 @@ public class EmptyCategoryStatsCollectionViewCell: UICollectionViewCell {
     // MARK: - 설정
 
     private func setupUI() {
-        contentView.backgroundColor = UIColor.systemGray5.withAlphaComponent(0.5)
+        contentView.backgroundColor = UIColor.systemGray5
+            .withAlphaComponent(0.5)
         contentView.layer.cornerRadius = 12
 
         contentView.addSubview(iconLabel)
@@ -168,11 +184,15 @@ public class EmptyCategoryStatsCollectionViewCell: UICollectionViewCell {
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: -8),
+            iconLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            iconLabel.centerYAnchor
+                .constraint(equalTo: contentView.centerYAnchor, constant: -8),
 
-            messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            messageLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 4),
+            messageLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            messageLabel.topAnchor
+                .constraint(equalTo: iconLabel.bottomAnchor, constant: 4),
         ])
     }
 }
@@ -185,14 +205,50 @@ public struct CategoryInfo {
     let color: UIColor
 
     static let categoryMapping: [String: CategoryInfo] = [
-        "cleaning": CategoryInfo(emoji: "🧹", name: "청소", color: UIColor.systemBlue),
-        "cooking": CategoryInfo(emoji: "👨‍🍳", name: "요리", color: UIColor.systemOrange),
-        "dishes": CategoryInfo(emoji: "🍽️", name: "설거지", color: UIColor.systemGreen),
-        "trash": CategoryInfo(emoji: "🗑️", name: "쓰레기", color: UIColor.systemGray),
-        "laundry": CategoryInfo(emoji: "👕", name: "빨래", color: UIColor.systemPurple),
-        "pet": CategoryInfo(emoji: "🐕", name: "반려동물", color: UIColor.systemBrown),
-        "study": CategoryInfo(emoji: "📚", name: "공부", color: UIColor.systemIndigo),
-        "exercise": CategoryInfo(emoji: "💪", name: "운동", color: UIColor.systemRed),
-        "other": CategoryInfo(emoji: "📝", name: "기타", color: UIColor.systemTeal),
+        "cleaning": CategoryInfo(
+            emoji: "🧹",
+            name: "청소",
+            color: UIColor.systemBlue
+        ),
+        "cooking": CategoryInfo(
+            emoji: "👨‍🍳",
+            name: "요리",
+            color: UIColor.systemOrange
+        ),
+        "dishes": CategoryInfo(
+            emoji: "🍽️",
+            name: "설거지",
+            color: UIColor.systemGreen
+        ),
+        "trash": CategoryInfo(
+            emoji: "🗑️",
+            name: "쓰레기",
+            color: UIColor.systemGray
+        ),
+        "laundry": CategoryInfo(
+            emoji: "👕",
+            name: "빨래",
+            color: UIColor.systemPurple
+        ),
+        "pet": CategoryInfo(
+            emoji: "🐕",
+            name: "반려동물",
+            color: UIColor.systemBrown
+        ),
+        "study": CategoryInfo(
+            emoji: "📚",
+            name: "공부",
+            color: UIColor.systemIndigo
+        ),
+        "exercise": CategoryInfo(
+            emoji: "💪",
+            name: "운동",
+            color: UIColor.systemRed
+        ),
+        "other": CategoryInfo(
+            emoji: "📝",
+            name: "기타",
+            color: UIColor.systemTeal
+        ),
     ]
 }

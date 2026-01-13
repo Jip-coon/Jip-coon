@@ -61,7 +61,8 @@ final class ProfileEditViewModel: ObservableObject {
                 return
             }
             
-            try await userService.updateUserName(userId: user.id, newName: newName)
+            try await userService
+                .updateUserName(userId: user.id, newName: newName)
             guard let updatedUser = try await userService.getUser(by: user.id) else {
                 throw NSError(
                     domain: "ProfileEdit",

@@ -55,20 +55,29 @@ public class UrgentTaskCollectionViewCell: UICollectionViewCell {
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            titleLabel.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
+            titleLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -12),
             titleLabel.heightAnchor.constraint(equalToConstant: 20),
 
-            timeLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
-            timeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            timeLabel.topAnchor
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
+            timeLabel.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            timeLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -12),
             timeLabel.heightAnchor.constraint(equalToConstant: 20),
         ])
     }
 
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleTap)
+        )
         contentView.addGestureRecognizer(tapGesture)
         contentView.isUserInteractionEnabled = true
     }
@@ -90,7 +99,11 @@ public class UrgentTaskCollectionViewCell: UICollectionViewCell {
 
     // MARK: - 구성
 
-    func configure(with quest: Quest, urgencyLevel: UrgencyLevel, onTap: @escaping () -> Void) {
+    func configure(
+        with quest: Quest,
+        urgencyLevel: UrgencyLevel,
+        onTap: @escaping () -> Void
+    ) {
         self.onTap = onTap
         updateContent(quest: quest, urgencyLevel: urgencyLevel)
         updateAppearance(urgencyLevel: urgencyLevel)
@@ -128,7 +141,9 @@ public class UrgentTaskCollectionViewCell: UICollectionViewCell {
 
     private func formatRemainingTime(_ timeRemaining: TimeInterval) -> String {
         let hours = Int(timeRemaining / 3600)
-        let minutes = Int((timeRemaining.truncatingRemainder(dividingBy: 3600)) / 60)
+        let minutes = Int(
+            (timeRemaining.truncatingRemainder(dividingBy: 3600)) / 60
+        )
 
         return hours > 0
         ? "⏰ \(hours)시간 \(minutes)분 남음"
@@ -167,10 +182,12 @@ public class EmptyUrgentTaskCollectionViewCell: UICollectionViewCell {
     }
 
     private func configureContentView() {
-        contentView.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.1)
+        contentView.backgroundColor = UIColor.systemGreen
+            .withAlphaComponent(0.1)
         contentView.layer.cornerRadius = 8
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.systemGreen.withAlphaComponent(0.3).cgColor
+        contentView.layer.borderColor = UIColor.systemGreen
+            .withAlphaComponent(0.3).cgColor
     }
 
     private func addSubviews() {
@@ -183,11 +200,15 @@ public class EmptyUrgentTaskCollectionViewCell: UICollectionViewCell {
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: -8),
+            iconLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            iconLabel.centerYAnchor
+                .constraint(equalTo: contentView.centerYAnchor, constant: -8),
 
-            messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            messageLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 2),
+            messageLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            messageLabel.topAnchor
+                .constraint(equalTo: iconLabel.bottomAnchor, constant: 2),
             messageLabel.bottomAnchor.constraint(
                 lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
         ])

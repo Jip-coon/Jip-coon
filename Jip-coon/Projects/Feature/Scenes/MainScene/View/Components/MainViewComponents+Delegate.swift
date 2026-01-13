@@ -86,7 +86,10 @@ extension MainViewComponents: UICollectionViewDelegate, UICollectionViewDelegate
         let page = round(targetX / pageWidth)
         let snappedX = page * pageWidth
 
-        let maxOffset = max(0, CGFloat(urgentPageControl.numberOfPages - 1) * pageWidth)
+        let maxOffset = max(
+            0,
+            CGFloat(urgentPageControl.numberOfPages - 1) * pageWidth
+        )
         targetContentOffset.pointee.x = max(0, min(snappedX, maxOffset))
     }
 

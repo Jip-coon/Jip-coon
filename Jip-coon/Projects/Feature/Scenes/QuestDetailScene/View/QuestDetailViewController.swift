@@ -138,7 +138,12 @@ final class QuestDetailViewController: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
         button.layer.cornerRadius = 12
-        button.addTarget(self, action: #selector(completeQuestButtonTapped), for: .touchUpInside)
+        button
+            .addTarget(
+                self,
+                action: #selector(completeQuestButtonTapped),
+                for: .touchUpInside
+            )
         button.backgroundColor = .mainOrange
         return button
     }()
@@ -147,9 +152,18 @@ final class QuestDetailViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public init(quest: Quest) {
+    init(
+        quest: Quest,
+        questService: QuestServiceProtocol,
+        userService: UserServiceProtocol
+    ) {
+
         self.quest = quest
-        self.viewModel = QuestDetailViewModel(quest: quest)
+        self.viewModel = QuestDetailViewModel(
+            quest: quest,
+            questService: questService,
+            userService: userService
+        )
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -183,6 +197,7 @@ final class QuestDetailViewController: UIViewController {
         
         // 메모 섹션
         let memoStackView = UIStackView(arrangedSubviews: [memoIconImageView, memoTitleLabel])
+
         memoStackView.axis = .horizontal
         memoStackView.spacing = 8
         
@@ -197,54 +212,97 @@ final class QuestDetailViewController: UIViewController {
         ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         // MARK: - 제약 조건 설정
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+        NSLayoutConstraint.activate(
+[
+            scrollView.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentView.topAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.leadingAnchor
+                ),
+            contentView.trailingAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.trailingAnchor
+                ),
+            contentView.bottomAnchor
+                .constraint(
+                    equalTo: scrollView.contentLayoutGuide.bottomAnchor
+                ),
+            contentView.widthAnchor
+                .constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
-            categoryIcon.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            categoryIcon.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            categoryIcon.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            categoryIcon.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 20),
             categoryIcon.widthAnchor.constraint(equalToConstant: 80),
             categoryIcon.heightAnchor.constraint(equalToConstant: 80),
             
-            categoryCarouselView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            categoryCarouselView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            categoryCarouselView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            categoryCarouselView.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 20),
+            categoryCarouselView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor),
+            categoryCarouselView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor),
             categoryCarouselView.heightAnchor.constraint(equalToConstant: 120),
             
-            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            titleLabel.topAnchor.constraint(equalTo: categoryIcon.bottomAnchor, constant: 12),
+            titleLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
+            titleLabel.topAnchor
+                .constraint(equalTo: categoryIcon.bottomAnchor, constant: 12),
             
-            titleEditTextField.topAnchor.constraint(equalTo: categoryCarouselView.bottomAnchor, constant: 20),
-            titleEditTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            titleEditTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            titleEditTextField.topAnchor
+                .constraint(
+                    equalTo: categoryCarouselView.bottomAnchor,
+                    constant: 20
+                ),
+            titleEditTextField.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            titleEditTextField.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             titleEditTextField.heightAnchor.constraint(equalToConstant: 35),
             
-            dateRowView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 120),
-            dateRowView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            dateRowView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            dateRowView.topAnchor
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 120),
+            dateRowView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            dateRowView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            timeRowView.topAnchor.constraint(equalTo: dateRowView.bottomAnchor, constant: 31),
-            timeRowView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            timeRowView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            timeRowView.topAnchor
+                .constraint(equalTo: dateRowView.bottomAnchor, constant: 31),
+            timeRowView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            timeRowView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            workerRowView.topAnchor.constraint(equalTo: timeRowView.bottomAnchor, constant: 31),
-            workerRowView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            workerRowView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            workerRowView.topAnchor
+                .constraint(equalTo: timeRowView.bottomAnchor, constant: 31),
+            workerRowView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            workerRowView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            starRowView.topAnchor.constraint(equalTo: workerRowView.bottomAnchor, constant: 31),
-            starRowView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            starRowView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            starRowView.topAnchor
+                .constraint(equalTo: workerRowView.bottomAnchor, constant: 31),
+            starRowView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            starRowView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            memoStackView.topAnchor.constraint(equalTo: starRowView.bottomAnchor, constant: 31),
-            memoStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            memoStackView.topAnchor
+                .constraint(equalTo: starRowView.bottomAnchor, constant: 31),
+            memoStackView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
             memoTextView.topAnchor.constraint(equalTo: memoStackView.bottomAnchor, constant: 12),
             memoTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
@@ -255,39 +313,60 @@ final class QuestDetailViewController: UIViewController {
             memoTextViewPlaceholder.topAnchor.constraint(equalTo: memoTextView.topAnchor, constant: 8),
             memoTextViewPlaceholder.leadingAnchor.constraint(equalTo: memoTextView.leadingAnchor, constant: 8),
             
-            completeQuestButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            completeQuestButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            completeQuestButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            completeQuestButton.leadingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 20
+                ),
+            completeQuestButton.trailingAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -20
+                ),
+            completeQuestButton.bottomAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                    constant: -20
+                ),
             completeQuestButton.heightAnchor.constraint(equalToConstant: 50),
-        ])
+]
+        )
     }
     
     // MARK: - ViewModel Binding
     
     private func setupBindings() {
         viewModel.$quest
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] updatedQuest in
                 self?.applyEditingModeState()
             }
             .store(in: &cancellables)
-        
+
         // 카테고리 변경 구독
         viewModel.$category
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] category in
                 self?.categoryIcon.text = category.emoji
-                self?.categoryIcon.backgroundColor = UIColor(named: category.backgroundColor, in: uiBundle, compatibleWith: nil)
+                self?.categoryIcon.backgroundColor = UIColor(
+                    named: category.backgroundColor,
+                    in: uiBundle,
+                    compatibleWith: nil
+                )
             }
             .store(in: &cancellables)
-        
+
         // 날짜 변경 구독
         viewModel.$selectedDate
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] date in
                 self?.dateRowView.setValueText(date.yyyyMMdEE)
             }
             .store(in: &cancellables)
-        
+
         // 시간 변경 구독
         viewModel.$selectedTime
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] time in
                 self?.timeRowView.setValueText(time.aHHmm)
             }
@@ -295,13 +374,15 @@ final class QuestDetailViewController: UIViewController {
         
         // 담당자 변경 구독
         viewModel.$selectedWorkerName
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] name in
                 self?.workerRowView.setValueText(name)
             }
             .store(in: &cancellables)
-        
+
         // 별 개수 변경 구독
         viewModel.$starCount
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] count in
                 self?.starRowView.setValueText("\(count) 개")
             }
@@ -384,7 +465,11 @@ final class QuestDetailViewController: UIViewController {
     
     // 별 개수 선택
     private func setupStarRowMenu() {
-        let menuActions = stride(from: 10, through: 50, by: 10).map { starCount in
+        let menuActions = stride(
+            from: 10,
+            through: 50,
+            by: 10
+        ).map { starCount in
             let title = "\(starCount) 개"
             return UIAction(title: title) { [weak self] _ in
                 self?.viewModel.updateStarCount(starCount)
@@ -419,7 +504,15 @@ final class QuestDetailViewController: UIViewController {
     }
     
     @objc private func completeQuestButtonTapped() {
-        // TODO: - 퀘스트 완료 처리
+        Task {
+            do {
+                try await viewModel.completeQuest()
+                // 성공 시 메인 화면으로 돌아가기
+                navigationController?.popViewController(animated: true)
+            } catch {
+                showErrorAlert(message: error.localizedDescription)
+            }
+        }
     }
     
     @objc private func titleTextFieldChanged() {
@@ -502,7 +595,7 @@ final class QuestDetailViewController: UIViewController {
         categoryIcon.isHidden = false
         titleLabel.isHidden = false
         completeQuestButton.isHidden = false
-        
+
         categoryCarouselView.isHidden = true
         titleEditTextField.isHidden = true
         
@@ -529,5 +622,15 @@ extension QuestDetailViewController: UITextViewDelegate {
     
     func textViewDidBeginEditing(_ textView: UITextView) {
         memoTextViewPlaceholder.isHidden = true
+    }
+
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "오류",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
 }

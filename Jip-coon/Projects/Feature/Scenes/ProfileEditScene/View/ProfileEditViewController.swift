@@ -18,8 +18,14 @@ final class ProfileEditViewController: UIViewController {
     
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        let config = UIImage.SymbolConfiguration(pointSize: 64, weight: .regular)
-        let iconImage = UIImage(systemName: "person.fill", withConfiguration: config)
+        let config = UIImage.SymbolConfiguration(
+            pointSize: 64,
+            weight: .regular
+        )
+        let iconImage = UIImage(
+            systemName: "person.fill",
+            withConfiguration: config
+        )
         imageView.image = iconImage
         imageView.contentMode = .center
         imageView.tintColor = .textGray
@@ -178,41 +184,78 @@ final class ProfileEditViewController: UIViewController {
     
     private func setupConstraints() {
         
-        NSLayoutConstraint.activate([
-            profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        NSLayoutConstraint.activate(
+[
+            profileImageView.topAnchor
+                .constraint(
+                    equalTo: view.safeAreaLayoutGuide.topAnchor,
+                    constant: 20
+                ),
+            profileImageView.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
             profileImageView.widthAnchor.constraint(equalToConstant: 147),
             profileImageView.heightAnchor.constraint(equalToConstant: 158),
             
             profileImageEditButton.widthAnchor.constraint(equalToConstant: 30),
             profileImageEditButton.heightAnchor.constraint(equalToConstant: 30),
-            profileImageEditButton.trailingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: -5),
-            profileImageEditButton.bottomAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: -10),
+            profileImageEditButton.trailingAnchor
+                .constraint(
+                    equalTo: profileImageView.trailingAnchor,
+                    constant: -5
+                ),
+            profileImageEditButton.bottomAnchor
+                .constraint(
+                    equalTo: profileImageView.bottomAnchor,
+                    constant: -10
+                ),
             
-            starImageView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 27),
-            starImageView.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: -30),
+            starImageView.topAnchor
+                .constraint(
+                    equalTo: profileImageView.bottomAnchor,
+                    constant: 27
+                ),
+            starImageView.leadingAnchor
+                .constraint(equalTo: view.centerXAnchor, constant: -30),
             starImageView.widthAnchor.constraint(equalToConstant: 19),
             
-            starCountLabel.topAnchor.constraint(equalTo: starImageView.topAnchor),
-            starCountLabel.leadingAnchor.constraint(equalTo: starImageView.trailingAnchor, constant: 10),
+            starCountLabel.topAnchor
+                .constraint(equalTo: starImageView.topAnchor),
+            starCountLabel.leadingAnchor
+                .constraint(
+                    equalTo: starImageView.trailingAnchor,
+                    constant: 10
+                ),
             
-            nameStackView.topAnchor.constraint(equalTo: starImageView.bottomAnchor, constant: 27),
-            nameStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            nameStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            nameStackView.topAnchor
+                .constraint(equalTo: starImageView.bottomAnchor, constant: 27),
+            nameStackView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            nameStackView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            emailInfoView.topAnchor.constraint(equalTo: nameStackView.bottomAnchor, constant: 20),
-            emailInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            emailInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            emailInfoView.topAnchor
+                .constraint(equalTo: nameStackView.bottomAnchor, constant: 20),
+            emailInfoView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            emailInfoView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            familyInfoView.topAnchor.constraint(equalTo: emailInfoView.bottomAnchor, constant: 20),
-            familyInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            familyInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            familyInfoView.topAnchor
+                .constraint(equalTo: emailInfoView.bottomAnchor, constant: 20),
+            familyInfoView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            familyInfoView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            profileInfoEditButton.topAnchor.constraint(equalTo: familyInfoView.bottomAnchor, constant: 50),
-            profileInfoEditButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            profileInfoEditButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            profileInfoEditButton.topAnchor
+                .constraint(equalTo: familyInfoView.bottomAnchor, constant: 50),
+            profileInfoEditButton.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            profileInfoEditButton.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
             profileInfoEditButton.heightAnchor.constraint(equalToConstant: 47),
-        ])
+]
+        )
     }
     
     private func dataBinding() {
@@ -243,9 +286,24 @@ final class ProfileEditViewController: UIViewController {
     }
     
     private func setupAddTarget() {
-        profileImageEditButton.addTarget(self, action: #selector(profileImageEditButtonTapped), for: .touchUpInside)
-        profileInfoEditButton.addTarget(self, action: #selector(profileInfoEditButtonTapped), for: .touchUpInside)
-        nameTextField.addTarget(self, action: #selector(nameTextFieldDidChange(_:)), for: .editingChanged)
+        profileImageEditButton
+            .addTarget(
+                self,
+                action: #selector(profileImageEditButtonTapped),
+                for: .touchUpInside
+            )
+        profileInfoEditButton
+            .addTarget(
+                self,
+                action: #selector(profileInfoEditButtonTapped),
+                for: .touchUpInside
+            )
+        nameTextField
+            .addTarget(
+                self,
+                action: #selector(nameTextFieldDidChange(_:)),
+                for: .editingChanged
+            )
     }
     
     @objc private func profileImageEditButtonTapped() {
@@ -273,7 +331,10 @@ final class ProfileEditViewController: UIViewController {
     }
     
     private func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        let tap = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissKeyboard)
+        )
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
@@ -284,10 +345,15 @@ final class ProfileEditViewController: UIViewController {
 }
 
 extension ProfileEditViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
+    ) {
         picker.dismiss(animated: true)
         
-        guard let selectedImage = info[.originalImage] as? UIImage else { return }
+        guard let selectedImage = info[.originalImage] as? UIImage else {
+            return
+        }
         
         profileImageView.image = selectedImage
         profileImageView.contentMode = .scaleAspectFill

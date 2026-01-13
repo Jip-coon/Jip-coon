@@ -94,7 +94,11 @@ final class SignUpViewModel: ObservableObject {
         do {
             // 현재 생성된 사용자의 UID 가져오기
             guard let currentUser = authService.currentUser else {
-                throw NSError(domain: "SignUp", code: -1, userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 가져올 수 없습니다."])
+                throw NSError(
+                    domain: "SignUp",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 가져올 수 없습니다."]
+                )
             }
             
             try await authService.updatePassword(password)
