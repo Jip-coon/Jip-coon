@@ -18,7 +18,7 @@ final class QuestDetailViewController: UIViewController {
     
     private var isEditingMode: Bool = false {
         didSet {
-            updateUIForEditingMode()
+            applyEditingModeState()
         }
     }
     
@@ -100,7 +100,7 @@ final class QuestDetailViewController: UIViewController {
     )
     
     // 메모
-    private let memoLeadingLabel: UIImageView = {
+    private let memoIconImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "text.page"))
         imageView.tintColor = .black
         return imageView
@@ -113,17 +113,22 @@ final class QuestDetailViewController: UIViewController {
         return label
     }()
     
-    private let memoContentLabel = UILabel()
-    private let memoEditTextField: UITextField = {
-        let textField = UITextField()
-        textField.font = .pretendard(ofSize: 16, weight: .regular)
-        textField.placeholder = "메모를 입력하세요"
-        textField.setPlaceholder(fontSize: 16)
-        textField.layer.borderColor = UIColor.textFieldStroke.cgColor
-        textField.layer.borderWidth = 0.7
-        textField.layer.cornerRadius = 10
-        textField.leftPadding()
-        return textField
+    private let memoTextView: UITextView = {
+        let textView = UITextView()
+        textView.font = .pretendard(ofSize: 16, weight: .regular)
+        textView.layer.borderColor = UIColor.textFieldStroke.cgColor
+        textView.layer.borderWidth = 0.7
+        textView.layer.cornerRadius = 10
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 8, right: 4)
+        return textView
+    }()
+    
+    private let memoTextViewPlaceholder: UILabel = {
+        let label = UILabel()
+        label.font = .pretendard(ofSize: 16, weight: .regular)
+        label.textColor = .secondaryLabel
+        label.text = "메모를 입력하세요"
+        return label
     }()
     
     // 하단 버튼
@@ -152,6 +157,7 @@ final class QuestDetailViewController: UIViewController {
         questService: QuestServiceProtocol,
         userService: UserServiceProtocol
     ) {
+
         self.quest = quest
         self.viewModel = QuestDetailViewModel(
             quest: quest,
@@ -165,13 +171,13 @@ final class QuestDetailViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
         setupBindings()
-        setupTextFieldDelegates()
+        observeTextChanges()
         setupRowViewActions()
-        updateUIForEditingMode()
+        applyEditingModeState()
     }
     
     private func setupLayout() {
@@ -190,20 +196,19 @@ final class QuestDetailViewController: UIViewController {
         contentView.addSubview(starRowView)
         
         // 메모 섹션
-        let memoStackView = UIStackView(
-            arrangedSubviews: [memoLeadingLabel, memoTitleLabel]
-        )
+        let memoStackView = UIStackView(arrangedSubviews: [memoIconImageView, memoTitleLabel])
+
         memoStackView.axis = .horizontal
         memoStackView.spacing = 8
         
         contentView.addSubview(memoStackView)
-        contentView.addSubview(memoContentLabel)
-        contentView.addSubview(memoEditTextField)
+        contentView.addSubview(memoTextView)
+        memoTextView.addSubview(memoTextViewPlaceholder)
         view.addSubview(completeQuestButton)
         
         [scrollView, contentView, categoryIcon, titleLabel, categoryCarouselView, titleEditTextField,
          dateRowView, timeRowView, workerRowView, starRowView,
-         memoStackView, memoContentLabel, memoEditTextField, completeQuestButton
+         memoStackView, memoTextView, completeQuestButton, memoTextViewPlaceholder
         ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         // MARK: - 제약 조건 설정
@@ -299,21 +304,14 @@ final class QuestDetailViewController: UIViewController {
             memoStackView.leadingAnchor
                 .constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
-            memoContentLabel.topAnchor
-                .constraint(equalTo: memoStackView.topAnchor),
-            memoContentLabel.trailingAnchor
-                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            memoTextView.topAnchor.constraint(equalTo: memoStackView.bottomAnchor, constant: 12),
+            memoTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            memoTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            memoTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
+            memoTextView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
             
-            memoEditTextField.topAnchor
-                .constraint(equalTo: memoStackView.bottomAnchor, constant: 12),
-            memoEditTextField.leadingAnchor
-                .constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            memoEditTextField.trailingAnchor
-                .constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            memoEditTextField.heightAnchor
-                .constraint(greaterThanOrEqualToConstant: 40),
-            memoEditTextField.bottomAnchor
-                .constraint(equalTo: contentView.bottomAnchor, constant: -100),
+            memoTextViewPlaceholder.topAnchor.constraint(equalTo: memoTextView.topAnchor, constant: 8),
+            memoTextViewPlaceholder.leadingAnchor.constraint(equalTo: memoTextView.leadingAnchor, constant: 8),
             
             completeQuestButton.leadingAnchor
                 .constraint(
@@ -335,11 +333,13 @@ final class QuestDetailViewController: UIViewController {
         )
     }
     
+    // MARK: - ViewModel Binding
+    
     private func setupBindings() {
         viewModel.$quest
             .receive(on: DispatchQueue.main)
             .sink { [weak self] updatedQuest in
-                self?.updateReadOnlyUI(with: updatedQuest)
+                self?.applyEditingModeState()
             }
             .store(in: &cancellables)
 
@@ -389,20 +389,7 @@ final class QuestDetailViewController: UIViewController {
             .store(in: &cancellables)
     }
     
-    private func setupTextFieldDelegates() {
-        titleEditTextField
-            .addTarget(
-                self,
-                action: #selector(titleTextFieldChanged),
-                for: .editingChanged
-            )
-        memoEditTextField
-            .addTarget(
-                self,
-                action: #selector(memoTextFieldChanged),
-                for: .editingChanged
-            )
-    }
+    // MARK: - RowView Actions (날짜, 시간, 사람, 별)
     
     private func setupRowViewActions() {
         setupDateRowAction()
@@ -424,6 +411,42 @@ final class QuestDetailViewController: UIViewController {
             guard let self = self, self.isEditingMode else { return }
             self.presentTimePicker()
         }
+    }
+    
+    // 날짜 버튼 -> DatePicker
+    private func presentDatePicker() {
+        let datePickerViewController = DatePickerViewController(datePickerMode: .date)
+        
+        datePickerViewController.onDidTapDone = { [weak self] date in
+            self?.viewModel.updateDate(date)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: datePickerViewController)
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
+    }
+    
+    // 시간 버튼 -> TimePicker
+    private func presentTimePicker() {
+        let timePickerViewController = DatePickerViewController(datePickerMode: .time)
+        
+        timePickerViewController.onDidTapDone = { [weak self] date in
+            self?.viewModel.updateTime(date)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: timePickerViewController)
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
     }
     
     // 담당 버튼 -> UIMenu(담당자 선택)
@@ -457,13 +480,19 @@ final class QuestDetailViewController: UIViewController {
         starRowView.setupMenu(menu)
     }
     
+    // 카테고리 선택
     private func setupCategorySelection() {
         categoryCarouselView.onCategorySelected = { [weak self] category in
             self?.viewModel.updateCategory(category)
         }
     }
     
-    // MARK: - Actions
+    // MARK: - Button, TextField Actions
+    
+    private func observeTextChanges() {
+        titleEditTextField.addTarget(self, action: #selector(titleTextFieldChanged), for: .editingChanged)
+        memoTextView.delegate = self
+    }
     
     @objc private func editButtonTapped() {
         isEditingMode = true
@@ -490,134 +519,109 @@ final class QuestDetailViewController: UIViewController {
         viewModel.updateTitle(titleEditTextField.text ?? "")
     }
     
-    @objc private func memoTextFieldChanged() {
-        viewModel.updateDescription(memoEditTextField.text ?? "")
-    }
+    // MARK: - EditMode에 따른 UI 변경
     
-    private func updateUIForEditingMode() {
-        updateNavigationBar()
-        updateVisibility()
-        updateRowViewStyles()
-    }
-    
-    private func updateNavigationBar() {
+    private func applyEditingModeState() {
         if isEditingMode {
-            let saveButton = UIBarButtonItem(
-                title: "완료",
-                style: .done,
-                target: self,
-                action: #selector(doneButtonTapped)
-            )
-            saveButton.tintColor = .systemBlue
-            navigationItem.rightBarButtonItem = saveButton
+            applyEditModeUI()
         } else {
-            let editButton = UIBarButtonItem(
-                image: UIImage(systemName: "pencil"),
-                style: .plain,
-                target: self,
-                action: #selector(editButtonTapped)
-            )
-            navigationItem.rightBarButtonItem = editButton
+            applyReadModeUI()
         }
+    }
+    
+    private func applyEditModeUI() {
+        updateNavigationBarForEdit()
+        updateRowViewsForEdit()
+        updateContentForEdit()
+    }
+    
+    private func updateNavigationBarForEdit() {
+        let saveButton = UIBarButtonItem(
+            title: "완료",
+            style: .done,
+            target: self,
+            action: #selector(doneButtonTapped)
+        )
+        saveButton.tintColor = .systemBlue
+        navigationItem.rightBarButtonItem = saveButton
         navigationItem.title = ""
     }
     
-    private func updateVisibility() {
-        // 읽기 모드 뷰
-        categoryIcon.isHidden = isEditingMode
-        titleLabel.isHidden = isEditingMode
-        memoContentLabel.isHidden = isEditingMode
-        completeQuestButton.isHidden = isEditingMode
-        
-        // 편집 모드 뷰
-        categoryCarouselView.isHidden = !isEditingMode
-        titleEditTextField.isHidden = !isEditingMode
-        memoEditTextField.isHidden = !isEditingMode
-        
-        // 편집 모드로 전환 시 TextField에 현재 값 설정
-        if isEditingMode {
-            titleEditTextField.text = viewModel.title
-            memoEditTextField.text = viewModel.description
-            categoryCarouselView.setInitialCategory(viewModel.category)
-        }
+    private func updateRowViewsForEdit() {
+        dateRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedDate.yyyyMMdEE)
+        timeRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedTime.aHHmm)
+        starRowView.updateButtonStyle(.rightArrowMenu, "\(viewModel.starCount) 개")
     }
     
-    private func updateRowViewStyles() {
-        if isEditingMode {
-            dateRowView
-                .updateButtonStyle(
-                    .rightArrowAction,
-                    viewModel.selectedDate.yyyyMMdEE
-                )
-            timeRowView
-                .updateButtonStyle(
-                    .rightArrowAction,
-                    viewModel.selectedTime.aHHmm
-                )
-            starRowView
-                .updateButtonStyle(.rightArrowMenu, "\(viewModel.starCount) 개")
-        } else {
-            dateRowView
-                .updateButtonStyle(.textOnly, viewModel.selectedDate.yyyyMMdEE)
-            timeRowView
-                .updateButtonStyle(.textOnly, viewModel.selectedTime.aHHmm)
-            starRowView.updateButtonStyle(.textOnly, "\(viewModel.starCount) 개")
-        }
+    private func updateContentForEdit() {
+        categoryIcon.isHidden = true
+        titleLabel.isHidden = true
+        completeQuestButton.isHidden = true
+        
+        categoryCarouselView.isHidden = false
+        titleEditTextField.isHidden = false
+        
+        memoTextView.isEditable = true
+        memoTextView.isSelectable = true
+        
+        titleEditTextField.text = viewModel.title
+        categoryCarouselView.setInitialCategory(viewModel.category)
     }
     
-    private func updateReadOnlyUI(with quest: Quest) {
-        titleLabel.text = quest.title
-        memoContentLabel.text = quest.description
-        categoryIcon.text = quest.category.emoji
+    private func applyReadModeUI() {
+        updateNavigationBarForRead()
+        updateRowViewsForRead()
+        updateContentForRead()
+    }
+    
+    private func updateNavigationBarForRead() {
+        let editButton = UIBarButtonItem(
+            image: UIImage(systemName: "pencil"),
+            style: .plain,
+            target: self,
+            action: #selector(editButtonTapped)
+        )
+        navigationItem.rightBarButtonItem = editButton
+        navigationItem.title = ""
+    }
+    
+    private func updateRowViewsForRead() {
+        dateRowView.updateButtonStyle(.textOnly, viewModel.selectedDate.yyyyMMdEE)
+        timeRowView.updateButtonStyle(.textOnly, viewModel.selectedTime.aHHmm)
+        starRowView.updateButtonStyle(.textOnly, "\(viewModel.starCount) 개")
+    }
+    
+    private func updateContentForRead() {
+        categoryIcon.isHidden = false
+        titleLabel.isHidden = false
+        completeQuestButton.isHidden = false
+
+        categoryCarouselView.isHidden = true
+        titleEditTextField.isHidden = true
+        
+        memoTextView.isEditable = false
+        memoTextView.isSelectable = true
+        memoTextView.isUserInteractionEnabled = true
+        
+        titleLabel.text = viewModel.title
+        categoryIcon.text = viewModel.category.emoji
         categoryIcon.backgroundColor = UIColor(
-            named: quest.category.backgroundColor,
+            named: viewModel.category.backgroundColor,
             in: uiBundle,
             compatibleWith: nil
         )
     }
-    
-    // 날짜 버튼 -> DatePicker
-    private func presentDatePicker() {
-        let datePickerViewController = DatePickerViewController(
-            datePickerMode: .date
-        )
-        
-        datePickerViewController.onDidTapDone = { [weak self] date in
-            self?.viewModel.updateDate(date)
-        }
-        
-        let navigationController = UINavigationController(
-            rootViewController: datePickerViewController
-        )
-        
-        if let sheet = navigationController.sheetPresentationController {
-            sheet.detents = [.medium()]
-            sheet.prefersGrabberVisible = true
-        }
-        
-        present(navigationController, animated: true)
+}
+
+// MARK: - UITextViewDelegate
+
+extension QuestDetailViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        viewModel.updateDescription(textView.text)
     }
     
-    // 시간 버튼 -> TimePicker
-    private func presentTimePicker() {
-        let timePickerViewController = DatePickerViewController(
-            datePickerMode: .time
-        )
-        
-        timePickerViewController.onDidTapDone = { [weak self] date in
-            self?.viewModel.updateTime(date)
-        }
-        
-        let navigationController = UINavigationController(
-            rootViewController: timePickerViewController
-        )
-        
-        if let sheet = navigationController.sheetPresentationController {
-            sheet.detents = [.medium()]
-            sheet.prefersGrabberVisible = true
-        }
-        
-        present(navigationController, animated: true)
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        memoTextViewPlaceholder.isHidden = true
     }
 
     private func showErrorAlert(message: String) {
