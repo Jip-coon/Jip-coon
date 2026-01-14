@@ -102,14 +102,15 @@ public class LoginViewController: UIViewController {
     }
     // MARK: - Button Action
     
-    @objc private func findIdButtonTapped() {
-        print("find id button tapped")
-        // TODO: - ID 찾기
-    }
-    
     @objc private func findPasswordButtonTapped() {
-        print("find password button tapped")
-        // TODO: - 비밀번호 찾기
+        let forgotPasswordViewController = ForgotPasswordViewController()
+        
+        if let sheet = forgotPasswordViewController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        self.present(forgotPasswordViewController, animated: true)
     }
     
     @objc private func loginButtonTapped() {
