@@ -69,12 +69,6 @@ public class LoginViewController: UIViewController {
     }
     
     private func setUpButtonAction() {
-        loginView.findIdButton
-            .addTarget(
-                self,
-                action: #selector(findIdButtonTapped),
-                for: .touchUpInside
-            )
         loginView.findPasswordButton
             .addTarget(
                 self,
