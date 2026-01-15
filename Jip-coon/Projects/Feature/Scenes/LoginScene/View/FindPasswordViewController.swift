@@ -1,5 +1,5 @@
 //
-//  ForgotPasswordViewController.swift
+//  FindPasswordViewController.swift
 //  Feature
 //
 //  Created by 예슬 on 1/15/26.
@@ -9,7 +9,11 @@ import Combine
 import UI
 import UIKit
 
-final class ForgotPasswordViewController: UIViewController {
+/// 비밀번호 찾기를 담당하는 뷰 컨트롤러
+/// - 입력한 이메일을 통해 비밀번호 재설정을 진행합니다.
+/// - 가입된 이메일인 경우 비밀번호 재설정 메일이 전송됩니다.
+/// - 보안 문제로 가입되지 않은 이메일을 입력해도 성공 알림이 뜹니다. (그러나 실제 메일 전송은 되지 않음)
+final class FindPasswordViewController: UIViewController {
     private let viewModel: LoginViewModel
     private var cancellables = Set<AnyCancellable>()
     
@@ -94,19 +98,30 @@ final class ForgotPasswordViewController: UIViewController {
         view.addSubview(sendMailButton)
         
         NSLayoutConstraint.activate([
-            descriptionLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
-            descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            descriptionLabel.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
+            descriptionLabel.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            descriptionLabel.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            emailTextField.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 30),
-            emailTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            emailTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            emailTextField.heightAnchor.constraint(equalToConstant: 50),
+            emailTextField.topAnchor
+                .constraint(equalTo: descriptionLabel.bottomAnchor, constant: 30),
+            emailTextField.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            emailTextField.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
+            emailTextField.heightAnchor
+                .constraint(equalToConstant: 50),
             
-            sendMailButton.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 30),
-            sendMailButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            sendMailButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            sendMailButton.heightAnchor.constraint(equalToConstant: 50),
+            sendMailButton.topAnchor
+                .constraint(equalTo: emailTextField.bottomAnchor, constant: 30),
+            sendMailButton.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 20),
+            sendMailButton.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor, constant: -20),
+            sendMailButton.heightAnchor
+                .constraint(equalToConstant: 50),
         ])
     }
     

@@ -103,14 +103,14 @@ public class LoginViewController: UIViewController {
     // MARK: - Button Action
     
     @objc private func findPasswordButtonTapped() {
-        let forgotPasswordViewController = ForgotPasswordViewController(viewModel: viewModel)
+        let findPasswordViewController = FindPasswordViewController(viewModel: viewModel)
         
-        if let sheet = forgotPasswordViewController.sheetPresentationController {
+        if let sheet = findPasswordViewController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.prefersGrabberVisible = true
         }
         
-        self.present(forgotPasswordViewController, animated: true)
+        self.present(findPasswordViewController, animated: true)
     }
     
     @objc private func loginButtonTapped() {
