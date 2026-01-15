@@ -42,4 +42,16 @@ public final class LoginViewModel: ObservableObject {
         }
         isLoading = false
     }
+    
+    /// 비밀번호 찾기(비밀번호 재설정 메일 전송)
+    func sendPasswordResetEmail(email: String) async -> Bool {
+        do {
+            try await authService.sendPasswordResetEmail(email: email)
+            return true
+        } catch {
+            errorMessage = authService.handleError(error)
+            return false
+        }
+    }
+    
 }

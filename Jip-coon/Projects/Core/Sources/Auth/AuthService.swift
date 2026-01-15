@@ -88,6 +88,12 @@ public final class AuthService: AuthServiceProtocol {
         try await user.updatePassword(to: newPassword)
     }
     
+    /// 비밀번호 재설정 메일 전송
+    /// - Parameter email: 이메일
+    public func sendPasswordResetEmail(email: String) async throws {
+        try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+    
     /// Firebase Auth 에러 처리
     public func handleError(_ error: Error) -> String {
         let nsError = error as NSError

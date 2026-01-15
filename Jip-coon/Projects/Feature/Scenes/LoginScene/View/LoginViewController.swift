@@ -69,12 +69,6 @@ public class LoginViewController: UIViewController {
     }
     
     private func setUpButtonAction() {
-        loginView.findIdButton
-            .addTarget(
-                self,
-                action: #selector(findIdButtonTapped),
-                for: .touchUpInside
-            )
         loginView.findPasswordButton
             .addTarget(
                 self,
@@ -108,14 +102,25 @@ public class LoginViewController: UIViewController {
     }
     // MARK: - Button Action
     
-    @objc private func findIdButtonTapped() {
-        print("find id button tapped")
-        // TODO: - ID 찾기
-    }
-    
     @objc private func findPasswordButtonTapped() {
-        print("find password button tapped")
-        // TODO: - 비밀번호 찾기
+        let findPasswordViewController = FindPasswordViewController(viewModel: viewModel)
+        
+        // 로그인 뷰에 입력된 이메일이 있다면, 비밀번호 재설정 뷰 이메일 텍스트필드에 이메일 작성
+        findPasswordViewController.emailTextField.text = loginView.emailTextField.text
+        
+        // 비밀번호 재설정 메일 전송 성공시, 로그인 뷰 이메일 텍스트필드에 이메일 작성
+        findPasswordViewController.onResetSuccess = { [weak self] email in
+            self?.loginView.emailTextField.text = email
+            self?.loginView.passwordTextField.becomeFirstResponder()
+        }
+        
+        // 비밀번호 재설정 뷰 모달로 띄우기
+        if let sheet = findPasswordViewController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        self.present(findPasswordViewController, animated: true)
     }
     
     @objc private func loginButtonTapped() {

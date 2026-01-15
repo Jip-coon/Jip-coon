@@ -28,7 +28,7 @@ final class LoginView: UIView {
         placeholder: "비밀번호",
         isSecure: true
     )
-    lazy var findIdButton: UIButton = makeUnderlineButton(title: "아이디 찾기")
+    
     lazy var findPasswordButton: UIButton = makeUnderlineButton(
         title: "비밀번호 찾기"
     )
@@ -119,7 +119,6 @@ final class LoginView: UIView {
         [loginTitle,
          emailTextField,
          passwordTextField,
-         findIdButton,
          findPasswordButton,
          loginButton,
          noAccountLabel,
@@ -134,7 +133,6 @@ final class LoginView: UIView {
          loginTitle,
          emailTextField,
          passwordTextField,
-         findIdButton,
          findPasswordButton,
          loginButton,
          noAccountLabel,
@@ -197,24 +195,16 @@ final class LoginView: UIView {
                 .constraint(equalTo: contentView.trailingAnchor, constant: -20),
             passwordTextField.heightAnchor.constraint(equalToConstant: 56),
             
-            findIdButton.topAnchor
-                .constraint(
-                    equalTo: passwordTextField.bottomAnchor,
-                    constant: 16
-                ),
-            findIdButton.trailingAnchor
-                .constraint(equalTo: contentView.centerXAnchor, constant: -14),
-            
             findPasswordButton.topAnchor
                 .constraint(
                     equalTo: passwordTextField.bottomAnchor,
                     constant: 16
                 ),
-            findPasswordButton.leadingAnchor
-                .constraint(equalTo: contentView.centerXAnchor, constant: 14),
+            findPasswordButton.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor),
             
             loginButton.topAnchor
-                .constraint(equalTo: findIdButton.bottomAnchor, constant: 44),
+                .constraint(equalTo: findPasswordButton.bottomAnchor, constant: 44),
             loginButton.leadingAnchor
                 .constraint(equalTo: contentView.leadingAnchor, constant: 20),
             loginButton.trailingAnchor
@@ -223,8 +213,8 @@ final class LoginView: UIView {
             
             noAccountLabel.topAnchor
                 .constraint(equalTo: loginButton.bottomAnchor, constant: 17),
-            noAccountLabel.leadingAnchor
-                .constraint(equalTo: findIdButton.leadingAnchor, constant: -10),
+            noAccountLabel.centerXAnchor
+                .constraint(equalTo: contentView.centerXAnchor, constant: -20),
             
             signUpButton.topAnchor
                 .constraint(equalTo: noAccountLabel.topAnchor),
