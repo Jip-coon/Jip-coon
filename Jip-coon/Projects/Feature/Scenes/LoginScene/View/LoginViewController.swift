@@ -103,7 +103,7 @@ public class LoginViewController: UIViewController {
     // MARK: - Button Action
     
     @objc private func findPasswordButtonTapped() {
-        let forgotPasswordViewController = ForgotPasswordViewController()
+        let forgotPasswordViewController = ForgotPasswordViewController(viewModel: viewModel)
         
         if let sheet = forgotPasswordViewController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
