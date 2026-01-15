@@ -365,115 +365,61 @@ public class MainViewModel: ObservableObject {
     private func loadQuestsDataAsync() async throws -> [Quest] {
         // 현재 사용자의 가족 ID를 가져와서 해당 가족의 퀘스트들을 조회
         guard let currentUser = try await userService.getCurrentUser() else {
-            // 사용자가 없는 경우 더미 데이터 반환
-            return createDummyQuests()
+            // 사용자가 없는 경우 빈 배열 반환
+            return []
         }
 
-        let familyId = currentUser.familyId ?? "dummy_family_id"
+        // 가족이 없는 경우 빈 배열 반환
+        guard let familyId = currentUser.familyId else {
+            return []
+        }
 
         do {
             let quests = try await questService.getFamilyQuests(
                 familyId: familyId
             )
-            // 실제 데이터가 있는 경우 반환, 없으면 더미 데이터 반환
-            let finalQuests = quests.isEmpty ? createDummyQuests() : quests
 
             // 승인 대기 카운트 계산 (현재 사용자가 생성자이고, 완료 상태인 퀘스트들)
-            if let currentUser = try await userService.getCurrentUser() {
-                let pendingCount = finalQuests.filter { quest in
-                    quest.createdBy == currentUser.id && quest.status == .completed
-                }.count
-                await MainActor.run {
-                    self.pendingApprovalCount = pendingCount
-                }
+            let pendingCount = quests.filter { quest in
+                quest.createdBy == currentUser.id && quest.status == .completed
+            }.count
+            await MainActor.run {
+                self.pendingApprovalCount = pendingCount
             }
 
-            return finalQuests
+            return quests
         } catch {
-            // Firebase 연결 실패 시 더미 데이터로 폴백
-            return createDummyQuests()
+            // Firebase 연결 실패 시 빈 배열 반환
+            return []
         }
     }
 
-    private func createDummyQuests() -> [Quest] {
-        let questData: [(String, String, QuestCategory, Int, Date?)] = [
-            ("설거지", "식사 후 설거지 • 1시간 전 시작", .dishes, 15,
-             makeDate(daysFromNow: 0, hour: 19, minute: 00)),
-            ("빨래 널기", "세탁기 완료 • 30분 전 시작", .laundry, 10,
-             makeDate(daysFromNow: 0, hour: 18, minute: 30)),
-            ("청소기 돌리기", "거실 청소 • 오늘까지", .cleaning, 20,
-             makeDate(daysFromNow: 0, hour: 23, minute: 59)),
-            ("쓰레기 배출", "분리수거 • 오늘 밤 12시까지", .trash, 5,
-             makeDate(daysFromNow: 0, hour: 24, minute: 00)),
-            ("약국 가기", "감기약 사오기 • 1시간 남음", .other, 10,
-             makeDate(daysFromNow: 1, hour: 10, minute: 00)),
-            ("강아지 산책", "30분 산책 • 2시간 지남", .pet, 8,
-             makeDate(daysFromNow: -1, hour: 16, minute: 00)),
-        ]
-
-        let quests = questData.map { title, description, category, points, dueDate in
-            var quest = Quest(
-                title: title,
-                description: description,
-                category: category,
-                createdBy: "dummy_user_id",
-                familyId: "dummy_family_id",
-                points: points
-            )
-            quest.dueDate = dueDate
-            quest.assignedTo = "dummy_user_id"
-            return quest
-        }
-
-        // 상태 및 마감일 설정
-        //        quests[0].status = .inProgress
-        //        quests[1].status = .inProgress
-        //
-        //        let now = Date()
-        //        quests[3].dueDate = Calendar.current.date(byAdding: .hour, value: 6, to: now)
-        //        quests[4].dueDate = Calendar.current.date(byAdding: .hour, value: 1, to: now)
-        //        quests[5].dueDate = Calendar.current.date(byAdding: .hour, value: -2, to: now)
-
-        return quests
-    }
-    
-    private func makeDate(daysFromNow: Int, hour: Int, minute: Int) -> Date {
-        var components = DateComponents()
-        let calendar = Calendar.current
-        let now = Date()
-
-        let today = calendar.dateComponents([.year, .month, .day], from: now)
-        
-        components.year = today.year
-        components.month = today.month
-        components.day = (today.day ?? 1) + daysFromNow
-        components.hour = hour
-        components.minute = minute
-
-        return calendar.date(from: components)!
-    }
 
     private func loadStatisticsDataAsync() async throws -> UserStatistics? {
-        try await Task.sleep(nanoseconds: 400_000_000)  // 0.4초 지연
+        // 현재 사용자의 통계 데이터를 계산
+        guard let currentUser = try await userService.getCurrentUser() else {
+            return nil
+        }
+
+        // TODO: 실제 통계 계산 로직 구현
+        // 현재는 기본값 반환
         return UserStatistics(
-            userId: "dummy_user_id",
-            totalQuests: 16,
-            completedQuests: 12,
-            weeklyPoints: 245,
-            monthlyPoints: 1020,
-            completionRate: 75.0,
-            averageCompletionTime: 2.5,
-            favoriteCategory: .cleaning,
-            streak: 5
+            userId: currentUser.id,
+            totalQuests: 0,
+            completedQuests: 0,
+            weeklyPoints: 0,
+            monthlyPoints: 0,
+            completionRate: 0.0,
+            averageCompletionTime: 0.0,
+            favoriteCategory: .other,
+            streak: 0
         )
     }
 
     private func loadRecentActivitiesAsync() async throws -> [String] {
-        try await Task.sleep(nanoseconds: 600_000_000)  // 0.6초 지연
-        return [
-            "관혁님이 '설거지' 완료했어요",
-            "예슬님이 '빨래 널기' 시작했어요",
-        ]
+        // TODO: 실제 최근 활동 데이터 조회 로직 구현
+        // 현재는 빈 배열 반환
+        return []
     }
 }
 
