@@ -16,6 +16,7 @@ import UIKit
 final class FindPasswordViewController: UIViewController {
     private let viewModel: LoginViewModel
     private var cancellables = Set<AnyCancellable>()
+    var onResetSuccess: ((String) -> Void)?
     
     private let descriptionLabel: UILabel = {
         let label = UILabel()
@@ -26,11 +27,11 @@ final class FindPasswordViewController: UIViewController {
         return label
     }()
     
-    private let emailTextField: UITextField = {
+    let emailTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "이메일"
         textField.font = .systemFont(ofSize: 16, weight: .regular)
-        textField.textColor = .textGray
+        textField.textColor = .black
         textField.setPlaceholder()
         textField.layer.borderColor = UIColor.textFieldStroke.cgColor
         textField.layer.borderWidth = 1
@@ -152,6 +153,7 @@ final class FindPasswordViewController: UIViewController {
         메일이 오지 않는다면 입력하신 이메일이 가입 시 사용한 정보와 일치하는지 확인해 주세요.
         (스팸 메일함도 확인 부탁드립니다.)
         """
+        let email = emailTextField.text ?? ""
         
         let alert = UIAlertController(
             title: "알림",
@@ -163,6 +165,7 @@ final class FindPasswordViewController: UIViewController {
             title: "확인",
             style: .default
         ) { [weak self] _ in
+            self?.onResetSuccess?(email)
             self?.dismiss(animated: true) // 확인 누르면 모달 닫기
         }
         
