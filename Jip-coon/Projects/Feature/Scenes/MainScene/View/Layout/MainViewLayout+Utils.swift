@@ -25,6 +25,7 @@ extension MainViewLayout {
             components.pointsLabel,
             components.familyNameLabel,
             components.notificationButton,
+            components.createFamilyButton,
         ])
 
         // 긴급 할일 섹션

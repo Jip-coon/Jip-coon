@@ -105,11 +105,6 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     
     /// 사용자의 가족 정보 조회
     public func getUserFamily(userId: String) async throws -> Family? {
-        // 개발용 더미 사용자 처리
-        if userId == "dummy_user_id" || userId.hasPrefix("dummy_") {
-            return createDummyFamily()
-        }
-
         // 사용자 정보 조회
         let userSnapshot = try await userDocument(id: userId).getDocument()
 
@@ -119,33 +114,10 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
             return nil
         }
 
-        // 개발용 더미 가족 처리
-        if familyId == "dummy_family_id" {
-            return createDummyFamily()
-        }
-
         // 가족 정보 조회
         return try await getFamily(by: familyId)
     }
 
-    /// 개발용 더미 가족 생성
-    private func createDummyFamily() -> Family {
-        var dummyFamily = Family(
-            id: "dummy_family_id",
-            name: "우리 가족",
-            createdBy: "dummy_parent_id"
-        )
-        // 구성원 추가
-        dummyFamily.memberIds
-            .append(
-                contentsOf: [
-                    "dummy_child1_id",
-                    "dummy_child2_id",
-                    "dummy_child3_id"
-                ]
-            )
-        return dummyFamily
-    }
     
     // MARK: - 구성원 및 초대코드 관리
     

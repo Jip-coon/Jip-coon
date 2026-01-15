@@ -61,24 +61,6 @@ extension MainViewLayout {
             components.familyInfoView.centerYAnchor.constraint(
                 equalTo: components.userProfileView.centerYAnchor),
 
-            components.familyNameLabel.topAnchor
-                .constraint(equalTo: components.familyInfoView.topAnchor),
-            components.familyNameLabel.leadingAnchor.constraint(
-                equalTo: components.familyInfoView.leadingAnchor),
-            components.familyNameLabel.trailingAnchor.constraint(
-                equalTo: components.familyInfoView.trailingAnchor),
-
-            components.notificationButton.topAnchor.constraint(
-                equalTo: components.familyNameLabel.bottomAnchor, constant: 8),
-            components.notificationButton.trailingAnchor.constraint(
-                equalTo: components.familyInfoView.trailingAnchor),
-            components.notificationButton.bottomAnchor.constraint(
-                equalTo: components.familyInfoView.bottomAnchor),
-            components.notificationButton.widthAnchor
-                .constraint(equalToConstant: 50),
-            components.notificationButton.heightAnchor
-                .constraint(equalToConstant: 24),
-
             // 스크롤뷰 제약조건
             components.scrollView.topAnchor
                 .constraint(equalTo: components.headerView.bottomAnchor),

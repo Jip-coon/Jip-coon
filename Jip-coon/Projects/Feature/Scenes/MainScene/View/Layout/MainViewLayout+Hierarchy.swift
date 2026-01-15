@@ -21,9 +21,7 @@ extension MainViewLayout {
         components.userProfileView.addSubview(components.userNameLabel)
         components.userProfileView.addSubview(components.pointsLabel)
 
-        // 가족 정보 뷰
-        components.familyInfoView.addSubview(components.familyNameLabel)
-        components.familyInfoView.addSubview(components.notificationButton)
+        // 가족 정보 뷰는 동적으로 추가됨 (MainViewController에서)
     }
 
     internal func setupContentHierarchy() {
