@@ -92,6 +92,34 @@ public class MainViewComponents: NSObject {
         return view
     }()
 
+    public lazy var createFamilyButton: UIButton = {
+        let button = UIButton(type: .system)
+
+        // UIButton Configuration을 사용하여 패딩 설정
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = "🏠 가족 만들기"
+        configuration.baseForegroundColor = .white
+        configuration.baseBackgroundColor = UIColor.mainOrange
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20)
+        
+        // 폰트 설정
+        configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = .systemFont(ofSize: 16, weight: .semibold)
+            return outgoing
+        }
+
+        button.configuration = configuration
+
+        // 그림자 효과 (UIButton Configuration과 호환)
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.2
+        button.layer.shadowOffset = CGSize(width: 0, height: 3)
+        button.layer.shadowRadius = 6
+
+        return button
+    }()
+
     public lazy var familyNameLabel: UILabel = {
         let label = UILabel()
         label.text = "가족이름"

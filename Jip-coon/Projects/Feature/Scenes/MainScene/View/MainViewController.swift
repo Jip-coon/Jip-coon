@@ -122,13 +122,73 @@ public class MainViewController: UIViewController {
     }
 
     private func setupActions() {
-        components.notificationButton.addTarget(
+        // 가족 생성 버튼 액션
+        components.createFamilyButton.addTarget(
             self,
-            action: #selector(
-                notificationButtonTapped
-            ),
+            action: #selector(createFamilyButtonTapped),
             for: .touchUpInside
         )
+
+        // 알림 버튼 액션
+        components.notificationButton.addTarget(
+            self,
+            action: #selector(notificationButtonTapped),
+            for: .touchUpInside
+        )
+    }
+
+    @objc private func createFamilyButtonTapped() {
+        showFamilyCreationScreen()
+    }
+
+    private func showFamilyCreationScreen() {
+        let familyCreationVC = FamilyCreationViewController(
+            familyService: familyService,
+            userService: userService
+        )
+        familyCreationVC.onFamilyCreated = { [weak self] in
+            // 가족 생성 완료 후 메인 화면으로 돌아와서 데이터 리프레시
+            self?.viewModel.loadInitialData(forceRefresh: true)
+        }
+
+        let navigationController = UINavigationController(rootViewController: familyCreationVC)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
+    }
+
+    private func updateFamilyInfoView(with family: Family?) {
+        // 기존 서브뷰들 제거
+        components.familyInfoView.subviews.forEach { $0.removeFromSuperview() }
+
+        if let family = family {
+            // 가족이 있는 경우: 가족 이름과 알림 버튼 표시
+            components.familyInfoView.addSubview(components.familyNameLabel)
+            components.familyInfoView.addSubview(components.notificationButton)
+
+            components.familyNameLabel.text = family.name
+
+            NSLayoutConstraint.activate([
+                components.familyNameLabel.topAnchor.constraint(equalTo: components.familyInfoView.topAnchor),
+                components.familyNameLabel.leadingAnchor.constraint(equalTo: components.familyInfoView.leadingAnchor),
+                components.familyNameLabel.trailingAnchor.constraint(equalTo: components.familyInfoView.trailingAnchor),
+
+                components.notificationButton.topAnchor.constraint(equalTo: components.familyNameLabel.bottomAnchor, constant: 8),
+                components.notificationButton.trailingAnchor.constraint(equalTo: components.familyInfoView.trailingAnchor),
+                components.notificationButton.bottomAnchor.constraint(equalTo: components.familyInfoView.bottomAnchor),
+                components.notificationButton.widthAnchor.constraint(equalToConstant: 50),
+                components.notificationButton.heightAnchor.constraint(equalToConstant: 24)
+            ])
+        } else {
+            // 가족이 없는 경우: 가족 생성 버튼 표시
+            components.familyInfoView.addSubview(components.createFamilyButton)
+
+            NSLayoutConstraint.activate([
+                components.createFamilyButton.leadingAnchor.constraint(equalTo: components.familyInfoView.leadingAnchor),
+                components.createFamilyButton.trailingAnchor.constraint(equalTo: components.familyInfoView.trailingAnchor),
+                components.createFamilyButton.topAnchor.constraint(equalTo: components.familyInfoView.topAnchor),
+                components.createFamilyButton.bottomAnchor.constraint(equalTo: components.familyInfoView.bottomAnchor)
+            ])
+        }
     }
 
     // MARK: - 데이터 바인딩 설정
@@ -149,12 +209,11 @@ public class MainViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        // 가족 정보 변경 시 가족 이름 레이블 업데이트
+        // 가족 정보 변경 시 UI 업데이트
         viewModel.$family
-            .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] family in
-                self?.components.familyNameLabel.text = family.name
+                self?.updateFamilyInfoView(with: family)
             }
             .store(in: &cancellables)
 
