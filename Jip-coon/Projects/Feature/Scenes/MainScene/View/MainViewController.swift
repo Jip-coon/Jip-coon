@@ -138,23 +138,23 @@ public class MainViewController: UIViewController {
     }
 
     @objc private func createFamilyButtonTapped() {
-        showFamilyCreationScreen()
+//        showFamilyCreationScreen()
     }
 
-    private func showFamilyCreationScreen() {
-        let familyCreationVC = FamilyCreationViewController(
-            familyService: familyService,
-            userService: userService
-        )
-        familyCreationVC.onFamilyCreated = { [weak self] in
-            // 가족 생성 완료 후 메인 화면으로 돌아와서 데이터 리프레시
-            self?.viewModel.loadInitialData(forceRefresh: true)
-        }
-
-        let navigationController = UINavigationController(rootViewController: familyCreationVC)
-        navigationController.modalPresentationStyle = .fullScreen
-        present(navigationController, animated: true)
-    }
+//    private func showFamilyCreationScreen() {
+//        let familyCreationVC = FamilyCreationViewController(
+//            familyService: familyService,
+//            userService: userService
+//        )
+//        familyCreationVC.onFamilyCreated = { [weak self] in
+//            // 가족 생성 완료 후 메인 화면으로 돌아와서 데이터 리프레시
+//            self?.viewModel.loadInitialData(forceRefresh: true)
+//        }
+//
+//        let navigationController = UINavigationController(rootViewController: familyCreationVC)
+//        navigationController.modalPresentationStyle = .fullScreen
+//        present(navigationController, animated: true)
+//    }
 
     private func updateFamilyInfoView(with family: Family?) {
         // 기존 서브뷰들 제거
