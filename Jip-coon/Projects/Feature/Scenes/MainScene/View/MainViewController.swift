@@ -331,7 +331,50 @@ public class MainViewController: UIViewController {
     }
 
     @objc private func notificationButtonTapped() {
-        // TODO: - 알림 화면으로 이동 구현
+        showFamilyInfoPopup()
+    }
+
+    private func showFamilyInfoPopup() {
+        guard let family = viewModel.family else {
+            showAlert(title: "오류", message: "가족 정보를 불러올 수 없습니다.")
+            return
+        }
+
+        let alert = UIAlertController(
+            title: "가족 정보",
+            message: """
+            가족명: \(family.name)
+
+            초대코드: \(family.inviteCode)
+            """,
+            preferredStyle: .alert
+        )
+
+        // 초대코드 복사 액션
+        alert.addAction(UIAlertAction(title: "초대코드 복사", style: .default) { [weak self] _ in
+            UIPasteboard.general.string = family.inviteCode
+            self?.showAlert(title: "완료", message: "초대코드가 클립보드에 복사되었습니다.")
+        })
+
+        // 공유 액션
+        alert.addAction(UIAlertAction(title: "공유하기", style: .default) { [weak self] _ in
+            let shareText = "우리 가족 '\(family.name)'에 참여하세요!\n초대코드: \(family.inviteCode)"
+            let activityVC = UIActivityViewController(
+                activityItems: [shareText],
+                applicationActivities: nil
+            )
+            self?.present(activityVC, animated: true)
+        })
+
+        // 가족 관리 액션 (추후 구현)
+        alert.addAction(UIAlertAction(title: "가족 관리", style: .default) { [weak self] _ in
+            // TODO: 가족 관리 화면으로 이동
+            self?.showAlert(title: "준비중", message: "가족 관리 기능은 곧 제공될 예정입니다.")
+        })
+
+        alert.addAction(UIAlertAction(title: "닫기", style: .cancel))
+
+        present(alert, animated: true)
     }
 
     private func handleUrgentTaskTapped(_ quest: Quest) {

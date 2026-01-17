@@ -167,6 +167,27 @@ public class FamilyCreationViewController: UIViewController {
         loadCurrentUser()
     }
     
+    // MARK: - Navigation Bar Setup
+    
+    private func setupNavigationBar() {
+        // 네비게이션 바 타이틀 설정
+        title = "가족 만들기"
+        
+        // 닫기 버튼 추가
+        let closeButton = UIBarButtonItem(
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
+            target: self,
+            action: #selector(closeButtonTapped)
+        )
+        closeButton.tintColor = UIColor.textGray
+        navigationItem.leftBarButtonItem = closeButton
+    }
+    
+    @objc private func closeButtonTapped() {
+        dismiss(animated: true)
+    }
+    
     // MARK: - UI Setup
     
     private func setupUI() {
