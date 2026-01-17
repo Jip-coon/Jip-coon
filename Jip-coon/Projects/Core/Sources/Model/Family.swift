@@ -21,6 +21,22 @@ public struct Family: Codable, Identifiable {
     public init(
         id: String = UUID().uuidString,
         name: String,
+        inviteCode: String,
+        createdBy: String
+    ) {
+        self.id = id
+        self.name = name
+        self.inviteCode = inviteCode
+        self.memberIds = [createdBy]
+        self.createdBy = createdBy
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+
+    // 기존 생성자 (하위 호환성 유지)
+    public init(
+        id: String = UUID().uuidString,
+        name: String,
         createdBy: String
     ) {
         self.id = id
@@ -28,7 +44,7 @@ public struct Family: Codable, Identifiable {
         self.inviteCode = String(
             format: "%06d",
             Int.random(in: 100000...999999)
-        ) // 임시로 만들어 놓음
+        )
         self.memberIds = [createdBy]
         self.createdBy = createdBy
         self.createdAt = Date()

@@ -23,32 +23,54 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     // MARK: - CRUD
     
     /// 가족 생성
-    public func createFamily(_ family: Family) async throws -> Family {
+    public func createFamily(name: String, createdBy: String) async throws -> Family {
+        // 중복되지 않는 초대코드 생성
+        let inviteCode = try await generateUniqueInviteCode()
+
+        // 가족 객체 생성
+        let family = Family(
+            id: UUID().uuidString,
+            name: name,
+            inviteCode: inviteCode,
+            createdBy: createdBy
+        )
+
+        // Firestore에 저장
         let docRef = familyCollection.document(family.id)
-        
-        // 중복된 초대코드 확인
-        let existingFamily = try await getFamilyByInviteCode(family.inviteCode)
-        if existingFamily != nil {
-            // 초대코드가 중복되면 새로 생성
-            var newFamily = family
-            newFamily = Family(
-                id: family.id,
-                name: family.name,
-                createdBy: family.createdBy
-            )
-            try docRef.setData(from: newFamily)
-            return newFamily
-        }
-        
         try docRef.setData(from: family)
-        
+
         // 생성자의 familyId 업데이트
         try await updateUserFamilyId(
-            userId: family.createdBy,
+            userId: createdBy,
             familyId: family.id
         )
-        
+
         return family
+    }
+
+    /// 중복되지 않는 초대코드 생성
+    private func generateUniqueInviteCode() async throws -> String {
+        var newCode: String
+        var attempts = 0
+        let maxAttempts = 10
+
+        repeat {
+            newCode = String(format: "%06d", Int.random(in: 100000...999999))
+            let existingFamily = try await getFamilyByInviteCode(newCode)
+
+            if existingFamily == nil {
+                return newCode
+            }
+
+            attempts += 1
+            if attempts >= maxAttempts {
+                throw NSError(
+                    domain: "FamilyService",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "초대코드 생성에 실패했습니다. 다시 시도해주세요."]
+                )
+            }
+        } while true
     }
     
     /// 가족 정보 조회

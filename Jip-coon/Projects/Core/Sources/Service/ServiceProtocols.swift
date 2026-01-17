@@ -68,7 +68,7 @@ public protocol UserServiceProtocol {
 
 public protocol FamilyServiceProtocol {
     /// 가족 생성
-    func createFamily(_ family: Family) async throws -> Family
+    func createFamily(name: String, createdBy: String) async throws -> Family
     
     /// 가족 정보 조회
     func getFamily(by id: String) async throws -> Family?
