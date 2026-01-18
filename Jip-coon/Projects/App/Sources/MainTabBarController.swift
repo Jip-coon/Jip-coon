@@ -73,6 +73,7 @@ final class MainTabBarController: UITabBarController {
 
         // 탭별 뷰 컨트롤러 설정: (컨트롤러, 탭 제목, 기본 아이콘, 선택 아이콘)
         let navs: [UINavigationController] = [
+            // 홈
             (
                 MainViewController(
                     viewModel: mainViewModel,
@@ -84,6 +85,14 @@ final class MainTabBarController: UITabBarController {
                 "house",
                 "house.fill"
             ),
+            // 퀘스트
+            (
+                AllQuestViewController(),
+                "퀘스트",
+                "list.star",
+                "list.star"
+            ),
+            // 랭킬
             (
                 RankingViewController(
                     userService: userService,
@@ -93,7 +102,13 @@ final class MainTabBarController: UITabBarController {
                 "trophy",
                 "trophy.fill"
             ),
-            (SettingViewController(), "설정", "gear", "gear.fill"),
+            // 설정
+            (
+                SettingViewController(),
+                "설정",
+                "gear",
+                "gear.fill"
+            ),
         ]
             .enumerated()
             .map { (
