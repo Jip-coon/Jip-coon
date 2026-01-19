@@ -50,6 +50,11 @@ public extension UIColor {
         in: .module,
         compatibleWith: nil
     )!
+    static let gray2 = UIColor(
+        named: "gray2",
+        in: .module,
+        compatibleWith: nil
+    )!
 
     /// Categories
     static let green1 = UIColor(
