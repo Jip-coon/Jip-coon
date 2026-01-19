@@ -82,6 +82,9 @@ public protocol FamilyServiceProtocol {
     /// 가족 삭제
     func deleteFamily(id: String) async throws
     
+    /// 초대코드로 가족 참여
+    func joinFamily(inviteCode: String, userId: String) async throws -> Family
+
     /// 가족에 구성원 추가
     func addMemberToFamily(familyId: String, userId: String) async throws
     

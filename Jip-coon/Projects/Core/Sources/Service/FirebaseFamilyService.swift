@@ -143,6 +143,37 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     
     // MARK: - 구성원 및 초대코드 관리
     
+    /// 초대코드로 가족 참여
+    public func joinFamily(inviteCode: String, userId: String) async throws -> Family {
+        // 초대코드로 가족 조회
+        guard let family = try await getFamilyByInviteCode(inviteCode) else {
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 초대코드입니다."]
+            )
+        }
+
+        // 이미 구성원인지 확인
+        if family.isMember(userId) {
+            throw NSError(
+                domain: "FamilyService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "이미 가족 구성원입니다."]
+            )
+        }
+
+        // 가족에 구성원 추가
+        var updatedFamily = family
+        updatedFamily.addMember(userId)
+        try await updateFamily(updatedFamily)
+
+        // 사용자의 familyId 업데이트
+        try await updateUserFamilyId(userId: userId, familyId: family.id)
+
+        return updatedFamily
+    }
+
     /// 가족에 구성원 추가
     public func addMemberToFamily(familyId: String, userId: String) async throws {
         guard var family = try await getFamily(by: familyId) else {
