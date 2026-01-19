@@ -23,7 +23,7 @@ extension MainViewLayout {
             components.profileImageView,
             components.userNameLabel,
             components.pointsLabel,
-            components.familyNameLabel,
+            components.familyNameButton,
             components.notificationButton,
             components.createFamilyButton,
         ])

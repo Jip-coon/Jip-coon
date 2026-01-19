@@ -129,12 +129,19 @@ public class MainViewController: UIViewController {
             for: .touchUpInside
         )
 
-        // 알림 버튼 액션
-        components.notificationButton.addTarget(
+        // 가족 이름 버튼 액션
+        components.familyNameButton.addTarget(
             self,
-            action: #selector(notificationButtonTapped),
+            action: #selector(familyNameButtonTapped),
             for: .touchUpInside
         )
+
+        // 알림 버튼 액션 (추후 구현 예정)
+//        components.notificationButton.addTarget(
+//            self,
+//            action: #selector(notificationButtonTapped),
+//            for: .touchUpInside
+//        )
     }
 
     @objc private func createFamilyButtonTapped() {
@@ -161,18 +168,18 @@ public class MainViewController: UIViewController {
         components.familyInfoView.subviews.forEach { $0.removeFromSuperview() }
 
         if let family = family {
-            // 가족이 있는 경우: 가족 이름과 알림 버튼 표시
-            components.familyInfoView.addSubview(components.familyNameLabel)
+            // 가족이 있는 경우: 가족 이름 버튼과 알림 버튼 표시
+            components.familyInfoView.addSubview(components.familyNameButton)
             components.familyInfoView.addSubview(components.notificationButton)
 
-            components.familyNameLabel.text = family.name
+            components.familyNameButton.setTitle(family.name, for: .normal)
 
             NSLayoutConstraint.activate([
-                components.familyNameLabel.topAnchor.constraint(equalTo: components.familyInfoView.topAnchor),
-                components.familyNameLabel.leadingAnchor.constraint(equalTo: components.familyInfoView.leadingAnchor),
-                components.familyNameLabel.trailingAnchor.constraint(equalTo: components.familyInfoView.trailingAnchor),
+                components.familyNameButton.topAnchor.constraint(equalTo: components.familyInfoView.topAnchor),
+                components.familyNameButton.leadingAnchor.constraint(equalTo: components.familyInfoView.leadingAnchor),
+                components.familyNameButton.trailingAnchor.constraint(equalTo: components.familyInfoView.trailingAnchor),
 
-                components.notificationButton.topAnchor.constraint(equalTo: components.familyNameLabel.bottomAnchor, constant: 8),
+                components.notificationButton.topAnchor.constraint(equalTo: components.familyNameButton.bottomAnchor, constant: 8),
                 components.notificationButton.trailingAnchor.constraint(equalTo: components.familyInfoView.trailingAnchor),
                 components.notificationButton.bottomAnchor.constraint(equalTo: components.familyInfoView.bottomAnchor),
                 components.notificationButton.widthAnchor.constraint(equalToConstant: 50),
@@ -330,7 +337,7 @@ public class MainViewController: UIViewController {
         }
     }
 
-    @objc private func notificationButtonTapped() {
+    @objc private func familyNameButtonTapped() {
         showFamilyInfoPopup()
     }
 

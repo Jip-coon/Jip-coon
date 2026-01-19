@@ -120,17 +120,34 @@ public class MainViewComponents: NSObject {
         return button
     }()
 
-    public lazy var familyNameLabel: UILabel = {
-        let label = UILabel()
-        label.text = "가족이름"
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = UIColor.textGray
-        return label
+    public lazy var familyNameButton: UIButton = {
+        let button = UIButton(type: .system)
+
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = "가족이름"
+        configuration.baseForegroundColor = .white
+        configuration.baseBackgroundColor = UIColor.mainOrange
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 10, bottom: 6, trailing: 10)
+
+        // 폰트 설정
+        configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = .systemFont(ofSize: 16, weight: .semibold)
+            return outgoing
+        }
+
+        button.configuration = configuration
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.2
+        button.layer.shadowOffset = CGSize(width: 0, height: 3)
+        button.layer.shadowRadius = 6
+
+        return button
     }()
 
     public lazy var notificationButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("🔔 2", for: .normal)
+        button.setTitle("🔔", for: .normal)
         button.setTitleColor(UIColor.mainOrange, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
         button.backgroundColor = UIColor.white.withAlphaComponent(0.9)
