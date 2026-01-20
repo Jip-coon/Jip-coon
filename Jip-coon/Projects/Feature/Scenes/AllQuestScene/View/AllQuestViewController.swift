@@ -15,6 +15,7 @@ public class AllQuestViewController: UIViewController{
     )
     
     private let filterButton = FilterButtonView()
+    
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.separatorStyle = .none
