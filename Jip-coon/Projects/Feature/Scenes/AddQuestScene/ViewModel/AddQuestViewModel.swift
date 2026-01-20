@@ -43,6 +43,7 @@ final class AddQuestViewModel: ObservableObject {
     var starCount: Int = 10
     private(set) var recurringType: RecurringType = .none    // 반복 타입
     var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    var selectedWorkerID: String?
     
     // MARK: - Method
     
@@ -119,10 +120,8 @@ final class AddQuestViewModel: ObservableObject {
         // 가족 ID 가져오기 (없으면 더미 가족 ID 사용)
         let familyId = currentUser.familyId ?? "dummy_family_id"
         
-        // 선택된 담당자 ID 찾기
-        var assignedTo: String? = familyMembers.first(
-            where: { $0.name == selectedWorkerName
-            })?.id
+        // 선택된 담당자 ID
+        var assignedTo: String? = selectedWorkerID
         
         // "선택해 주세요"인 경우 현재 사용자를 담당자로 설정
         if selectedWorkerName == "선택해 주세요" || assignedTo == nil {

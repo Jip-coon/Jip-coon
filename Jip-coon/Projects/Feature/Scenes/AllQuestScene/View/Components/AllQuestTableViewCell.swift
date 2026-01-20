@@ -98,10 +98,16 @@ final class AllQuestTableViewCell: UITableViewCell {
         ])
     }
     
-    func configureUI(with quest: Quest) {
+    func configureUI(with quest: Quest, members: [User]) {
         titleLabel.text = "\(quest.category.emoji) \(quest.title)"
         
         // TODO: - 담당자 이름 설정
+        if let assignedId = quest.assignedTo,
+           let member = members.first(where: { $0.id == assignedId }) {
+            assigneeLabel.text = member.name
+        } else {
+            assigneeLabel.text = "없음"
+        }
         
         // 상태에 따른 색상 설정
         let statusColor: UIColor

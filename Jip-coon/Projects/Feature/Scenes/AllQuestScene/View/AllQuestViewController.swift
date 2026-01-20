@@ -5,10 +5,15 @@
 //  Created by 예슬 on 1/18/26.
 //
 
+import Combine
 import UI
 import UIKit
 
 public class AllQuestViewController: UIViewController{
+    private let viewModel: AllQuestViewModel
+    private var cancellables: Set<AnyCancellable> = []
+    
+    // MARK: - UI Components
     
     private let segmentControl = UnderlineSegmentControl(
         titles: ["오늘", "예정", "지난"]
@@ -23,12 +28,25 @@ public class AllQuestViewController: UIViewController{
         return tableView
     }()
     
+    public init(viewModel: AllQuestViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Lifecycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
         setupConstraints()
     }
+    
+    // MARK: - Setup
     
     private func setupUI() {
         view.backgroundColor = .backgroundWhite
@@ -79,11 +97,21 @@ public class AllQuestViewController: UIViewController{
         )
     }
     
+    private func bindViewModel() {
+        viewModel.$allQuests
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
+    }
+    
 }
+
+// MARK: - TableView Delegate
 
 extension AllQuestViewController: UITableViewDelegate {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 11
+        return viewModel.allQuests.count
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -93,6 +121,8 @@ extension AllQuestViewController: UITableViewDelegate {
     
 }
 
+// MARK: - TableView DataSource
+
 extension AllQuestViewController: UITableViewDataSource {
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
@@ -101,7 +131,7 @@ extension AllQuestViewController: UITableViewDataSource {
             fatalError("Could not dequeue AllQuestTableViewCell")
         }
         
-        cell.dummyConfigure()
+        cell.configureUI(with: viewModel.allQuests[indexPath.row], members: viewModel.familyMembers)
         
         return cell
     }

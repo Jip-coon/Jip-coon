@@ -439,6 +439,7 @@ final class AddQuestViewController: UIViewController {
             UIAction(title: member.name) { [weak self] _ in
                 self?.viewModel
                     .selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
+                self?.viewModel.selectedWorkerID = member.id 
             }
         }
         
