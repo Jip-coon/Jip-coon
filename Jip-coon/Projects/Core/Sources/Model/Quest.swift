@@ -89,9 +89,8 @@ public struct Quest: Codable, Identifiable {
     ///   - createdBy: 생성자 사용자 ID
     ///   - familyId: 소속 가족 ID
     ///   - points: 완료 시 획득 포인트 (기본값: 10)
-    ///   - assignedTo:
-    ///   - recurringType:
-    ///   - recurringEndDate:
+    ///   - assignedTo: 담당자 사용자 ID
+    ///   - dueDate: 마감일(날짜, 시간)
     /// - Note: FirebaseQuestService에서 퀘스트 생성 시 사용
     ///         실제 Firestore 문서 ID를 사용하여 데이터 일관성 보장
     public init(
@@ -102,7 +101,8 @@ public struct Quest: Codable, Identifiable {
         createdBy: String,
         familyId: String,
         points: Int,
-        assignedTo: String? = nil
+        assignedTo: String? = nil,
+        dueDate: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -113,7 +113,7 @@ public struct Quest: Codable, Identifiable {
         self.createdBy = createdBy
         self.familyId = familyId
         self.points = points
-        self.dueDate = nil
+        self.dueDate = dueDate
         self.recurringType = .none
         self.recurringEndDate = nil
         self.createdAt = Date()

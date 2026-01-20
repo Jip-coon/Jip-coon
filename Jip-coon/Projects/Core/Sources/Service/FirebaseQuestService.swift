@@ -52,7 +52,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 createdBy: quest.createdBy,
                 familyId: quest.familyId,
                 points: quest.points,
-                assignedTo: quest.assignedTo
+                assignedTo: quest.assignedTo,
+                dueDate: quest.dueDate
             )
 
             // Firestore에 저장

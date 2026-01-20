@@ -43,6 +43,8 @@ final class AllQuestTableViewCell: UITableViewCell {
         return label
     }()
     
+    // MARK: - init
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
@@ -51,6 +53,8 @@ final class AllQuestTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Method
     
     private func setupUI() {
         contentView.addSubview(containerView)
@@ -101,7 +105,7 @@ final class AllQuestTableViewCell: UITableViewCell {
     func configureUI(with quest: Quest, members: [User]) {
         titleLabel.text = "\(quest.category.emoji) \(quest.title)"
         
-        // TODO: - 담당자 이름 설정
+        // 담당자 이름 설정
         if let assignedId = quest.assignedTo,
            let member = members.first(where: { $0.id == assignedId }) {
             assigneeLabel.text = member.name
@@ -133,18 +137,6 @@ final class AllQuestTableViewCell: UITableViewCell {
         containerView.backgroundColor = statusColor.withAlphaComponent(0.1)
         containerView.layer.borderWidth = 1
         containerView.layer.borderColor = statusColor
-            .withAlphaComponent(0.3).cgColor
-    }
-    
-    func dummyConfigure() {
-        titleLabel.text = "🔹 Dummy Quest"
-        assigneeLabel.text = "Dummy Assignee"
-        statusLabel.text = "Pending"
-        statusLabel.backgroundColor = .textGray
-        
-        containerView.backgroundColor = UIColor.green.withAlphaComponent(0.1)
-        containerView.layer.borderWidth = 1
-        containerView.layer.borderColor = UIColor.green
             .withAlphaComponent(0.3).cgColor
     }
     

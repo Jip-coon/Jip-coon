@@ -476,6 +476,7 @@ final class AddQuestViewController: UIViewController {
         viewModel.title = titleTextField.text ?? ""
         viewModel.description = memoTextField.text ?? ""
         viewModel.questCreateDate = Date()
+        viewModel.combineDateAndTime()
         
         // 비동기로 퀘스트 저장
         Task {
