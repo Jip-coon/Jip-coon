@@ -10,8 +10,8 @@ import Foundation
 
 public final class AllQuestViewModel: ObservableObject {
     
-    private let userService: UserServiceProtocol
-    private let questService: QuestServiceProtocol
+    let userService: UserServiceProtocol
+    let questService: QuestServiceProtocol
     
     public init(
         userService: UserServiceProtocol,

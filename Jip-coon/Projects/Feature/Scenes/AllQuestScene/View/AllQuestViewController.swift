@@ -199,13 +199,22 @@ public class AllQuestViewController: UIViewController{
 // MARK: - TableView Delegate
 
 extension AllQuestViewController: UITableViewDelegate {
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.currentQuests.count
-    }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         // Cell ContainerView Height = 75, Padding = 15
         return 90
+    }
+    
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let quest = viewModel.currentQuests[indexPath.row]
+        
+        let questDetailViewController = QuestDetailViewController(
+            quest: quest,
+            questService: viewModel.questService,
+            userService: viewModel.userService
+        )
+        
+        navigationController?.pushViewController(questDetailViewController, animated: true)
     }
     
 }
@@ -213,6 +222,11 @@ extension AllQuestViewController: UITableViewDelegate {
 // MARK: - TableView DataSource
 
 extension AllQuestViewController: UITableViewDataSource {
+    
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.currentQuests.count
+    }
+    
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: AllQuestTableViewCell.identifier) as? AllQuestTableViewCell
@@ -227,4 +241,5 @@ extension AllQuestViewController: UITableViewDataSource {
         
         return cell
     }
+    
 }
