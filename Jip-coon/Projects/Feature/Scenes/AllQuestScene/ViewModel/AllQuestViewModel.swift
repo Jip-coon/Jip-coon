@@ -25,7 +25,7 @@ public final class AllQuestViewModel: ObservableObject {
             await fetchAllQuests()
         }
         // 초기 데이터 세팅
-        changeSelectedSegment()
+        updateCurrentQuests()
     }
     
     enum AllQuestSegmentControl {
@@ -37,10 +37,13 @@ public final class AllQuestViewModel: ObservableObject {
     // MARK: - Properties
     
     @Published var allQuests: [Quest] = [] {
-        didSet { filterQuests() }
+        didSet { filterQuestsByDate() }
     }
     @Published var selectedSegment: AllQuestSegmentControl = .today {
-        didSet { changeSelectedSegment() }
+        didSet { updateCurrentQuests() }
+    }
+    @Published var selectedStatusOptions: Set<FilterButtonView.FilterOption> = [.all] {
+        didSet { updateCurrentQuests() }
     }
     @Published private(set) var currentQuests: [Quest] = []
     
@@ -49,8 +52,9 @@ public final class AllQuestViewModel: ObservableObject {
     var upcomingQuests: [Quest] = []
     var pastQuests: [Quest] = []
     
-    // MARK: - Method
+    // MARK: - 서버에서 데이터 가져오기
     
+    /// 가족 정보 가져오기
     private func fetchFamilyMembers() async {
         do {
             guard let user = try await userService.getCurrentUser() else {
@@ -89,27 +93,30 @@ public final class AllQuestViewModel: ObservableObject {
         }
     }
     
+    // MARK: - 필터링 관리
+    
     /// 모든 퀘스트를 기준으로 퀘스트 분리
     /// - 오늘 퀘스트
     /// - 예정 퀘스트(내일 - 7일 후)
     /// - 과거 퀘스트(7일 전 - 어제)
-    private func filterQuests() {
+    private func filterQuestsByDate() {
         filterTodayQuests()
         filterUpcomingQuests()
         filterPastQuests()
-        changeSelectedSegment()
+        updateCurrentQuests()
     }
     
-    private func changeSelectedSegment() {
-        switch selectedSegment {
-            case .today:
-                currentQuests = todayQuests
-            case .upcoming:
-                currentQuests = upcomingQuests
-            case .past:
-                currentQuests = pastQuests
-        }
+    /// 필터(날짜, 상태) 적용된 데이터 가져오기
+    /// - 현재 탭(날짜별)에 맞는 데이터셋 확보
+    /// - 확보된 데이터셋에 상태 필터 적용
+    /// - 최종 결과물 업데이트
+    private func updateCurrentQuests() {
+        let dateFiltered = getQuestsForCurrentSegment()
+        let statusFiltered = applyStatusFilter(to: dateFiltered)
+        self.currentQuests = statusFiltered
     }
+    
+    // MARK: - Helper (날짜별)
     
     /// 오늘 퀘스트
     private func filterTodayQuests() {
@@ -155,5 +162,45 @@ public final class AllQuestViewModel: ObservableObject {
             }
         // 가장 최근이 위 (내림차순)
             .sorted { ($0.dueDate ?? .distantPast) > ($1.dueDate ?? .distantPast) }
+    }
+    
+    // MARK: - Helper (상태별)
+    
+    /// 날짜 탭에 따른 데이터 선택
+    private func getQuestsForCurrentSegment() -> [Quest] {
+        switch selectedSegment {
+            case .today: return todayQuests
+            case .upcoming: return upcomingQuests
+            case .past: return pastQuests
+        }
+    }
+    
+    /// 상태 옵션에 따른 데이터 필터링
+    private func applyStatusFilter(to quests: [Quest]) -> [Quest] {
+        // '전체'가 포함되어 있으면 필터링 없이 그대로 반환
+        if selectedStatusOptions.contains(.all) {
+            return quests
+        }
+        
+        // 선택된 상태값만 추출
+        return quests.filter { quest in
+            selectedStatusOptions.contains { option in
+                isMatch(quest: quest, with: option)
+            }
+        }
+    }
+    
+    /// 개별 옵션 매칭 로직
+    private func isMatch(quest: Quest, with option: FilterButtonView.FilterOption) -> Bool {
+        switch option {
+            case .pending:
+                return quest.status == .pending
+            case .progressing:
+                return quest.status == .inProgress
+            case .completed:
+                return [.completed, .approved, .rejected].contains(quest.status)
+            default:
+                return false
+        }
     }
 }

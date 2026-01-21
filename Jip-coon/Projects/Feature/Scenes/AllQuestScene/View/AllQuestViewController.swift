@@ -64,6 +64,15 @@ public class AllQuestViewController: UIViewController{
         bindViewModel()
         setupNotificationCenter()
         setupSegmentedControl()
+        setupFilterButton()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        Task { [weak self] in
+            await self?.viewModel.fetchAllQuests()
+        }
     }
     
     // MARK: - Setup
@@ -124,17 +133,6 @@ public class AllQuestViewController: UIViewController{
         )
     }
     
-    private func bindViewModel() {
-        // 퀘스트가 변경 됐을 경우
-        viewModel.$currentQuests
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateEmptyState()
-                self?.tableView.reloadData()
-            }
-            .store(in: &cancellables)
-    }
-    
     /// 퀘스트 생성 알림 구독
     private func setupNotificationCenter() {
         NotificationCenter.default.addObserver(
@@ -167,6 +165,25 @@ public class AllQuestViewController: UIViewController{
                     break
             }
         }
+    }
+    
+    private func setupFilterButton() {
+        filterButton.onFilterChanged = { [weak self] options in
+            self?.viewModel.selectedStatusOptions = options
+        }
+    }
+    
+    // MARK: - Data Binding
+    
+    private func bindViewModel() {
+        // 퀘스트가 변경 됐을 경우
+        viewModel.$currentQuests
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateEmptyState()
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
     }
     
     /// 퀘스트 없을 경우

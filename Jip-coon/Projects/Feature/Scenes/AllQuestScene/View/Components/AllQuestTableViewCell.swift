@@ -57,6 +57,8 @@ final class AllQuestTableViewCell: UITableViewCell {
     // MARK: - Method
     
     private func setupUI() {
+        selectionStyle = .none
+        
         contentView.addSubview(containerView)
         containerView.addSubview(titleLabel)
         containerView.addSubview(assigneeLabel)
