@@ -36,21 +36,22 @@ public final class AllQuestViewModel: ObservableObject {
     
     // MARK: - Properties
     
-    @Published var allQuests: [Quest] = [] {
+    @Published private(set) var sectionedQuests: [QuestSection] = []
+    
+    var selectedSegment: AllQuestSegmentControl = .today {
+        didSet { updateCurrentQuests() }
+    }
+    var selectedStatusOptions: Set<FilterButtonView.FilterOption> = [.all] {
+        didSet { updateCurrentQuests() }
+    }
+    
+    private(set) var familyMembers: [User] = []
+    private var todayQuests: [Quest] = []
+    private var upcomingQuests: [Quest] = []
+    private var pastQuests: [Quest] = []
+    private var allQuests: [Quest] = [] {
         didSet { filterQuestsByDate() }
     }
-    @Published var selectedSegment: AllQuestSegmentControl = .today {
-        didSet { updateCurrentQuests() }
-    }
-    @Published var selectedStatusOptions: Set<FilterButtonView.FilterOption> = [.all] {
-        didSet { updateCurrentQuests() }
-    }
-    @Published private(set) var currentQuests: [Quest] = []
-    
-    var familyMembers: [User] = []
-    var todayQuests: [Quest] = []
-    var upcomingQuests: [Quest] = []
-    var pastQuests: [Quest] = []
     
     // MARK: - 서버에서 데이터 가져오기
     
@@ -113,7 +114,13 @@ public final class AllQuestViewModel: ObservableObject {
     private func updateCurrentQuests() {
         let dateFiltered = getQuestsForCurrentSegment()
         let statusFiltered = applyStatusFilter(to: dateFiltered)
-        self.currentQuests = statusFiltered
+        
+        // 섹션 나누기
+        if selectedSegment == .today {
+            self.sectionedQuests = statusFiltered.isEmpty ? [] : [QuestSection(date: Date(), quests: statusFiltered)]
+        } else {
+            self.sectionedQuests = groupQuestsByDate(statusFiltered)
+        }
     }
     
     // MARK: - Helper (날짜별)
@@ -203,4 +210,29 @@ public final class AllQuestViewModel: ObservableObject {
                 return false
         }
     }
+    
+    // MARK: - Helper (섹션)
+    
+    /// 날짜별 그룹화
+    private func groupQuestsByDate(_ quests: [Quest]) -> [QuestSection] {
+        let dictionary = Dictionary(grouping: quests) { (quest) -> Date in
+            // 시간을 제외한 "날짜" 정보만 추출하여 키값으로 사용
+            return Calendar.current.startOfDay(for: quest.dueDate ?? quest.createdAt)
+        }
+        
+        // 날짜순으로 정렬하여 Section 배열 생성
+        return dictionary.keys.sorted(by: {
+            selectedSegment == .upcoming ? $0 < $1 : $0 > $1
+        }).map {
+            QuestSection(date: $0, quests: dictionary[$0] ?? [])
+        }
+    }
+    
+}
+
+// MARK: - Quest Section
+
+struct QuestSection {
+    let date: Date
+    let quests: [Quest]
 }

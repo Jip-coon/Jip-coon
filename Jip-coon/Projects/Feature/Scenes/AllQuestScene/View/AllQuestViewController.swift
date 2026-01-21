@@ -9,7 +9,7 @@ import Combine
 import UI
 import UIKit
 
-public class AllQuestViewController: UIViewController{
+public class AllQuestViewController: UIViewController {
     private let viewModel: AllQuestViewModel
     private var cancellables: Set<AnyCancellable> = []
     
@@ -25,12 +25,13 @@ public class AllQuestViewController: UIViewController{
         let tableView = UITableView()
         tableView.separatorStyle = .none
         tableView.showsVerticalScrollIndicator = false
+        tableView.sectionHeaderTopPadding = 0
         return tableView
     }()
     
     private let emptyLabel: UILabel = {
         let label = UILabel()
-        label.text = "등록된 퀘스트가 없습니다\n퀘스트를 추가해 보세요"
+        label.text = "퀘스트가 없습니다"
         label.numberOfLines = 2
         label.textColor = .black
         label.font = .systemFont(ofSize: 16, weight: .regular)
@@ -177,7 +178,7 @@ public class AllQuestViewController: UIViewController{
     
     private func bindViewModel() {
         // 퀘스트가 변경 됐을 경우
-        viewModel.$currentQuests
+        viewModel.$sectionedQuests
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateEmptyState()
@@ -188,7 +189,7 @@ public class AllQuestViewController: UIViewController{
     
     /// 퀘스트 없을 경우
     private func updateEmptyState() {
-        let isEmpty = viewModel.currentQuests.isEmpty
+        let isEmpty = viewModel.sectionedQuests.isEmpty
         
         tableView.isHidden = isEmpty
         emptyLabel.isHidden = !isEmpty
@@ -206,7 +207,7 @@ extension AllQuestViewController: UITableViewDelegate {
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let quest = viewModel.currentQuests[indexPath.row]
+        let quest = viewModel.sectionedQuests[indexPath.section].quests[indexPath.row]
         
         let questDetailViewController = QuestDetailViewController(
             quest: quest,
@@ -223,8 +224,41 @@ extension AllQuestViewController: UITableViewDelegate {
 
 extension AllQuestViewController: UITableViewDataSource {
     
+    public func numberOfSections(in tableView: UITableView) -> Int {
+        return viewModel.sectionedQuests.count
+    }
+    
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.currentQuests.count
+        return viewModel.sectionedQuests[section].quests.count
+    }
+    
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+
+        if viewModel.selectedSegment == .today { return nil }
+
+        let container = UIView()
+        container.backgroundColor = .backgroundWhite
+
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .semibold)
+        label.textColor = .textGray
+        label.text = viewModel.sectionedQuests[section].date.mmDDe
+
+        container.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -10),
+            label.topAnchor.constraint(equalTo: container.topAnchor)
+        ])
+
+        return container
+    }
+    
+    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        viewModel.selectedSegment == .today ? 0 : 27
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -235,7 +269,7 @@ extension AllQuestViewController: UITableViewDataSource {
         }
         
         cell.configureUI(
-            with: viewModel.currentQuests[indexPath.row],
+            with: viewModel.sectionedQuests[indexPath.section].quests[indexPath.row],
             members: viewModel.familyMembers
         )
         
