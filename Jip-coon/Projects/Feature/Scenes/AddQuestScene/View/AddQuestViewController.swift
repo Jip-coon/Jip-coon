@@ -113,6 +113,18 @@ final class AddQuestViewController: UIViewController {
         return view
     }()
     
+    // 종료일
+    private let scheduleEndDateView: InfoRowView = {
+        let label = UILabel()
+        label.text = "📅"
+        label.font = .systemFont(ofSize: 15)
+        return InfoRowView(
+            leading: label,
+            title: "종료일",
+            value: Date.now.yyyyMMdEE
+        )
+    }()
+    
     private let missionAddButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("퀘스트 추가", for: .normal)
@@ -156,6 +168,7 @@ final class AddQuestViewController: UIViewController {
             workerInfoRowView,
             starInfoRowView,
             scheduleRepeatView,
+            scheduleEndDateView,
             missionAddButton
             
         ].forEach(containerView.addSubview)
@@ -171,6 +184,7 @@ final class AddQuestViewController: UIViewController {
             workerInfoRowView,
             starInfoRowView,
             scheduleRepeatView,
+            scheduleEndDateView,
             missionAddButton
             
         ].forEach {
@@ -303,10 +317,17 @@ final class AddQuestViewController: UIViewController {
                     ),
                 scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
                 
+                scheduleEndDateView.topAnchor
+                    .constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 30),
+                scheduleEndDateView.leadingAnchor
+                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+                scheduleEndDateView.trailingAnchor
+                    .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+                
                 missionAddButton.topAnchor
                     .constraint(
-                        equalTo: scheduleRepeatView.bottomAnchor,
-                        constant: 47
+                        equalTo: scheduleEndDateView.bottomAnchor,
+                        constant: 30
                     ),
                 missionAddButton.leadingAnchor
                     .constraint(equalTo: containerView.leadingAnchor, constant: 20),
@@ -352,6 +373,11 @@ final class AddQuestViewController: UIViewController {
     
     /// 각 버튼 액션 정의
     private func setupInfoRowViewButtonAction() {
+        // 카테고리
+        categoryCarouselView.onCategorySelected = { [weak self] category in
+            self?.viewModel.category = category
+        }
+        
         // 날짜
         dateInfoRowView.onTap = { [weak self] in
             self?.presentDatePicker()
@@ -370,9 +396,9 @@ final class AddQuestViewController: UIViewController {
             self?.viewModel.updateSelectedRepeatDays(days)
         }
         
-        // 카테고리
-        categoryCarouselView.onCategorySelected = { [weak self] category in
-            self?.viewModel.category = category
+        // 종료일
+        scheduleEndDateView.onTap = { [weak self] in
+            self?.presentScheduleEndDatePicker()
         }
         
         missionAddButton
@@ -465,6 +491,30 @@ final class AddQuestViewController: UIViewController {
         let menu = UIMenu(title: "별의 개수", children: menuActions)
         
         starInfoRowView.setupMenu(menu)
+    }
+    
+    /// 종료 날짜 버튼 -> DatePicker
+    private func presentScheduleEndDatePicker() {
+        let datePickerViewController = DatePickerViewController(
+            datePickerMode: .date
+        )
+        
+        datePickerViewController.onDidTapDone = { [weak self] date in
+            self?.scheduleEndDateView.setValueText(date.yyyyMMdEE)
+            self?.viewModel.recurringEndDate = date
+//            self?.viewModel.combineDateAndTime()
+        }
+        
+        let navigationController = UINavigationController(
+            rootViewController: datePickerViewController
+        )
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
     }
     
     /// 퀘스트추가 버튼

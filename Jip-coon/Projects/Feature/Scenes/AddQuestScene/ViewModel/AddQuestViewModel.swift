@@ -23,18 +23,20 @@ final class AddQuestViewModel: ObservableObject {
         self.familyService = familyService
         self.questService = questService
     }
-    @Published var title: String = ""
-    @Published var description: String = ""
-    @Published var questCreateDate: Date = Date()
-    @Published var selectedDate: Date = Date()  // 선택된 날짜
-    @Published var selectedTime: Date = Date()  // 선택된 시간
-    @Published var questDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
-    @Published var category: QuestCategory = .laundry
-    @Published var familyMembers: [User] = []   // 가족 구성원
+    
+    var title: String = ""
+    var description: String = ""
+    var questCreateDate: Date = Date()
+    var selectedDate: Date = Date()  // 선택된 날짜
+    var selectedTime: Date = Date()  // 선택된 시간
+    var questDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
+    var category: QuestCategory = .laundry
+    var familyMembers: [User] = []   // 가족 구성원
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
-    @Published var starCount: Int = 10
-    @Published private(set) var recurringType: RecurringType = .none    // 반복 타입
-    @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    var starCount: Int = 10
+    private(set) var recurringType: RecurringType = .none    // 반복 타입
+    var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    var recurringEndDate: Date = Date()    // 반복 종료일
     
     // TODO: - Firebase에서 데이터 가져오기
     func fetchFamilyMembers(for currentFamilyId: String) {
@@ -129,12 +131,14 @@ final class AddQuestViewModel: ObservableObject {
             points: starCount
         )
 
-        // 마감일 설정
+        // 마감일, 담당자 설정
         var questToSave = quest
         questToSave.dueDate = questDueDate
-        questToSave.recurringType = recurringType
         questToSave.assignedTo = assignedTo
-
+        
+        // 반복 설정
+        questToSave.recurringType = recurringType
+        
         // Firebase에 저장
         _ = try await questService.createQuest(questToSave)
     }
