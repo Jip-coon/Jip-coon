@@ -21,6 +21,13 @@ public extension Date {
         formatter.dateFormat = "a h시 mm분"
         return formatter.string(from: self)
     }
+    
+    var mmDDe: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "MM월 dd일 E요일"
+        return formatter.string(from: self)
+    }
 
     /// 경과 시간을 표시하는 문자열
     var timeAgoString: String {

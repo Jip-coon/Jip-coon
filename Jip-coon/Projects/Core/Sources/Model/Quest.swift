@@ -53,8 +53,14 @@ public struct Quest: Codable, Identifiable {
     ///   - points: 완료 시 획득 포인트 (기본값: 10)
     /// - Note: UUID를 사용하여 클라이언트 측 임시 ID 생성
     ///         실제 저장 시 Firestore 자동 ID로 교체
-    public init(title: String, description: String? = nil, category: QuestCategory,
-                createdBy: String, familyId: String, points: Int = 10) {
+    public init(
+        title: String,
+        description: String? = nil,
+        category: QuestCategory,
+        createdBy: String,
+        familyId: String,
+        points: Int = 10
+    ) {
         self.id = UUID().uuidString
         self.title = title
         self.description = description
@@ -83,20 +89,31 @@ public struct Quest: Codable, Identifiable {
     ///   - createdBy: 생성자 사용자 ID
     ///   - familyId: 소속 가족 ID
     ///   - points: 완료 시 획득 포인트 (기본값: 10)
+    ///   - assignedTo: 담당자 사용자 ID
+    ///   - dueDate: 마감일(날짜, 시간)
     /// - Note: FirebaseQuestService에서 퀘스트 생성 시 사용
     ///         실제 Firestore 문서 ID를 사용하여 데이터 일관성 보장
-    public init(id: String, title: String, description: String? = nil, category: QuestCategory,
-                createdBy: String, familyId: String, points: Int = 10) {
+    public init(
+        id: String,
+        title: String,
+        description: String? = nil,
+        category: QuestCategory,
+        createdBy: String,
+        familyId: String,
+        points: Int,
+        assignedTo: String? = nil,
+        dueDate: Date? = nil
+    ) {
         self.id = id
         self.title = title
         self.description = description
         self.category = category
         self.status = .pending
-        self.assignedTo = nil
+        self.assignedTo = assignedTo
         self.createdBy = createdBy
         self.familyId = familyId
         self.points = points
-        self.dueDate = nil
+        self.dueDate = dueDate
         self.recurringType = .none
         self.recurringEndDate = nil
         self.createdAt = Date()
