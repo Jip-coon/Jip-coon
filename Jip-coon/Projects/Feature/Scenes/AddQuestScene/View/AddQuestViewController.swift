@@ -507,7 +507,6 @@ final class AddQuestViewController: UIViewController {
         datePickerViewController.onDidTapDone = { [weak self] date in
             self?.scheduleEndDateView.setValueText(date.yyyyMMdEE)
             self?.viewModel.recurringEndDate = date
-//            self?.viewModel.combineDateAndTime()
         }
         
         let navigationController = UINavigationController(
@@ -525,8 +524,6 @@ final class AddQuestViewController: UIViewController {
     /// 퀘스트추가 버튼
     @objc private func missionAddButtonTapped() {
         view.endEditing(true)
-        
-        // TODO: - 모든 정보 입력했는지 확인
         
         viewModel.title = titleTextField.text ?? ""
         viewModel.description = memoTextField.text ?? ""
