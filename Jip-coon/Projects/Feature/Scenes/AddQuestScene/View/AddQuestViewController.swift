@@ -351,6 +351,14 @@ final class AddQuestViewController: UIViewController {
                 self?.workerInfoRowView.setValueText(name)
             }
             .store(in: &cancellables)
+        
+        viewModel.$familyMembers
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] members in
+                guard !members.isEmpty else { return }
+                self?.setupWorkerSelectionMenu()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - 키보드 관련
@@ -388,7 +396,6 @@ final class AddQuestViewController: UIViewController {
             self?.presentTimePicker()
         }
         
-        setupWorkerSelectionMenu()  // 담당
         setupStarSelectionMenu()    // 별
         
         // 반복
@@ -459,13 +466,11 @@ final class AddQuestViewController: UIViewController {
     
     /// 담당 버튼 -> UIMenu(담당자 선택)
     private func setupWorkerSelectionMenu() {
-        // TODO: - fetch 부분 수정
-        viewModel.fetchFamilyMembers(for: "123")
-        
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
                 self?.viewModel
                     .selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
+                self?.viewModel.selectedWorkerID = member.id 
             }
         }
         
@@ -526,6 +531,7 @@ final class AddQuestViewController: UIViewController {
         viewModel.title = titleTextField.text ?? ""
         viewModel.description = memoTextField.text ?? ""
         viewModel.questCreateDate = Date()
+        viewModel.combineDateAndTime()
         
         // 비동기로 퀘스트 저장
         Task {

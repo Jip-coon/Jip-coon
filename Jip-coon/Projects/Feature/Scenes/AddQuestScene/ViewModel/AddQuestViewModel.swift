@@ -22,25 +22,47 @@ final class AddQuestViewModel: ObservableObject {
         self.userService = userService
         self.familyService = familyService
         self.questService = questService
+        
+        Task {
+            await fetchFamilyMembers()
+        }
     }
     
+    // MARK: - Properties
     var title: String = ""
     var description: String = ""
     var questCreateDate: Date = Date()
     var selectedDate: Date = Date()  // 선택된 날짜
     var selectedTime: Date = Date()  // 선택된 시간
     var questDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
-    var category: QuestCategory = .laundry
-    var familyMembers: [User] = []   // 가족 구성원
+    var category: QuestCategory = .cleaning
+    @Published var familyMembers: [User] = []   // 가족 구성원
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
     var starCount: Int = 10
     private(set) var recurringType: RecurringType = .none    // 반복 타입
     var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
     var recurringEndDate: Date = Date()    // 반복 종료일
+    var selectedWorkerID: String?
     
-    // TODO: - Firebase에서 데이터 가져오기
-    func fetchFamilyMembers(for currentFamilyId: String) {
-        
+    // MARK: - Method
+    
+    private func fetchFamilyMembers() async {
+        do {
+            guard let currentUser = try await userService.getCurrentUser() else {
+                print("현재 사용자 정보 가져오기 실패")
+                return
+            }
+            
+            guard let familyId = currentUser.familyId else {
+                print("가족 아이디 가져오기 실패")
+                return
+            }
+            
+            self.familyMembers = try await userService.getFamilyMembers(familyId: familyId)
+            
+        } catch {
+            print("가족 구성원 가져오기 실패: \(error)")
+        }
     }
     
     // 담당자 저장
@@ -99,10 +121,8 @@ final class AddQuestViewModel: ObservableObject {
             throw AddQuestError.familyNotFound
         }
         
-        // 선택된 담당자 ID 찾기
-        var assignedTo: String? = familyMembers.first(
-            where: { $0.name == selectedWorkerName
-            })?.id
+        // 선택된 담당자 ID
+        var assignedTo: String? = selectedWorkerID
         
         // "선택해 주세요"인 경우 현재 사용자를 담당자로 설정
         if selectedWorkerName == "선택해 주세요" || assignedTo == nil {
