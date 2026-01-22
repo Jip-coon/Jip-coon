@@ -84,7 +84,7 @@ public struct FirestoreFields {
         static let isApproved = "isApproved"
     }
     
-    struct QusetTemplate {
+    struct QuestTemplate {
         static let id = "id"
         static let title = "title"
         static let description = "description"

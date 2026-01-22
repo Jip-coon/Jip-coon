@@ -132,7 +132,7 @@ public protocol QuestServiceProtocol {
     func getQuestsByAssignee(userId: String) async throws -> [Quest]
     
     /// 퀘스트 상태 변경
-    func updateQuestStatus(questId: String, status: QuestStatus) async throws
+    func updateQuestStatus(quest: Quest, status: QuestStatus) async throws
     
     /// 퀘스트 담당자 지정
     func assignQuest(questId: String, userId: String) async throws
@@ -141,7 +141,7 @@ public protocol QuestServiceProtocol {
     func startQuest(questId: String, userId: String) async throws
     
     /// 퀘스트 완료 제출
-    func submitQuestCompletion(questId: String, submission: QuestSubmission) async throws
+    func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws
     
     /// 퀘스트 완료를 승인하거나 거절하는 메소드
     /// - Parameters:

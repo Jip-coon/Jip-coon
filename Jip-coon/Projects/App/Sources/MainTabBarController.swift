@@ -97,7 +97,7 @@ final class MainTabBarController: UITabBarController {
                 "list.star",
                 "list.star"
             ),
-            // 랭킬
+            // 랭킹
             (
                 RankingViewController(
                     userService: userService,

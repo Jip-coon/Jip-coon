@@ -53,10 +53,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 title: quest.title,
                 description: quest.description,
                 category: quest.category,
+                assignedTo: quest.assignedTo,
                 createdBy: quest.createdBy,
                 familyId: quest.familyId,
                 points: quest.points,
-                assignedTo: quest.assignedTo,
                 dueDate: quest.dueDate
             )
 
@@ -204,39 +204,67 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
     /// 퀘스트의 진행 상태를 변경하는 메소드
     /// - Parameters:
-    ///   - questId: 상태를 변경할 퀘스트의 ID
+    ///   - quest: 상태를 변경할 퀘스트
     ///   - status: 변경할 새로운 상태
     /// - Note: 상태별로 적절한 타임스탬프 필드 자동 업데이트
     ///         (시작시간, 완료시간, 승인시간 등)
     ///         updatedAt 필드는 항상 현재 시간으로 갱신
-    public func updateQuestStatus(questId: String, status: QuestStatus) async throws {
+    public func updateQuestStatus(quest: Quest, status: QuestStatus) async throws {
         do {
-            var updateData: [String: Any] = [
-                FirestoreFields.Quest.status: status.rawValue,
-                FirestoreFields.Quest.updatedAt: Timestamp(date: Date())
-            ]
-
-            // 상태별 추가 필드 설정
-            switch status {
-            case .inProgress:
-                updateData[FirestoreFields.Quest.startedAt] = Timestamp(
-                    date: Date()
+            // 가상 퀘스트(ID가 virtual_로 시작)인 경우 처리
+            if quest.id.hasPrefix("virtual_") {
+                let newDocRef = questsCollection.document()
+                
+                // 가상 퀘스트의 정보를 바탕으로 실제 DB에 저장할 객체를 새로 생성
+                let finalQuest = Quest(
+                    id: newDocRef.documentID,          // 가상 ID 대신 방금 만든 실제 문서 ID 사용
+                    templateId: quest.templateId,      // 템플릿 ID 유지
+                    title: quest.title,
+                    description: quest.description,
+                    category: quest.category,
+                    status: status,
+                    recurringType: quest.recurringType,
+                    assignedTo: quest.assignedTo,
+                    createdBy: quest.createdBy,
+                    familyId: quest.familyId,
+                    points: quest.points,
+                    dueDate: quest.dueDate,            // 가상 퀘스트가 생성됐을때 그 날짜 유지
+                    startedAt: status == .inProgress ? Date() : nil,
+                    completedAt: status == .completed ? Date() : nil,
+                    approvedAt: status == .approved ? Date() : nil,
+                    updatedAt: Date()
                 )
-            case .completed:
-                updateData[FirestoreFields.Quest.completedAt] = Timestamp(
-                    date: Date()
-                )
-            case .approved:
-                updateData[FirestoreFields.Quest.approvedAt] = Timestamp(
-                    date: Date()
-                )
-            case .rejected:
-                break // 거절 시 추가 필드 없음
-            case .pending:
-                break // 대기 시 추가 필드 없음
+                
+                // 가상 퀘스트를 실제 문서로 생성
+                try newDocRef.setData(from: finalQuest)
+            } else {
+                var updateData: [String: Any] = [
+                    FirestoreFields.Quest.status: status.rawValue,
+                    FirestoreFields.Quest.updatedAt: Timestamp(date: Date())
+                ]
+                
+                // 상태별 추가 필드 설정
+                switch status {
+                    case .inProgress:
+                        updateData[FirestoreFields.Quest.startedAt] = Timestamp(
+                            date: Date()
+                        )
+                    case .completed:
+                        updateData[FirestoreFields.Quest.completedAt] = Timestamp(
+                            date: Date()
+                        )
+                    case .approved:
+                        updateData[FirestoreFields.Quest.approvedAt] = Timestamp(
+                            date: Date()
+                        )
+                    case .rejected:
+                        break // 거절 시 추가 필드 없음
+                    case .pending:
+                        break // 대기 시 추가 필드 없음
+                }
+                
+                try await questsCollection.document(quest.id).updateData(updateData)
             }
-
-            try await questsCollection.document(questId).updateData(updateData)
         } catch {
             throw FirebaseQuestServiceError
                 .updateFailed(error.localizedDescription)
@@ -273,7 +301,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                     .invalidStatus("대기중인 퀘스트만 시작할 수 있습니다")
             }
 
-            try await updateQuestStatus(questId: questId, status: .inProgress)
+            try await updateQuestStatus(quest: quest, status: .inProgress)
         } catch let error as FirebaseQuestServiceError {
             throw error
         } catch {
@@ -285,10 +313,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     // MARK: - Submission & Review Workflow
 
     /// 퀘스트 완료 제출
-    public func submitQuestCompletion(questId: String, submission: QuestSubmission) async throws {
+    public func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws {
         do {
             // 1. 퀘스트 상태를 completed로 변경
-            try await updateQuestStatus(questId: questId, status: .completed)
+            try await updateQuestStatus(quest: quest, status: .completed)
 
             // 2. 제출 데이터 생성 (나중에 QuestSubmissionService로 분리 가능)
             try submissionsCollection
@@ -310,7 +338,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
 
             // 2. 퀘스트 상태 변경
             let newStatus: QuestStatus = isApproved ? .approved : .rejected
-            try await updateQuestStatus(questId: questId, status: newStatus)
+            try await updateQuestStatus(quest: quest, status: newStatus)
 
             // 3. 승인 시 포인트 지급
             if isApproved && quest.status == .completed {
@@ -429,29 +457,34 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         startDate: Date,
         endDate: Date
     ) async throws -> [Quest] {
+        let calendar = Calendar.current
+        
+        // 시작 날짜와 종료 날짜의 시간을 00:00:00으로 초기화하여 시간 오차 제거
+        let normalizedStart = calendar.startOfDay(for: startDate)
+        let normalizedEnd = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endDate) ?? endDate
         // 1. 이미 DB에 존재하는 실제 퀘스트(인스턴스) 가져오기
         let snapshot = try await questsCollection
             .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
-            .whereField(FirestoreFields.Quest.dueDate, isGreaterThanOrEqualTo: startDate)
-            .whereField(FirestoreFields.Quest.dueDate, isLessThanOrEqualTo: endDate)
+            .whereField(FirestoreFields.Quest.dueDate, isGreaterThanOrEqualTo: normalizedStart)
+            .whereField(FirestoreFields.Quest.dueDate, isLessThanOrEqualTo: normalizedEnd)
             .getDocuments()
         
         let realQuests = snapshot.documents.compactMap { try? $0.data(as: Quest.self) }
+        print("✅ 실제 퀘스트 개수: \(realQuests.count)")
         
-        // B. 반복 규칙(템플릿) 가져오기
+        // 2. 반복 규칙(템플릿) 가져오기
         let templateSnapshot = try await templatesCollection
-            .whereField(FirestoreFields.QusetTemplate.familyId, isEqualTo: familyId)
+            .whereField(FirestoreFields.QuestTemplate.familyId, isEqualTo: familyId)
             .getDocuments()
         
         let templates = templateSnapshot.documents.compactMap { try? $0.data(as: QuestTemplate.self) }
         
         var resultQuests = realQuests
-        let calendar = Calendar.current
         
-        // C. 템플릿 기반 가상 퀘스트 생성 및 병합
+        // 3. 템플릿 기반 가상 퀘스트 생성 및 병합
         for template in templates {
-            var date = startDate
-            while date <= endDate {
+            var date = normalizedStart
+            while date <= normalizedEnd {
                 // 요일 일치 여부 확인
                 let weekday = calendar.component(.weekday, from: date) - 1
                 if template.selectedRepeatDays.contains(weekday) {
@@ -476,7 +509,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                             createdBy: template.createdBy,
                             familyId: template.familyId,
                             points: template.points,
-                            dueDate: date
+                            dueDate: calendar.startOfDay(for: date)
                         )
                         resultQuests.append(virtualQuest)
                     }
@@ -501,29 +534,29 @@ enum FirebaseQuestServiceError: LocalizedError {
     case queryFailed(String)
     case submissionFailed(String)
     case reviewFailed(String)
-
+    
     var errorDescription: String? {
         switch self {
-        case .questNotFound:
-            return "퀘스트를 찾을 수 없습니다"
-        case .permissionDenied:
-            return "권한이 없습니다"
-        case .invalidStatus(let message):
-            return message
-        case .creationFailed(let details):
-            return "퀘스트 생성에 실패했습니다: \(details)"
-        case .fetchFailed(let details):
-            return "퀘스트 조회에 실패했습니다: \(details)"
-        case .updateFailed(let details):
-            return "퀘스트 수정에 실패했습니다: \(details)"
-        case .deletionFailed(let details):
-            return "퀘스트 삭제에 실패했습니다: \(details)"
-        case .queryFailed(let details):
-            return "퀘스트 검색에 실패했습니다: \(details)"
-        case .submissionFailed(let details):
-            return "제출에 실패했습니다: \(details)"
-        case .reviewFailed(let details):
-            return "검토에 실패했습니다: \(details)"
+            case .questNotFound:
+                return "퀘스트를 찾을 수 없습니다"
+            case .permissionDenied:
+                return "권한이 없습니다"
+            case .invalidStatus(let message):
+                return message
+            case .creationFailed(let details):
+                return "퀘스트 생성에 실패했습니다: \(details)"
+            case .fetchFailed(let details):
+                return "퀘스트 조회에 실패했습니다: \(details)"
+            case .updateFailed(let details):
+                return "퀘스트 수정에 실패했습니다: \(details)"
+            case .deletionFailed(let details):
+                return "퀘스트 삭제에 실패했습니다: \(details)"
+            case .queryFailed(let details):
+                return "퀘스트 검색에 실패했습니다: \(details)"
+            case .submissionFailed(let details):
+                return "제출에 실패했습니다: \(details)"
+            case .reviewFailed(let details):
+                return "검토에 실패했습니다: \(details)"
         }
     }
 }
