@@ -129,16 +129,16 @@ public protocol QuestServiceProtocol {
     func getQuestsByCategory(familyId: String, category: QuestCategory) async throws -> [Quest]
     
     /// 담당자별 퀘스트 조회
-    func getQuestsByAssignee(userId: String) async throws -> [Quest]
+    func getQuestsByAssignee(userId: String, familyId: String) async throws -> [Quest]
     
     /// 퀘스트 상태 변경
     func updateQuestStatus(quest: Quest, status: QuestStatus) async throws
     
     /// 퀘스트 담당자 지정
-    func assignQuest(questId: String, userId: String) async throws
+    func assignQuest(quest: Quest, userId: String) async throws
     
     /// 퀘스트 시작
-    func startQuest(questId: String, userId: String) async throws
+    func startQuest(quest: Quest, userId: String) async throws
     
     /// 퀘스트 완료 제출
     func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws
