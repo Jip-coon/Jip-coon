@@ -27,6 +27,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     private var submissionsCollection: CollectionReference {
         return db.collection(FirestoreCollections.questSubmissions)
     }
+    
+    private var templatesCollection: CollectionReference {
+        return db.collection(FirestoreCollections.questTemplates)
+    }
 
     public init() { }
 
@@ -405,40 +409,80 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     }
 
     // MARK: - Recurring Quests
-
-    /// 반복 퀘스트 생성
-    public func createRecurringQuest(baseQuest: Quest, targetDate: Date) async throws -> Quest {
-        do {
-            // Firestore에서 자동 생성된 ID 사용
-            let documentRef = questsCollection.document()
-            let documentId = documentRef.documentID
-
-            // 새로운 Quest 객체 생성 (createdAt 지정)
-            let questToSave = Quest(
-                id: documentId,
-                title: baseQuest.title,
-                description: baseQuest.description,
-                category: baseQuest.category,
-                createdBy: baseQuest.createdBy,
-                familyId: baseQuest.familyId,
-                points: baseQuest.points,
-                createdAt: Date()  // 새로운 생성 시간
-            )
-
-            // 추가 속성 설정을 위해 임시 객체 생성 (수정 가능한 필드만)
-            var finalQuest = questToSave
-            finalQuest.dueDate = targetDate
-            finalQuest.recurringType = baseQuest.recurringType
-            finalQuest.updatedAt = Date()
-
-            // Firestore에 저장
-            try documentRef.setData(from: finalQuest)
-
-            return finalQuest
-        } catch {
-            throw FirebaseQuestServiceError
-                .creationFailed(error.localizedDescription)
+    
+    /// 템플릿 저장
+    public func createQuestTemplate(_ template: QuestTemplate) async throws {
+        try templatesCollection.document(template.id).setData(from: template)
+    }
+    
+    /// 퀘스트 조회 (병합 로직)
+    /// - Parameters:
+    ///   - familyId: 가족 ID
+    ///   - startDate: 퀘스트 시작 날짜
+    ///   - endDate: 퀘스트 종료 날짜
+    /// - Returns: 퀘스트
+    /// - Note: 실제 퀘스트와 반복 규칙에 따라 만든 가상 데이터를 하나의 [Quset] 배열로 합칩니다.
+    public func fetchQuestsWithRepeat(
+        familyId: String,
+        startDate: Date,
+        endDate: Date
+    ) async throws -> [Quest] {
+        // 1. 이미 DB에 존재하는 실제 퀘스트(인스턴스) 가져오기
+        let snapshot = try await questsCollection
+            .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
+            .whereField(FirestoreFields.Quest.dueDate, isGreaterThanOrEqualTo: startDate)
+            .whereField(FirestoreFields.Quest.dueDate, isLessThanOrEqualTo: endDate)
+            .getDocuments()
+        
+        let realQuests = snapshot.documents.compactMap { try? $0.data(as: Quest.self) }
+        
+        // B. 반복 규칙(템플릿) 가져오기
+        let templateSnapshot = try await templatesCollection
+            .whereField(FirestoreFields.QusetTemplate.familyId, isEqualTo: familyId)
+            .getDocuments()
+        
+        let templates = templateSnapshot.documents.compactMap { try? $0.data(as: QuestTemplate.self) }
+        
+        var resultQuests = realQuests
+        let calendar = Calendar.current
+        
+        // C. 템플릿 기반 가상 퀘스트 생성 및 병합
+        for template in templates {
+            var date = startDate
+            while date <= endDate {
+                // 요일 일치 여부 확인
+                let weekday = calendar.component(.weekday, from: date) - 1
+                if template.selectedRepeatDays.contains(weekday) {
+                    
+                    // 해당 날짜에 이미 실제 기록(realQuests)이 있는지 확인
+                    let isAlreadyExists = realQuests.contains { real in
+                        real.templateId == template.id &&
+                        calendar.isDate(real.dueDate ?? Date(), inSameDayAs: date)
+                    }
+                    
+                    if !isAlreadyExists {
+                        // 가상 퀘스트 생성
+                        let virtualQuest = Quest(
+                            id: "virtual_\(template.id)_\(date.timeIntervalSince1970)",
+                            templateId: template.id,
+                            title: template.title,
+                            description: template.description,
+                            category: template.category,
+                            status: .pending,
+                            recurringType: template.recurringType,
+                            assignedTo: template.assignedTo,
+                            createdBy: template.createdBy,
+                            familyId: template.familyId,
+                            points: template.points,
+                            dueDate: date
+                        )
+                        resultQuests.append(virtualQuest)
+                    }
+                }
+                date = calendar.date(byAdding: .day, value: 1, to: date)!
+            }
         }
+        return resultQuests.sorted { ($0.dueDate ?? Date()) < ($1.dueDate ?? Date()) }
     }
 }
 

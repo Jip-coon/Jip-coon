@@ -16,6 +16,7 @@ public struct FirestoreCollections {
     public static let questSubmissions = "quest_submissions"
     public static let statistics = "statistics"
     public static let notifications = "notifications"
+    public static let questTemplates = "quest_templates"
 }
 
 
@@ -81,5 +82,21 @@ public struct FirestoreFields {
         static let reviewedAt = "reviewedAt"
         static let reviewComment = "reviewComment"
         static let isApproved = "isApproved"
+    }
+    
+    struct QusetTemplate {
+        static let id = "id"
+        static let title = "title"
+        static let description = "description"
+        static let category = "category"
+        static let points = "points"
+        static let createdBy = "createdBy"
+        static let familyId = "familyId"
+        static let assignedTo = "assignedTo"
+        static let recurringType = "recurringType"
+        static let selectedRepeatDays = "selectedRepeatDays"
+        static let startDate = "startDate"
+        static let reccuringEndDate = "reccuringEndDate"
+        static let updatedAt = "updatedAt"
     }
 }

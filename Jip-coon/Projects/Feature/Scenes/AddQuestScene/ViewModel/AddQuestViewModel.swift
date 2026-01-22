@@ -13,7 +13,7 @@ final class AddQuestViewModel: ObservableObject {
     private let userService: UserServiceProtocol
     private let familyService: FamilyServiceProtocol
     private let questService: QuestServiceProtocol
-
+    
     init(
         userService: UserServiceProtocol,
         familyService: FamilyServiceProtocol,
@@ -40,21 +40,7 @@ final class AddQuestViewModel: ObservableObject {
     
     // TODO: - Firebase에서 데이터 가져오기
     func fetchFamilyMembers(for currentFamilyId: String) {
-        // Sample data
-        let user1 = User(
-            id: "user123",
-            name: "예슬",
-            email: "yeseul@example.com",
-            role: .parent
-        )
-        let user2 = User(
-            id: "user456",
-            name: "관혁",
-            email: "jipcoon@example.com",
-            role: .child
-        )
         
-        self.familyMembers = [user1, user2]
     }
     
     // 담당자 저장
@@ -107,42 +93,58 @@ final class AddQuestViewModel: ObservableObject {
         guard let currentUser = try await userService.getCurrentUser() else {
             throw AddQuestError.userNotFound
         }
-
-        // 가족 ID 가져오기 (없으면 더미 가족 ID 사용)
-        let familyId = currentUser.familyId ?? "dummy_family_id"
-
+        
+        // 가족 ID 가져오기
+        guard let familyId = currentUser.familyId else {
+            throw AddQuestError.familyNotFound
+        }
+        
         // 선택된 담당자 ID 찾기
         var assignedTo: String? = familyMembers.first(
             where: { $0.name == selectedWorkerName
             })?.id
-
+        
         // "선택해 주세요"인 경우 현재 사용자를 담당자로 설정
         if selectedWorkerName == "선택해 주세요" || assignedTo == nil {
             assignedTo = currentUser.id
         }
-
-        // Quest 객체 생성
-        let quest = Quest(
-            title: title,
-            description: description.isEmpty ? nil : description,
-            category: category,
-            createdBy: currentUser.id,
-            familyId: familyId,
-            points: starCount
-        )
-
-        // 마감일, 담당자 설정
-        var questToSave = quest
-        questToSave.dueDate = questDueDate
-        questToSave.assignedTo = assignedTo
         
-        // 반복 설정
-        questToSave.recurringType = recurringType
-        
-        // Firebase에 저장
-        _ = try await questService.createQuest(questToSave)
+        if recurringType != .none {
+            // 반복 퀘스트인 경우 Template 저장
+            let repeatDaysIndexes = selectedRepeatDays.map { $0.weekdayIndex }
+            
+            let template = QuestTemplate(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                category: category,
+                points: starCount,
+                createdBy: currentUser.id,
+                familyId: familyId,
+                assignedTo: assignedTo,
+                recurringType: recurringType,
+                selectedRepeatDays: repeatDaysIndexes,
+                startDate: selectedDate,
+                recurringEndDate: recurringEndDate
+            )
+            
+            try await questService.createQuestTemplate(template)
+        } else {
+            // 일반 퀘스트인 경우
+            let quest = Quest(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                category: category,
+                assignedTo: assignedTo,
+                createdBy: currentUser.id,
+                familyId: familyId,
+                points: starCount,
+                dueDate: questDueDate
+            )
+            
+            _ = try await questService.createQuest(quest)
+        }
     }
-
+    
 }
 
 // MARK: - Error Types
@@ -151,15 +153,15 @@ enum AddQuestError: LocalizedError {
     case userNotFound
     case familyNotFound
     case saveFailed(String)
-
+    
     var errorDescription: String? {
         switch self {
-        case .userNotFound:
-            return "사용자 정보를 찾을 수 없습니다"
-        case .familyNotFound:
-            return "가족 정보를 찾을 수 없습니다"
-        case .saveFailed(let details):
-            return "퀘스트 저장에 실패했습니다: \(details)"
+            case .userNotFound:
+                return "사용자 정보를 찾을 수 없습니다"
+            case .familyNotFound:
+                return "가족 정보를 찾을 수 없습니다"
+            case .saveFailed(let details):
+                return "퀘스트 저장에 실패했습니다: \(details)"
         }
     }
 }

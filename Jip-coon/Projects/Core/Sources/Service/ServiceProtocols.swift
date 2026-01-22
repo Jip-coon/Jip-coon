@@ -155,7 +155,16 @@ public protocol QuestServiceProtocol {
     func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws
     
     /// 반복 퀘스트 생성
-    func createRecurringQuest(baseQuest: Quest, targetDate: Date) async throws -> Quest
+    func createQuestTemplate(_ template: QuestTemplate) async throws
+    
+    /// 퀘스트 조회 (병합 로직)
+    /// - Parameters:
+    ///   - familyId: 가족 ID
+    ///   - startDate: 퀘스트 시작 날짜
+    ///   - endDate: 퀘스트 종료 날짜
+    /// - Returns: 퀘스트
+    /// - Note: 실제 퀘스트와 반복 규칙에 따라 만든 가상 데이터를 하나의 [Quset] 배열로 합칩니다.
+    func fetchQuestsWithRepeat(familyId: String, startDate: Date, endDate: Date) async throws -> [Quest]
     
     /// 가족의 퀘스트 목록을 실시간으로 관찰하는 Publisher 제공
     /// - Parameter familyId: 관찰할 가족 ID
