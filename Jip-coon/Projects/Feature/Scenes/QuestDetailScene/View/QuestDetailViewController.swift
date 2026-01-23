@@ -61,7 +61,7 @@ final class QuestDetailViewController: UIViewController {
             imageView.tintColor = .black
             return imageView
         }(),
-        title: "날짜",
+        title: "마감일",
         value: quest.dueDate?.yyyyMMdEE ?? "",
         buttonStyle: isEditingMode ? .rightArrowAction : .textOnly
     )
@@ -72,7 +72,7 @@ final class QuestDetailViewController: UIViewController {
             imageView.tintColor = .black
             return imageView
         }(),
-        title: "시간",
+        title: "마감시간",
         value: quest.dueDate?.aHHmm ?? "",
         buttonStyle: isEditingMode ? .rightArrowAction : .textOnly
     )
@@ -148,9 +148,25 @@ final class QuestDetailViewController: UIViewController {
         return button
     }()
     
-    // TODO: - 반복타입 만들기
+    // 반복
+    private let scheduleRepeatView: ScheduleRepeatView = {
+        let view = ScheduleRepeatView()
+        return view
+    }()
     
-    // MARK: - Lifecycle
+    // 종료일
+    private lazy var scheduleEndDateView = InfoRowView (
+        leading: {
+            let imageView = UIImageView(image: UIImage(systemName: "calendar"))
+            imageView.tintColor = .black
+            return imageView
+        }(),
+        title: "반복 종료일",
+        value: quest.dueDate?.yyyyMMdEE ?? "",
+        buttonStyle: isEditingMode ? .rightArrowAction : .textOnly
+    )
+    
+    // MARK: - init
     
     init(
         quest: Quest,
@@ -171,6 +187,8 @@ final class QuestDetailViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
@@ -180,9 +198,10 @@ final class QuestDetailViewController: UIViewController {
         applyEditingModeState()
     }
     
+    // MARK: - 뷰 계층 설정
+    
     private func setupLayout() {
         view.backgroundColor = .white
-        // MARK: - 뷰 계층 설정
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
@@ -204,6 +223,8 @@ final class QuestDetailViewController: UIViewController {
         contentView.addSubview(memoStackView)
         contentView.addSubview(memoTextView)
         memoTextView.addSubview(memoTextViewPlaceholder)
+        contentView.addSubview(scheduleRepeatView)
+        contentView.addSubview(scheduleEndDateView)
         view.addSubview(completeQuestButton)
         
         [
@@ -221,6 +242,8 @@ final class QuestDetailViewController: UIViewController {
             memoTextView,
             completeQuestButton,
             memoTextViewPlaceholder,
+            scheduleRepeatView,
+            scheduleEndDateView
             
         ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
@@ -285,7 +308,7 @@ final class QuestDetailViewController: UIViewController {
                 titleEditTextField.heightAnchor.constraint(equalToConstant: 35),
                 
                 dateRowView.topAnchor
-                    .constraint(equalTo: titleLabel.bottomAnchor, constant: 120),
+                    .constraint(equalTo: titleLabel.bottomAnchor, constant: 45),
                 dateRowView.leadingAnchor
                     .constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 dateRowView.trailingAnchor
@@ -321,10 +344,19 @@ final class QuestDetailViewController: UIViewController {
                 memoTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 memoTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                 memoTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
-                memoTextView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
                 
                 memoTextViewPlaceholder.topAnchor.constraint(equalTo: memoTextView.topAnchor, constant: 8),
                 memoTextViewPlaceholder.leadingAnchor.constraint(equalTo: memoTextView.leadingAnchor, constant: 8),
+                
+                scheduleRepeatView.topAnchor.constraint(equalTo: memoTextView.bottomAnchor, constant: 20),
+                scheduleRepeatView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                scheduleRepeatView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
+                
+                scheduleEndDateView.topAnchor.constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 20),
+                scheduleEndDateView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                scheduleEndDateView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                scheduleEndDateView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200),
                 
                 completeQuestButton.leadingAnchor
                     .constraint(
