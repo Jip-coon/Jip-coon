@@ -23,6 +23,7 @@ final class QuestDetailViewModel: ObservableObject {
     @Published var starCount: Int = 10
     @Published private(set) var recurringType: RecurringType = .none    // 반복 타입
     @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    @Published var recurringEndDate: Date?
 
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
@@ -50,6 +51,16 @@ final class QuestDetailViewModel: ObservableObject {
             selectedDate = due
             selectedTime = due
         }
+        
+        // 반복 요일 설정
+        if let days = quest.selectedRepeatDays {
+            self.selectedRepeatDays = Set(days.compactMap { index in
+                // index가 0(일)~6(토)일 경우를 대비한 매핑
+                Day.allCases.first { $0.weekdayIndex == index }
+            })
+        }
+        
+        self.recurringEndDate = quest.recurringEndDate
     }
     
     // MARK: - Data Updates

@@ -162,7 +162,7 @@ final class QuestDetailViewController: UIViewController {
             return imageView
         }(),
         title: "반복 종료일",
-        value: quest.dueDate?.yyyyMMdEE ?? "",
+        value: quest.recurringEndDate?.yyyyMMdEE ?? "",
         buttonStyle: isEditingMode ? .rightArrowAction : .textOnly
     )
     
@@ -430,6 +430,14 @@ final class QuestDetailViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] count in
                 self?.starRowView.setValueText("\(count) 개")
+            }
+            .store(in: &cancellables)
+        
+        // 반복 요일 설정
+        viewModel.$selectedRepeatDays
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] days in
+                self?.scheduleRepeatView.updateDays(days)
             }
             .store(in: &cancellables)
     }

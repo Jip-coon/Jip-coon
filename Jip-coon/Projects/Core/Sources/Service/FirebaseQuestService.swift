@@ -470,7 +470,9 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             createdBy: template.createdBy,
             familyId: template.familyId,
             points: template.points,
-            dueDate: date
+            dueDate: date,
+            selectedRepeatDays: template.selectedRepeatDays,
+            recurringEndDate: template.recurringEndDate
         )
     }
     
