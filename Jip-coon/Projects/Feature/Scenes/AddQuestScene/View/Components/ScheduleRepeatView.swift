@@ -92,4 +92,10 @@ final class ScheduleRepeatView: UIView {
             dayButtons[day].isSelected = true
         }
     }
+    
+    func setEnabled(_ isEnabled: Bool) {
+        dayButtons.allButtons.forEach { button in
+            button.isUserInteractionEnabled = isEnabled
+        }
+    }
 }

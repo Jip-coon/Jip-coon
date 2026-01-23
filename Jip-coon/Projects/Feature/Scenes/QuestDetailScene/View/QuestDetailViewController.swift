@@ -308,7 +308,7 @@ final class QuestDetailViewController: UIViewController {
                 titleEditTextField.heightAnchor.constraint(equalToConstant: 35),
                 
                 dateRowView.topAnchor
-                    .constraint(equalTo: titleLabel.bottomAnchor, constant: 45),
+                    .constraint(equalTo: titleEditTextField.bottomAnchor, constant: 20),
                 dateRowView.leadingAnchor
                     .constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 dateRowView.trailingAnchor
@@ -340,23 +340,37 @@ final class QuestDetailViewController: UIViewController {
                 memoStackView.leadingAnchor
                     .constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 
-                memoTextView.topAnchor.constraint(equalTo: memoStackView.bottomAnchor, constant: 12),
-                memoTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-                memoTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-                memoTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
+                memoTextView.topAnchor
+                    .constraint(equalTo: memoStackView.bottomAnchor, constant: 12),
+                memoTextView.leadingAnchor
+                    .constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                memoTextView.trailingAnchor
+                    .constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                memoTextView.heightAnchor
+                    .constraint(greaterThanOrEqualToConstant: 100),
                 
-                memoTextViewPlaceholder.topAnchor.constraint(equalTo: memoTextView.topAnchor, constant: 8),
-                memoTextViewPlaceholder.leadingAnchor.constraint(equalTo: memoTextView.leadingAnchor, constant: 8),
+                memoTextViewPlaceholder
+                    .topAnchor.constraint(equalTo: memoTextView.topAnchor, constant: 8),
+                memoTextViewPlaceholder
+                    .leadingAnchor.constraint(equalTo: memoTextView.leadingAnchor, constant: 8),
                 
-                scheduleRepeatView.topAnchor.constraint(equalTo: memoTextView.bottomAnchor, constant: 20),
-                scheduleRepeatView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-                scheduleRepeatView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-                scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
+                scheduleRepeatView
+                    .topAnchor.constraint(equalTo: memoTextView.bottomAnchor, constant: 20),
+                scheduleRepeatView
+                    .leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                scheduleRepeatView
+                    .trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                scheduleRepeatView
+                    .heightAnchor.constraint(equalToConstant: 75),
                 
-                scheduleEndDateView.topAnchor.constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 20),
-                scheduleEndDateView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-                scheduleEndDateView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-                scheduleEndDateView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200),
+                scheduleEndDateView
+                    .topAnchor.constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 20),
+                scheduleEndDateView
+                    .leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                scheduleEndDateView
+                    .trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                scheduleEndDateView
+                    .bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200),
                 
                 completeQuestButton.leadingAnchor
                     .constraint(
@@ -450,6 +464,8 @@ final class QuestDetailViewController: UIViewController {
         setupWorkerRowMenu()
         setupStarRowMenu()
         setupCategorySelection()
+        setupRepeatDaysRowAction()
+        setupReccuringEndDateRowAction()
     }
     
     /// 날짜 설정
@@ -502,7 +518,24 @@ final class QuestDetailViewController: UIViewController {
     /// 카테고리 선택
     private func setupCategorySelection() {
         categoryCarouselView.onCategorySelected = { [weak self] category in
-            self?.viewModel.updateCategory(category)
+            guard let self = self, self.isEditingMode else { return }
+            self.viewModel.updateCategory(category)
+        }
+    }
+    
+    /// 반복 퀘스트 요일 선택
+    private func setupRepeatDaysRowAction() {
+        scheduleRepeatView.onDayButtonTapped = { [weak self] days in
+            guard let self = self, self.isEditingMode else { return }
+            self.viewModel.updateSelectedRepeatDays(days)
+        }
+    }
+    
+    /// 종료일 선택
+    private func setupReccuringEndDateRowAction() {
+        scheduleEndDateView.onTap = { [weak self] in
+            guard let self = self, self.isEditingMode else { return }
+            self.presentScheduleEndDatePicker()
         }
     }
     
@@ -542,6 +575,29 @@ final class QuestDetailViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
+    /// 종료 날짜 버튼 -> DatePicker
+    private func presentScheduleEndDatePicker() {
+        let datePickerViewController = DatePickerViewController(
+            datePickerMode: .date
+        )
+        
+        datePickerViewController.onDidTapDone = { [weak self] date in
+            self?.scheduleEndDateView.setValueText(date.yyyyMMdEE)
+            self?.viewModel.recurringEndDate = date
+        }
+        
+        let navigationController = UINavigationController(
+            rootViewController: datePickerViewController
+        )
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
+    }
+    
     // MARK: - Button, TextField Actions
     
     /// 텍스트필드, 텍스트뷰 setup
@@ -557,7 +613,9 @@ final class QuestDetailViewController: UIViewController {
     
     /// 수정 모드에서 완료 버튼 눌렸을 때
     @objc private func doneButtonTapped() {
-        viewModel.saveChanges()
+        Task {
+            try await viewModel.saveChanges()
+        }
         isEditingMode = false
     }
     
@@ -615,6 +673,7 @@ final class QuestDetailViewController: UIViewController {
         dateRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedDate.yyyyMMdEE)
         timeRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedTime.aHHmm)
         starRowView.updateButtonStyle(.rightArrowMenu, "\(viewModel.starCount) 개")
+        scheduleEndDateView.updateButtonStyle(.rightArrowMenu, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
     }
     
     /// (수정모드) 모드에 맞게 UI 숨기기 또는 보이기
@@ -631,6 +690,8 @@ final class QuestDetailViewController: UIViewController {
         
         titleEditTextField.text = viewModel.title
         categoryCarouselView.setInitialCategory(viewModel.category)
+        
+        scheduleRepeatView.setEnabled(true)
     }
     
     // MARK: - EditMode에 따른 UI 변경 (읽기모드)
@@ -659,6 +720,7 @@ final class QuestDetailViewController: UIViewController {
         dateRowView.updateButtonStyle(.textOnly, viewModel.selectedDate.yyyyMMdEE)
         timeRowView.updateButtonStyle(.textOnly, viewModel.selectedTime.aHHmm)
         starRowView.updateButtonStyle(.textOnly, "\(viewModel.starCount) 개")
+        scheduleEndDateView.updateButtonStyle(.textOnly, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
     }
     
     /// (읽기모드) 모드에 맞게 UI 숨기기 또는 보이기
@@ -681,6 +743,8 @@ final class QuestDetailViewController: UIViewController {
             in: uiBundle,
             compatibleWith: nil
         )
+        
+        scheduleRepeatView.setEnabled(false)
     }
     
     /// 에러 메시지 알림창

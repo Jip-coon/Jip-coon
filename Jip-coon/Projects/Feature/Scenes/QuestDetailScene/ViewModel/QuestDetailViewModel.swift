@@ -11,20 +11,19 @@ import Foundation
 
 final class QuestDetailViewModel: ObservableObject {
     @Published var quest: Quest
-
-    @Published var title: String = ""
-    @Published var description: String = ""
-    @Published var questCreateDate: Date = Date()
     @Published var selectedDate: Date = Date()  // 선택된 날짜
     @Published var selectedTime: Date = Date()  // 선택된 시간
     @Published var category: QuestCategory = .laundry
-    @Published var familyMembers: [User] = []   // 가족 구성원
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
     @Published var starCount: Int = 10
-    @Published private(set) var recurringType: RecurringType = .none    // 반복 타입
     @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
-    @Published var recurringEndDate: Date?
-
+    
+    var title: String = ""
+    var familyMembers: [User] = []   // 가족 구성원
+    var recurringEndDate: Date?
+    private(set) var recurringType: RecurringType = .none    // 반복 타입
+    private var description: String = ""
+    
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
 
@@ -93,7 +92,20 @@ final class QuestDetailViewModel: ObservableObject {
         category = newCategory
     }
     
-    func saveChanges() {
+    // 요일 반복 저장
+    func updateSelectedRepeatDays(_ days: [Day]) {
+        self.selectedRepeatDays = Set(days)
+        
+        if days.isEmpty {
+            recurringType = .none
+        } else if days.count == 7 {
+            recurringType = .daily
+        } else {
+            recurringType = .weekly
+        }
+    }
+    
+    func saveChanges() async throws {
         quest.title = title
         quest.description = description
         quest.category = category
@@ -101,6 +113,14 @@ final class QuestDetailViewModel: ObservableObject {
         quest.points = starCount
         quest.dueDate = combineDateAndTime()
         quest.recurringType = recurringType
+        quest.recurringEndDate = recurringEndDate
+        quest.selectedRepeatDays = selectedRepeatDays.map { $0.weekdayIndex }
+        
+        do {
+            try await questService.updateQuest(quest)
+        } catch {
+            throw QuestDetailError.questUpdateFail
+        }
     }
     
     func combineDateAndTime() -> Date {
@@ -164,16 +184,20 @@ final class QuestDetailViewModel: ObservableObject {
 }
 
 // MARK: - Error Types
+
 enum QuestDetailError: LocalizedError {
     case notAssignedToQuest
     case userNotFound
+    case questUpdateFail
 
     var errorDescription: String? {
         switch self {
-        case .notAssignedToQuest:
-            return "이 퀘스트의 담당자가 아닙니다"
-        case .userNotFound:
-            return "사용자 정보를 찾을 수 없습니다"
+            case .notAssignedToQuest:
+                return "이 퀘스트의 담당자가 아닙니다"
+            case .userNotFound:
+                return "사용자 정보를 찾을 수 없습니다"
+            case .questUpdateFail:
+                return "퀘스트 수정에 실패했습니다"
         }
     }
 }
