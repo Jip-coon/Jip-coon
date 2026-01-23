@@ -128,7 +128,7 @@ final class QuestDetailViewModel: ObservableObject {
 
         // 퀘스트 상태를 completed로 변경
         try await questService
-            .updateQuestStatus(questId: quest.id, status: .completed)
+            .updateQuestStatus(quest: quest, status: .completed)
 
         // 담당자가 지정되지 않은 퀘스트였다면, 완료 시점에 담당자를 현재 사용자로 설정
         var questToUpdate = quest

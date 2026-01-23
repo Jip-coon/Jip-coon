@@ -10,6 +10,7 @@ import Core
 import UI
 import UIKit
 
+/// 퀘스트를 추가하는 뷰 컨트롤러
 final class AddQuestViewController: UIViewController {
     private let viewModel: AddQuestViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -112,6 +113,18 @@ final class AddQuestViewController: UIViewController {
         return view
     }()
     
+    // 종료일
+    private let scheduleEndDateView: InfoRowView = {
+        let label = UILabel()
+        label.text = "📅"
+        label.font = .systemFont(ofSize: 15)
+        return InfoRowView(
+            leading: label,
+            title: "종료일",
+            value: Date.now.yyyyMMdEE
+        )
+    }()
+    
     private let missionAddButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("퀘스트 추가", for: .normal)
@@ -155,6 +168,7 @@ final class AddQuestViewController: UIViewController {
             workerInfoRowView,
             starInfoRowView,
             scheduleRepeatView,
+            scheduleEndDateView,
             missionAddButton
             
         ].forEach(containerView.addSubview)
@@ -170,6 +184,7 @@ final class AddQuestViewController: UIViewController {
             workerInfoRowView,
             starInfoRowView,
             scheduleRepeatView,
+            scheduleEndDateView,
             missionAddButton
             
         ].forEach {
@@ -302,10 +317,17 @@ final class AddQuestViewController: UIViewController {
                     ),
                 scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
                 
+                scheduleEndDateView.topAnchor
+                    .constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 30),
+                scheduleEndDateView.leadingAnchor
+                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+                scheduleEndDateView.trailingAnchor
+                    .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+                
                 missionAddButton.topAnchor
                     .constraint(
-                        equalTo: scheduleRepeatView.bottomAnchor,
-                        constant: 47
+                        equalTo: scheduleEndDateView.bottomAnchor,
+                        constant: 30
                     ),
                 missionAddButton.leadingAnchor
                     .constraint(equalTo: containerView.leadingAnchor, constant: 20),
@@ -320,6 +342,8 @@ final class AddQuestViewController: UIViewController {
             ]
         )
     }
+    
+    // MARK: - ViewModel Binding
     
     private func bindViewModel() {
         viewModel.$selectedWorkerName
@@ -337,7 +361,9 @@ final class AddQuestViewController: UIViewController {
             .store(in: &cancellables)
     }
     
-    // 화면 탭하면 키보드 숨기기
+    // MARK: - 키보드 관련
+    
+    /// 화면 탭하면 키보드 숨기기
     private func hideKeyboardWhenTappedAround() {
         let tap = UITapGestureRecognizer(
             target: self,
@@ -353,8 +379,13 @@ final class AddQuestViewController: UIViewController {
     
     // MARK: - 버튼 관련 함수
     
-    // 각 버튼 액션 정의
+    /// 각 버튼 액션 정의
     private func setupInfoRowViewButtonAction() {
+        // 카테고리
+        categoryCarouselView.onCategorySelected = { [weak self] category in
+            self?.viewModel.category = category
+        }
+        
         // 날짜
         dateInfoRowView.onTap = { [weak self] in
             self?.presentDatePicker()
@@ -372,9 +403,9 @@ final class AddQuestViewController: UIViewController {
             self?.viewModel.updateSelectedRepeatDays(days)
         }
         
-        // 카테고리
-        categoryCarouselView.onCategorySelected = { [weak self] category in
-            self?.viewModel.category = category
+        // 종료일
+        scheduleEndDateView.onTap = { [weak self] in
+            self?.presentScheduleEndDatePicker()
         }
         
         missionAddButton
@@ -385,7 +416,7 @@ final class AddQuestViewController: UIViewController {
             )
     }
     
-    // 날짜 버튼 -> DatePicker
+    /// 날짜 버튼 -> DatePicker
     private func presentDatePicker() {
         let datePickerViewController = DatePickerViewController(
             datePickerMode: .date
@@ -409,7 +440,7 @@ final class AddQuestViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
-    // 시간 버튼 -> TimePicker
+    /// 시간 버튼 -> TimePicker
     private func presentTimePicker() {
         let timePickerViewController = DatePickerViewController(
             datePickerMode: .time
@@ -433,7 +464,7 @@ final class AddQuestViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
-    // 담당 버튼 -> UIMenu(담당자 선택)
+    /// 담당 버튼 -> UIMenu(담당자 선택)
     private func setupWorkerSelectionMenu() {
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
@@ -448,7 +479,7 @@ final class AddQuestViewController: UIViewController {
         workerInfoRowView.setupMenu(menu)
     }
     
-    // 별 개수 선택
+    /// 별 개수 선택
     private func setupStarSelectionMenu() {
         let menuActions = stride(
             from: 10,
@@ -467,11 +498,32 @@ final class AddQuestViewController: UIViewController {
         starInfoRowView.setupMenu(menu)
     }
     
-    // 퀘스트추가 버튼
+    /// 종료 날짜 버튼 -> DatePicker
+    private func presentScheduleEndDatePicker() {
+        let datePickerViewController = DatePickerViewController(
+            datePickerMode: .date
+        )
+        
+        datePickerViewController.onDidTapDone = { [weak self] date in
+            self?.scheduleEndDateView.setValueText(date.yyyyMMdEE)
+            self?.viewModel.recurringEndDate = date
+        }
+        
+        let navigationController = UINavigationController(
+            rootViewController: datePickerViewController
+        )
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navigationController, animated: true)
+    }
+    
+    /// 퀘스트추가 버튼
     @objc private func missionAddButtonTapped() {
         view.endEditing(true)
-        
-        // TODO: - 모든 정보 입력했는지 확인
         
         viewModel.title = titleTextField.text ?? ""
         viewModel.description = memoTextField.text ?? ""
@@ -496,10 +548,12 @@ final class AddQuestViewController: UIViewController {
         }
     }
     
+    /// 에러 알림창
     private func showErrorAlert(message: String) {
         showAlert(title: "오류", message: message)
     }
     
+    /// 알림창 띄우기
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(
             title: title,

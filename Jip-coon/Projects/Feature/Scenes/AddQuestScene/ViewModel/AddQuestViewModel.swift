@@ -29,10 +29,6 @@ final class AddQuestViewModel: ObservableObject {
     }
     
     // MARK: - Properties
-    
-    @Published var familyMembers: [User] = []   // 가족 구성원
-    @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
-    
     var title: String = ""
     var description: String = ""
     var questCreateDate: Date = Date()
@@ -40,9 +36,12 @@ final class AddQuestViewModel: ObservableObject {
     var selectedTime: Date = Date()  // 선택된 시간
     var questDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
     var category: QuestCategory = .cleaning
+    @Published var familyMembers: [User] = []   // 가족 구성원
+    @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
     var starCount: Int = 10
     private(set) var recurringType: RecurringType = .none    // 반복 타입
     var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    var recurringEndDate: Date = Date()    // 반복 종료일
     var selectedWorkerID: String?
     
     // MARK: - Method
@@ -117,8 +116,10 @@ final class AddQuestViewModel: ObservableObject {
             throw AddQuestError.userNotFound
         }
         
-        // 가족 ID 가져오기 (없으면 더미 가족 ID 사용)
-        let familyId = currentUser.familyId ?? "dummy_family_id"
+        // 가족 ID 가져오기
+        guard let familyId = currentUser.familyId else {
+            throw AddQuestError.familyNotFound
+        }
         
         // 선택된 담당자 ID
         var assignedTo: String? = selectedWorkerID
@@ -128,24 +129,40 @@ final class AddQuestViewModel: ObservableObject {
             assignedTo = currentUser.id
         }
         
-        // Quest 객체 생성
-        let quest = Quest(
-            title: title,
-            description: description.isEmpty ? nil : description,
-            category: category,
-            createdBy: currentUser.id,
-            familyId: familyId,
-            points: starCount
-        )
-        
-        // 마감일 설정
-        var questToSave = quest
-        questToSave.dueDate = questDueDate
-        questToSave.recurringType = recurringType
-        questToSave.assignedTo = assignedTo
-        
-        // Firebase에 저장
-        _ = try await questService.createQuest(questToSave)
+        if recurringType != .none {
+            // 반복 퀘스트인 경우 Template 저장
+            let repeatDaysIndexes = selectedRepeatDays.map { $0.weekdayIndex }
+            
+            let template = QuestTemplate(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                category: category,
+                points: starCount,
+                createdBy: currentUser.id,
+                familyId: familyId,
+                assignedTo: assignedTo,
+                recurringType: recurringType,
+                selectedRepeatDays: repeatDaysIndexes,
+                startDate: selectedDate,
+                recurringEndDate: recurringEndDate
+            )
+            
+            try await questService.createQuestTemplate(template)
+        } else {
+            // 일반 퀘스트인 경우
+            let quest = Quest(
+                title: title,
+                description: description.isEmpty ? nil : description,
+                category: category,
+                assignedTo: assignedTo,
+                createdBy: currentUser.id,
+                familyId: familyId,
+                points: starCount,
+                dueDate: questDueDate
+            )
+            
+            _ = try await questService.createQuest(quest)
+        }
     }
     
 }

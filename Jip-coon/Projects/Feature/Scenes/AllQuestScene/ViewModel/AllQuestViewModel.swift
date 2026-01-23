@@ -76,18 +76,29 @@ public final class AllQuestViewModel: ObservableObject {
     
     /// 현재 가족의 모든 퀘스트를 조회
     func fetchAllQuests() async {
+        guard let user = try? await userService.getCurrentUser() else {
+            print("현재 사용자 정보를 가져오지 못했습니다.")
+            return
+        }
+        
+        guard let familyId = user.familyId else {
+            print("가족 ID가 없습니다.")
+            return
+        }
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // 탭 구성을 위해 오늘 기준 ±7일 범위를 설정
+        let startDate = calendar.date(byAdding: .day, value: -7, to: today)!
+        let endDate = calendar.date(byAdding: .day, value: 7, to: today)!
+        
         do {
-            guard let user = try await userService.getCurrentUser() else {
-                print("현재 사용자 정보를 가져오지 못했습니다.")
-                return
-            }
-            
-            guard let familyId = user.familyId else {
-                print("가족 ID가 없습니다.")
-                return
-            }
-            
-            let quests = try await questService.getFamilyQuests(familyId: familyId)
+            let quests = try await questService.fetchQuestsWithRepeat(
+                familyId: familyId,
+                startDate: startDate,
+                endDate: endDate
+            )
             await MainActor.run { self.allQuests = quests }
         } catch {
             print("퀘스트를 불러오지 못했습니다.")
@@ -217,7 +228,7 @@ public final class AllQuestViewModel: ObservableObject {
     private func groupQuestsByDate(_ quests: [Quest]) -> [QuestSection] {
         let dictionary = Dictionary(grouping: quests) { (quest) -> Date in
             // 시간을 제외한 "날짜" 정보만 추출하여 키값으로 사용
-            return Calendar.current.startOfDay(for: quest.dueDate ?? quest.createdAt)
+            return Calendar.current.startOfDay(for: quest.dueDate ?? Date())
         }
         
         // 날짜순으로 정렬하여 Section 배열 생성

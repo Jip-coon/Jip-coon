@@ -9,7 +9,25 @@ import UIKit
 import UI
 
 enum Day: String, CaseIterable {
-    case mon = "월", tue = "화", wed = "수", thu = "목", fri = "금", sat = "토", sun = "일"
+    case mon = "월"
+    case tue = "화"
+    case wed = "수"
+    case thu = "목"
+    case fri = "금"
+    case sat = "토"
+    case sun = "일"
+    
+    var weekdayIndex: Int {
+        switch self {
+            case .sun: return 0
+            case .mon: return 1
+            case .tue: return 2
+            case .wed: return 3
+            case .thu: return 4
+            case .fri: return 5
+            case .sat: return 6
+        }
+    }
 }
 
 final class DayButton: UIButton {
