@@ -166,6 +166,23 @@ final class QuestDetailViewController: UIViewController {
         buttonStyle: isEditingMode ? .rightArrowAction : .textOnly
     )
     
+    private let questDeleteButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+        let image = UIImage(systemName: "trash", withConfiguration: symbolConfig)
+        
+        config.title = "퀘스트 삭제"
+        config.image = image
+        config.imagePlacement = .leading
+        config.imagePadding = 6
+        config.baseForegroundColor = .textRed
+        
+        let button = UIButton(configuration: config)
+        button.titleLabel?.font = .pretendard(ofSize: 16, weight: .regular)
+        
+        return button
+    }()
+    
     // MARK: - init
     
     init(
@@ -173,7 +190,6 @@ final class QuestDetailViewController: UIViewController {
         questService: QuestServiceProtocol,
         userService: UserServiceProtocol
     ) {
-        
         self.quest = quest
         self.viewModel = QuestDetailViewModel(
             quest: quest,
@@ -225,6 +241,7 @@ final class QuestDetailViewController: UIViewController {
         memoTextView.addSubview(memoTextViewPlaceholder)
         contentView.addSubview(scheduleRepeatView)
         contentView.addSubview(scheduleEndDateView)
+        contentView.addSubview(questDeleteButton)
         view.addSubview(completeQuestButton)
         
         [
@@ -243,7 +260,8 @@ final class QuestDetailViewController: UIViewController {
             completeQuestButton,
             memoTextViewPlaceholder,
             scheduleRepeatView,
-            scheduleEndDateView
+            scheduleEndDateView,
+            questDeleteButton
             
         ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
@@ -369,8 +387,10 @@ final class QuestDetailViewController: UIViewController {
                     .leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                 scheduleEndDateView
                     .trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-                scheduleEndDateView
-                    .bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200),
+                
+                questDeleteButton.topAnchor.constraint(equalTo: scheduleEndDateView.bottomAnchor, constant: 65),
+                questDeleteButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+                questDeleteButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
                 
                 completeQuestButton.leadingAnchor
                     .constraint(
