@@ -10,6 +10,8 @@ import Combine
 import Foundation
 
 final class QuestDetailViewModel: ObservableObject {
+    // MARK: - Properties
+    
     @Published var quest: Quest
     @Published var selectedDate: Date = Date()  // 선택된 날짜
     @Published var selectedTime: Date = Date()  // 선택된 시간
@@ -27,6 +29,8 @@ final class QuestDetailViewModel: ObservableObject {
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
 
+    // MARK: - init
+    
     init(
         quest: Quest,
         questService: QuestServiceProtocol,
@@ -37,6 +41,8 @@ final class QuestDetailViewModel: ObservableObject {
         self.userService = userService
         loadQuestData()
     }
+    
+    // MARK: - Data load
     
     func loadQuestData() {
         title = quest.title
@@ -60,6 +66,10 @@ final class QuestDetailViewModel: ObservableObject {
         }
         
         self.recurringEndDate = quest.recurringEndDate
+    }
+    
+    func fetchFamilyMembers() {
+        // TODO: - 가족이름 불러오기
     }
     
     // MARK: - Data Updates
@@ -92,7 +102,7 @@ final class QuestDetailViewModel: ObservableObject {
         category = newCategory
     }
     
-    // 요일 반복 저장
+    /// 반복 요일 저장
     func updateSelectedRepeatDays(_ days: [Day]) {
         self.selectedRepeatDays = Set(days)
         
@@ -105,24 +115,7 @@ final class QuestDetailViewModel: ObservableObject {
         }
     }
     
-    func saveChanges() async throws {
-        quest.title = title
-        quest.description = description
-        quest.category = category
-        quest.assignedTo = selectedWorkerName
-        quest.points = starCount
-        quest.dueDate = combineDateAndTime()
-        quest.recurringType = recurringType
-        quest.recurringEndDate = recurringEndDate
-        quest.selectedRepeatDays = selectedRepeatDays.map { $0.weekdayIndex }
-        
-        do {
-            try await questService.updateQuest(quest)
-        } catch {
-            throw QuestDetailError.questUpdateFail
-        }
-    }
-    
+    /// 시간과 날짜 합쳐서 DueDate로
     func combineDateAndTime() -> Date {
         let calendar = Calendar.current
         let day = calendar.dateComponents(
@@ -141,11 +134,28 @@ final class QuestDetailViewModel: ObservableObject {
         return calendar.date(from: merged) ?? Date()
     }
     
-    func fetchFamilyMembers() {
-        // TODO: - 가족이름 불러오기
+    // MARK: - 퀘스트 수정, 완료 처리
+    
+    /// 수정 모드에서 완료 버튼 눌렀을때 (수정 완료)
+    func saveChanges() async throws {
+        quest.title = title
+        quest.description = description
+        quest.category = category
+        quest.assignedTo = selectedWorkerName
+        quest.points = starCount
+        quest.dueDate = combineDateAndTime()
+        quest.recurringType = recurringType
+        quest.recurringEndDate = recurringEndDate
+        quest.selectedRepeatDays = selectedRepeatDays.map { $0.weekdayIndex }
+        
+        do {
+            try await questService.updateQuest(quest)
+        } catch {
+            throw QuestDetailError.questUpdateFail
+        }
     }
 
-    // 퀘스트 완료 처리
+    /// 퀘스트 완료 처리
     func completeQuest() async throws {
         // 현재 사용자 정보 가져오기
         guard let currentUser = try await userService.getCurrentUser() else {

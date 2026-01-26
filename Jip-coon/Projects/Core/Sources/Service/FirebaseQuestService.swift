@@ -96,28 +96,31 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     /// 퀘스트 업데이트
     public func updateQuest(_ quest: Quest) async throws {
         do {
+            // [공통 로직] 템플릿 ID가 있다면 무조건 템플릿의 반복 규칙도 함께 수정
+            if let templateId = quest.templateId {
+                try await templatesCollection.document(templateId).updateData([
+                    FirestoreFields.QuestTemplate.title: quest.title,
+                    FirestoreFields.QuestTemplate.description: quest.description ?? "",
+                    FirestoreFields.QuestTemplate.category: quest.category.rawValue,
+                    FirestoreFields.QuestTemplate.points: quest.points,
+                    FirestoreFields.QuestTemplate.assignedTo: quest.assignedTo as Any,
+                    FirestoreFields.QuestTemplate.recurringType: quest.recurringType.rawValue,
+                    FirestoreFields.QuestTemplate.selectedRepeatDays: quest.selectedRepeatDays ?? [],
+                    FirestoreFields.QuestTemplate.recurringEndDate: quest.recurringEndDate as Any,
+                    FirestoreFields.QuestTemplate.updatedAt: Timestamp(date: Date())
+                ])
+            }
+            
+            // [개별 퀘스트 처리]
             if quest.id.hasPrefix("virtual_") {
-                if let templateId = quest.templateId {
-                    try await templatesCollection.document(templateId).updateData([
-                        FirestoreFields.QuestTemplate.title: quest.title,
-                        FirestoreFields.QuestTemplate.description: quest.description ?? "",
-                        FirestoreFields.QuestTemplate.category: quest.category.rawValue,
-                        FirestoreFields.QuestTemplate.points: quest.points,
-                        FirestoreFields.QuestTemplate.assignedTo: quest.assignedTo as Any,
-                        FirestoreFields.QuestTemplate.recurringType: quest.recurringType.rawValue,
-                        FirestoreFields.QuestTemplate.selectedRepeatDays: quest.selectedRepeatDays ?? [],
-                        FirestoreFields.QuestTemplate.recurringEndDate: quest.recurringEndDate as Any, // 종료일 업데이트
-                        FirestoreFields.QuestTemplate.updatedAt: Timestamp(date: Date())
-                    ])
-                }
-                // 가상 퀘스트를 실제 문서로 등록
+                // 가상 퀘스트 -> 상태 변경 등을 위해 실제 문서로 변환
                 _ = try await updateQuestStatus(quest: quest, status: quest.status)
             } else {
+                // 이미 생성된 실제 퀘스트 문서 업데이트
                 try questsCollection.document(quest.id).setData(from: quest)
             }
         } catch {
-            throw FirebaseQuestServiceError
-                .updateFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
         }
     }
 
