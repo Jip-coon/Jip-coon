@@ -449,6 +449,15 @@ final class QuestDetailViewController: UIViewController {
             }
             .store(in: &cancellables)
         
+        // 가족 이름 가져오기
+        viewModel.$familyMembers
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] members in
+                guard !members.isEmpty else { return }
+                self?.setupWorkerRowMenu()
+            }
+            .store(in: &cancellables)
+        
         // 담당자 변경 구독
         viewModel.$selectedWorkerName
             .receive(on: DispatchQueue.main)
@@ -497,7 +506,6 @@ final class QuestDetailViewController: UIViewController {
     private func setupRowViewActions() {
         setupDateRowAction()
         setupTimeRowAction()
-        setupWorkerRowMenu()
         setupStarRowMenu()
         setupCategorySelection()
         setupRepeatDaysRowAction()
@@ -522,8 +530,6 @@ final class QuestDetailViewController: UIViewController {
     
     /// 담당 버튼 -> UIMenu(담당자 선택)
     private func setupWorkerRowMenu() {
-        viewModel.fetchFamilyMembers()
-        
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
                 self?.viewModel.updateWorker(member.name)
@@ -830,6 +836,7 @@ final class QuestDetailViewController: UIViewController {
         timeRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedTime.aHHmm)
         starRowView.updateButtonStyle(.rightArrowMenu, "\(viewModel.starCount) 개")
         scheduleEndDateView.updateButtonStyle(.rightArrowMenu, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
+        workerRowView.isUserInteractionEnabled = true
     }
     
     /// (수정모드) 모드에 맞게 UI 숨기기 또는 보이기
@@ -882,6 +889,7 @@ final class QuestDetailViewController: UIViewController {
         timeRowView.updateButtonStyle(.textOnly, viewModel.selectedTime.aHHmm)
         starRowView.updateButtonStyle(.textOnly, "\(viewModel.starCount) 개")
         scheduleEndDateView.updateButtonStyle(.textOnly, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
+        workerRowView.isUserInteractionEnabled = false
     }
     
     /// (읽기모드) 모드에 맞게 UI 숨기기 또는 보이기

@@ -20,12 +20,12 @@ final class QuestDetailViewModel: ObservableObject {
     @Published var starCount: Int = 10
     @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
     @Published var errorMessage: String?
+    @Published var familyMembers: [User] = []   // 가족 구성원
     
     var title: String = ""
     var description: String?
     var recurringEndDate: Date?
     private(set) var recurringType: RecurringType = .none    // 반복 타입
-    var familyMembers: [User] = []   // 가족 구성원
     var allQuests: [Quest] = []
     var templates: [QuestTemplate] = []
     var deleteSuccess = PassthroughSubject<Void, Never>()
@@ -43,8 +43,9 @@ final class QuestDetailViewModel: ObservableObject {
         self.quest = quest
         self.questService = questService
         self.userService = userService
-        loadQuestData()
         loadAllQuests()
+        fetchFamilyMembers()
+        loadQuestData()
     }
     
     // MARK: - Data load
@@ -91,7 +92,31 @@ final class QuestDetailViewModel: ObservableObject {
     }
     
     func fetchFamilyMembers() {
-        // TODO: - 가족이름 불러오기
+        Task {
+            do {
+                guard let currentUser = try await userService.getCurrentUser() else {
+                    print("현재 사용자 정보 가져오기 실패")
+                    return
+                }
+                
+                guard let familyId = currentUser.familyId else {
+                    print("가족 아이디 가져오기 실패")
+                    return
+                }
+                
+                let members = try await userService.getFamilyMembers(familyId: familyId)
+                
+                await MainActor.run {
+                    self.familyMembers = members
+                    
+                    if let assignedId = self.quest.assignedTo {
+                        self.selectedWorkerName = members.first(where: { $0.id == assignedId })?.name ?? ""
+                    }
+                }
+            } catch {
+                print("가족 구성원 가져오기 실패: \(error)")
+            }
+        }
     }
     
     // MARK: - Data Updates
@@ -215,6 +240,7 @@ final class QuestDetailViewModel: ObservableObject {
         self.quest = updatedQuest
     }
     
+    /// 퀘스트 삭제
     func deleteQuest(mode: DeleteMode) {
         Task {
             do {
