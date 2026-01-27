@@ -553,6 +553,20 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     
     /// 가상 퀘스트 객체 생성 헬퍼
     private func createVirtualQuest(from template: QuestTemplate, on date: Date) -> Quest {
+        let calendar = Calendar.current
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: date)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: template.recurringDueTime ?? date)
+        
+        // 반복 날짜와 마감 시간을 합치기
+        var combinedComponents = DateComponents()
+        combinedComponents.year = dateComponents.year
+        combinedComponents.month = dateComponents.month
+        combinedComponents.day = dateComponents.day
+        combinedComponents.hour = timeComponents.hour
+        combinedComponents.minute = timeComponents.minute
+        
+        let finalDueDate = calendar.date(from: combinedComponents) ?? date
+        
         return Quest(
             id: "virtual_\(template.id)_\(date.timeIntervalSince1970)",
             templateId: template.id,
@@ -565,7 +579,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             createdBy: template.createdBy,
             familyId: template.familyId,
             points: template.points,
-            dueDate: date,
+            dueDate: finalDueDate,
             selectedRepeatDays: template.selectedRepeatDays,
             recurringEndDate: template.recurringEndDate
         )

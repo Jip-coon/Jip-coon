@@ -27,6 +27,7 @@ public struct QuestTemplate: Codable, Identifiable {
     public var recurringEndDate: Date?
     public var updatedAt: Date
     public var excludedDates: [Date]?
+    public var recurringDueTime: Date?
     
     /// Quest Template 생성자
     /// - Parameters:
@@ -43,6 +44,8 @@ public struct QuestTemplate: Codable, Identifiable {
     ///   - startDate: 퀘스트 시작일
     ///   - recurringEndDate: 반복 퀘스트 종료일
     ///   - updatedAt: 마지막 수정 시각
+    ///   - excludedDates: 반복 퀘스트에서 제외된 날짜
+    ///   - recurringDueTime: 반복 퀘스트에서 적용되어야 하는 마감 시간
     public init(
         id: String = UUID().uuidString,
         title: String,
@@ -57,7 +60,8 @@ public struct QuestTemplate: Codable, Identifiable {
         startDate: Date,
         recurringEndDate: Date? = nil,
         updatedAt: Date = Date(),
-        excludedDates: [Date]?
+        excludedDates: [Date]?,
+        recurringDueTime: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -73,5 +77,6 @@ public struct QuestTemplate: Codable, Identifiable {
         self.recurringEndDate = recurringEndDate
         self.updatedAt = updatedAt
         self.excludedDates = excludedDates
+        self.recurringDueTime = recurringDueTime
     }
 }

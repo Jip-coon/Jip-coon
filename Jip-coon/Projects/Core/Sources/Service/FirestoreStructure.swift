@@ -100,5 +100,6 @@ public struct FirestoreFields {
         static let recurringEndDate = "recurringEndDate"
         static let updatedAt = "updatedAt"
         static let excludedDates = "excludedDates"
+        static let recurringDueTime = "recurringDueTime"
     }
 }
