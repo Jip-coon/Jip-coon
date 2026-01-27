@@ -147,7 +147,7 @@ public enum UrgencyLevel: String, CaseIterable, Codable {
         case .low: return "여유"
         case .medium: return "보통"
         case .high: return "긴급"
-        case .critical: return "매우 긴급"
+        case .critical: return "기한 지남"
         }
     }
 

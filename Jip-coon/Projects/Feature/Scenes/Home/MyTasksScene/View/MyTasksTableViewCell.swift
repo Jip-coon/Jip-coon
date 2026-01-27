@@ -1,17 +1,20 @@
 //
-//  AllQuestTableViewCell.swift
+//  MyTasksTableViewCell.swift
 //  Feature
 //
-//  Created by 예슬 on 1/19/26.
+//  Created by 심관혁 on 1/27/26.
 //
 
+import UIKit
 import Core
 import UI
-import UIKit
 
-final class AllQuestTableViewCell: UITableViewCell {
+public class MyTasksTableViewCell: UITableViewCell {
+    public static let identifier = "MyTasksTableViewCell"
     
-    static let identifier = "AllQuestTableViewCell"
+    public var onTap: (() -> Void)?
+    
+    // MARK: - UI Components
     
     private let containerView: UIView = {
         let view = UIView()
@@ -24,6 +27,7 @@ final class AllQuestTableViewCell: UITableViewCell {
         return view
     }()
     
+    // 카테고리 이모지 컨테이너
     private let emojiContainer: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 24
@@ -31,6 +35,7 @@ final class AllQuestTableViewCell: UITableViewCell {
         return view
     }()
     
+    // 카테고리 이모지 라벨
     private let emojiLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 24)
@@ -38,22 +43,16 @@ final class AllQuestTableViewCell: UITableViewCell {
         return label
     }()
     
+    // 제목
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .bold)
+        label.font = .systemFont(ofSize: 17, weight: .bold) // 조금 더 크게, 볼드체
         label.textColor = .label
         label.numberOfLines = 1
         return label
     }()
     
-    private lazy var infoStack: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 8
-        stack.alignment = .center
-        return stack
-    }()
-    
+    // 마감일
     private lazy var dateStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
@@ -76,21 +75,7 @@ final class AllQuestTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let assigneeLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = .textGray
-        return label
-    }()
-    
-    private let separatorLabel: UILabel = {
-        let label = UILabel()
-        label.text = "•"
-        label.font = .systemFont(ofSize: 12)
-        label.textColor = .systemGray3
-        return label
-    }()
-    
+    // 상태 배지
     private let statusContainer: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 12
@@ -105,18 +90,15 @@ final class AllQuestTableViewCell: UITableViewCell {
         return label
     }()
     
-    // MARK: - init
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
+        setupTapGesture()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: - Method
     
     private func setupUI() {
         backgroundColor = .clear
@@ -124,7 +106,7 @@ final class AllQuestTableViewCell: UITableViewCell {
         
         contentView.addSubview(containerView)
         
-        [emojiContainer, titleLabel, infoStack, statusContainer].forEach {
+        [emojiContainer, titleLabel, dateStack, statusContainer].forEach {
             containerView.addSubview($0)
         }
         
@@ -134,13 +116,13 @@ final class AllQuestTableViewCell: UITableViewCell {
         dateStack.addArrangedSubview(dateIcon)
         dateStack.addArrangedSubview(dueDateLabel)
         
-        infoStack.addArrangedSubview(dateStack)
-        infoStack.addArrangedSubview(separatorLabel)
-        infoStack.addArrangedSubview(assigneeLabel)
-        
-        [containerView, emojiContainer, emojiLabel, titleLabel, infoStack, statusContainer, statusLabel].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        emojiContainer.translatesAutoresizingMaskIntoConstraints = false
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateStack.translatesAutoresizingMaskIntoConstraints = false
+        statusContainer.translatesAutoresizingMaskIntoConstraints = false
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
@@ -169,41 +151,51 @@ final class AllQuestTableViewCell: UITableViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: statusContainer.leadingAnchor, constant: -12),
             titleLabel.topAnchor.constraint(equalTo: emojiContainer.topAnchor, constant: 2),
             
-            infoStack.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            infoStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            infoStack.trailingAnchor.constraint(lessThanOrEqualTo: statusContainer.leadingAnchor, constant: -12)
+            dateStack.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            dateStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            dateStack.trailingAnchor.constraint(lessThanOrEqualTo: statusContainer.leadingAnchor, constant: -12)
         ])
     }
     
-    func configureUI(with quest: Quest, members: [User]) {
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        containerView.addGestureRecognizer(tapGesture)
+        containerView.isUserInteractionEnabled = true
+    }
+    
+    @objc private func handleTap() {
+        // 클릭 시 살짝 작아지는 애니메이션
+        UIView.animate(withDuration: 0.1, animations: {
+            self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+        }) { _ in
+            UIView.animate(withDuration: 0.1) {
+                self.containerView.transform = .identity
+            }
+        }
+        onTap?()
+    }
+    
+    public func configure(with quest: Quest, familyMembers: [User], onTap: @escaping () -> Void) {
+        self.onTap = onTap
+        
         emojiLabel.text = quest.category.emoji
         titleLabel.text = quest.title
         
         let categoryColor = UIColor.questCategoryColor(for: quest.category.backgroundColor)
         emojiContainer.backgroundColor = categoryColor.withAlphaComponent(0.2)
         
-        // 담당자 이름 설정
-        if let assignedId = quest.assignedTo,
-           let member = members.first(where: { $0.id == assignedId }) {
-            assigneeLabel.text = member.name
-        } else {
-            assigneeLabel.text = "미정"
-        }
-        
-        // 마감일 정보
+        // 날짜 포맷팅
         if let dueDate = quest.dueDate {
             let formatter = DateFormatter()
-            formatter.dateFormat = "M/dd HH:mm"
+            formatter.dateFormat = "M월 d일 a h:mm" 
+            formatter.locale = Locale(identifier: "ko_KR")
             dueDateLabel.text = formatter.string(from: dueDate)
             dateIcon.isHidden = false
-            separatorLabel.isHidden = false
         } else {
             dueDateLabel.text = "날짜 미정"
             dateIcon.isHidden = true
-            separatorLabel.isHidden = false
         }
         
-        // 상태에 따른 색상 설정
         let statusText = quest.status.displayName
         statusLabel.text = statusText
         
@@ -218,12 +210,5 @@ final class AllQuestTableViewCell: UITableViewCell {
         
         statusContainer.backgroundColor = statusColor.withAlphaComponent(0.1)
         statusLabel.textColor = statusColor
-    }
-    
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        super.setHighlighted(highlighted, animated: animated)
-        UIView.animate(withDuration: 0.1) {
-            self.containerView.transform = highlighted ? CGAffineTransform(scaleX: 0.96, y: 0.96) : .identity
-        }
     }
 }
