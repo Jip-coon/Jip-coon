@@ -84,7 +84,7 @@ final class QuestDetailViewController: UIViewController {
             return imageView
         }(),
         title: "사람",
-        value: quest.assignedTo ?? "",
+        value: viewModel.selectedWorkerName,
         buttonStyle: .capsuleMenu
     )
     
@@ -509,7 +509,7 @@ final class QuestDetailViewController: UIViewController {
         setupStarRowMenu()
         setupCategorySelection()
         setupRepeatDaysRowAction()
-        setupReccuringEndDateRowAction()
+        setupRecurringEndDateRowAction()
     }
     
     /// 날짜 설정
@@ -533,6 +533,7 @@ final class QuestDetailViewController: UIViewController {
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
                 self?.viewModel.updateWorker(member.name)
+                self?.viewModel.selectedWorkerID = member.id 
             }
         }
         
@@ -574,10 +575,14 @@ final class QuestDetailViewController: UIViewController {
     }
     
     /// 종료일 선택
-    private func setupReccuringEndDateRowAction() {
+    private func setupRecurringEndDateRowAction() {
         scheduleEndDateView.onTap = { [weak self] in
-            guard let self = self, self.isEditingMode else { return }
+            print("처음")
+            guard let self = self, self.isEditingMode else {
+                print("설마 여기서")
+                return }
             self.presentScheduleEndDatePicker()
+            print("눌리니")
         }
     }
     
@@ -835,7 +840,7 @@ final class QuestDetailViewController: UIViewController {
         dateRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedDate.yyyyMMdEE)
         timeRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedTime.aHHmm)
         starRowView.updateButtonStyle(.rightArrowMenu, "\(viewModel.starCount) 개")
-        scheduleEndDateView.updateButtonStyle(.rightArrowMenu, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
+        scheduleEndDateView.updateButtonStyle(.rightArrowAction, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
         workerRowView.isUserInteractionEnabled = true
     }
     

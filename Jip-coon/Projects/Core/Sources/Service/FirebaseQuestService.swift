@@ -100,12 +100,12 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             if let templateId = quest.templateId {
                 try await templatesCollection.document(templateId).updateData([
                     FirestoreFields.QuestTemplate.title: quest.title,
-                    FirestoreFields.QuestTemplate.description: quest.description ?? "",
+                    FirestoreFields.QuestTemplate.description: quest.description ?? NSNull(),
                     FirestoreFields.QuestTemplate.category: quest.category.rawValue,
                     FirestoreFields.QuestTemplate.points: quest.points,
                     FirestoreFields.QuestTemplate.assignedTo: quest.assignedTo as Any,
                     FirestoreFields.QuestTemplate.recurringType: quest.recurringType.rawValue,
-                    FirestoreFields.QuestTemplate.selectedRepeatDays: quest.selectedRepeatDays ?? [],
+                    FirestoreFields.QuestTemplate.selectedRepeatDays: quest.selectedRepeatDays ?? [] as Any,
                     FirestoreFields.QuestTemplate.recurringEndDate: quest.recurringEndDate as Any,
                     FirestoreFields.QuestTemplate.updatedAt: Timestamp(date: Date())
                 ])

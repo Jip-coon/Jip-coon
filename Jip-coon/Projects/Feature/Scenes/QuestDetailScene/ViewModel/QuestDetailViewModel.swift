@@ -24,6 +24,7 @@ final class QuestDetailViewModel: ObservableObject {
     
     var title: String = ""
     var description: String?
+    var selectedWorkerID: String?
     var recurringEndDate: Date?
     private(set) var recurringType: RecurringType = .none    // 반복 타입
     var allQuests: [Quest] = []
@@ -57,6 +58,7 @@ final class QuestDetailViewModel: ObservableObject {
         selectedWorkerName = quest.assignedTo ?? ""
         starCount = quest.points
         recurringType = quest.recurringType
+        selectedWorkerID = quest.assignedTo
         
         if let due = quest.dueDate {
             selectedDate = due
@@ -189,7 +191,7 @@ final class QuestDetailViewModel: ObservableObject {
         quest.title = title
         quest.description = description
         quest.category = category
-        quest.assignedTo = selectedWorkerName
+        quest.assignedTo = selectedWorkerID
         quest.points = starCount
         quest.dueDate = combineDateAndTime()
         quest.recurringType = recurringType
