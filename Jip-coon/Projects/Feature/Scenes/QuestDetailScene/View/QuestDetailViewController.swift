@@ -177,6 +177,12 @@ final class QuestDetailViewController: UIViewController {
         return button
     }()
     
+    private let bottomContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .backgroundWhite
+        return view
+    }()
+    
     // MARK: - init
     
     init(
@@ -212,7 +218,7 @@ final class QuestDetailViewController: UIViewController {
     // MARK: - 뷰 계층 설정
     
     private func setupLayout() {
-        view.backgroundColor = .white
+        view.backgroundColor = .backgroundWhite
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
@@ -237,7 +243,8 @@ final class QuestDetailViewController: UIViewController {
         contentView.addSubview(scheduleRepeatView)
         contentView.addSubview(scheduleEndDateView)
         contentView.addSubview(questDeleteButton)
-        view.addSubview(completeQuestButton)
+        view.addSubview(bottomContainerView)
+        bottomContainerView.addSubview(completeQuestButton)
         
         [
             scrollView,
@@ -252,6 +259,7 @@ final class QuestDetailViewController: UIViewController {
             starRowView,
             memoStackView,
             memoTextView,
+            bottomContainerView,
             completeQuestButton,
             memoTextViewPlaceholder,
             scheduleRepeatView,
@@ -360,7 +368,7 @@ final class QuestDetailViewController: UIViewController {
                 memoTextView.trailingAnchor
                     .constraint(equalTo: contentView.trailingAnchor, constant: -20),
                 memoTextView.heightAnchor
-                    .constraint(greaterThanOrEqualToConstant: 100),
+                    .constraint(equalToConstant: 100),
                 
                 memoTextViewPlaceholder
                     .topAnchor.constraint(equalTo: memoTextView.topAnchor, constant: 8),
@@ -390,22 +398,23 @@ final class QuestDetailViewController: UIViewController {
                 questDeleteButton
                     .bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
                 
+                bottomContainerView.topAnchor
+                    .constraint(equalTo: completeQuestButton.topAnchor, constant: -10),
+                bottomContainerView.leadingAnchor
+                    .constraint(equalTo: view.leadingAnchor),
+                bottomContainerView.trailingAnchor
+                    .constraint(equalTo: view.trailingAnchor),
+                bottomContainerView.bottomAnchor
+                    .constraint(equalTo: view.bottomAnchor),
+                
                 completeQuestButton.leadingAnchor
-                    .constraint(
-                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                        constant: 20
-                    ),
+                    .constraint(equalTo: bottomContainerView.leadingAnchor, constant: 20),
                 completeQuestButton.trailingAnchor
-                    .constraint(
-                        equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                        constant: -20
-                    ),
+                    .constraint(equalTo: bottomContainerView.trailingAnchor, constant: -20),
                 completeQuestButton.bottomAnchor
-                    .constraint(
-                        equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                        constant: -20
-                    ),
-                completeQuestButton.heightAnchor.constraint(equalToConstant: 50),
+                    .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+                completeQuestButton.heightAnchor
+                    .constraint(equalToConstant: 50),
             ]
         )
     }
@@ -533,7 +542,7 @@ final class QuestDetailViewController: UIViewController {
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
                 self?.viewModel.updateWorker(member.name)
-                self?.viewModel.selectedWorkerID = member.id 
+                self?.viewModel.selectedWorkerID = member.id
             }
         }
         
@@ -577,12 +586,8 @@ final class QuestDetailViewController: UIViewController {
     /// 종료일 선택
     private func setupRecurringEndDateRowAction() {
         scheduleEndDateView.onTap = { [weak self] in
-            print("처음")
-            guard let self = self, self.isEditingMode else {
-                print("설마 여기서")
-                return }
+            guard let self = self, self.isEditingMode else { return }
             self.presentScheduleEndDatePicker()
-            print("눌리니")
         }
     }
     
@@ -849,6 +854,7 @@ final class QuestDetailViewController: UIViewController {
         categoryIcon.isHidden = true
         titleLabel.isHidden = true
         completeQuestButton.isHidden = true
+        bottomContainerView.isHidden = true
         
         categoryCarouselView.isHidden = false
         titleEditTextField.isHidden = false
@@ -902,6 +908,7 @@ final class QuestDetailViewController: UIViewController {
         categoryIcon.isHidden = false
         titleLabel.isHidden = false
         completeQuestButton.isHidden = false
+        bottomContainerView.isHidden = false
         
         categoryCarouselView.isHidden = true
         titleEditTextField.isHidden = true
