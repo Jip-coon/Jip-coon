@@ -22,7 +22,7 @@ final class QuestDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     var title: String = ""
-    private var description: String = ""
+    var description: String?
     var recurringEndDate: Date?
     private(set) var recurringType: RecurringType = .none    // 반복 타입
     var familyMembers: [User] = []   // 가족 구성원
@@ -51,7 +51,7 @@ final class QuestDetailViewModel: ObservableObject {
     
     private func loadQuestData() {
         title = quest.title
-        description = quest.description ?? ""
+        description = quest.description
         category = quest.category
         selectedWorkerName = quest.assignedTo ?? ""
         starCount = quest.points
@@ -101,7 +101,8 @@ final class QuestDetailViewModel: ObservableObject {
     }
     
     func updateDescription(_ newDescription: String) {
-        description = newDescription
+        let trimmedText = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        description = trimmedText.isEmpty ? nil : trimmedText
     }
     
     func updateDate(_ newDate: Date) {

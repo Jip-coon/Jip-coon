@@ -847,6 +847,11 @@ final class QuestDetailViewController: UIViewController {
         titleEditTextField.text = viewModel.title
         categoryCarouselView.setInitialCategory(viewModel.category)
         
+        if let memo = viewModel.description {
+            memoTextView.text = memo
+            memoTextViewPlaceholder.isHidden = true
+        }
+        
         scheduleRepeatView.setEnabled(true)
     }
     
@@ -900,6 +905,11 @@ final class QuestDetailViewController: UIViewController {
             compatibleWith: nil
         )
         
+        if let memo = viewModel.description {
+            memoTextView.text = memo
+            memoTextViewPlaceholder.isHidden = true
+        }
+        
         scheduleRepeatView.setEnabled(false)
     }
     
@@ -920,6 +930,7 @@ final class QuestDetailViewController: UIViewController {
 extension QuestDetailViewController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         viewModel.updateDescription(textView.text)
+        memoTextViewPlaceholder.isHidden = !textView.text.isEmpty
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
