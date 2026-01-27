@@ -144,7 +144,8 @@ final class AddQuestViewModel: ObservableObject {
                 recurringType: recurringType,
                 selectedRepeatDays: repeatDaysIndexes,
                 startDate: selectedDate,
-                recurringEndDate: recurringEndDate
+                recurringEndDate: recurringEndDate,
+                excludedDates: nil
             )
             
             try await questService.createQuestTemplate(template)

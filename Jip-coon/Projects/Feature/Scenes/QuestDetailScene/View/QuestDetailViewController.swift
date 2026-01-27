@@ -132,18 +132,12 @@ final class QuestDetailViewController: UIViewController {
     }()
     
     // 하단 버튼
-    private lazy var completeQuestButton: UIButton = {
+    private let completeQuestButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("퀘스트 완료", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
         button.layer.cornerRadius = 12
-        button
-            .addTarget(
-                self,
-                action: #selector(completeQuestButtonTapped),
-                for: .touchUpInside
-            )
         button.backgroundColor = .mainOrange
         return button
     }()
@@ -211,6 +205,7 @@ final class QuestDetailViewController: UIViewController {
         setupBindings()
         observeTextChanges()
         setupRowViewActions()
+        setupButtonActions()
         applyEditingModeState()
     }
     
@@ -388,9 +383,12 @@ final class QuestDetailViewController: UIViewController {
                 scheduleEndDateView
                     .trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                 
-                questDeleteButton.topAnchor.constraint(equalTo: scheduleEndDateView.bottomAnchor, constant: 65),
-                questDeleteButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-                questDeleteButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
+                questDeleteButton
+                    .topAnchor.constraint(equalTo: scheduleEndDateView.bottomAnchor, constant: 65),
+                questDeleteButton
+                    .centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+                questDeleteButton
+                    .bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -100),
                 
                 completeQuestButton.leadingAnchor
                     .constraint(
@@ -472,6 +470,24 @@ final class QuestDetailViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] days in
                 self?.scheduleRepeatView.updateDays(days)
+            }
+            .store(in: &cancellables)
+        
+        // 삭제 성공
+        viewModel.deleteSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigationController?.popViewController(animated: true)
+            }
+            .store(in: &cancellables)
+        
+        // 에러 메시지 설정
+        viewModel.$errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let error = errorMessage {
+                    self?.showErrorAlert(message: error)
+                }
             }
             .store(in: &cancellables)
     }
@@ -622,8 +638,27 @@ final class QuestDetailViewController: UIViewController {
     
     /// 텍스트필드, 텍스트뷰 setup
     private func observeTextChanges() {
-        titleEditTextField.addTarget(self, action: #selector(titleTextFieldChanged), for: .editingChanged)
+        titleEditTextField.addTarget(
+            self,
+            action: #selector(titleTextFieldChanged),
+            for: .editingChanged
+        )
         memoTextView.delegate = self
+    }
+    
+    /// Button setup
+    private func setupButtonActions() {
+        completeQuestButton.addTarget(
+            self,
+            action: #selector(completeQuestButtonTapped),
+            for: .touchUpInside
+        )
+        
+        questDeleteButton.addTarget(
+            self,
+            action: #selector(questDeleteButtonTapped),
+            for: .touchUpInside
+        )
     }
     
     /// 수정 버튼 눌렸을 때
@@ -652,9 +687,110 @@ final class QuestDetailViewController: UIViewController {
         }
     }
     
+    /// 퀘스트 삭제 버튼 눌렀을 때
+    @objc private func questDeleteButtonTapped() {
+        presentDeleteAlert()
+    }
+    
     /// 제목 텍스트필드 내용 바뀔 때
     @objc private func titleTextFieldChanged() {
         viewModel.updateTitle(titleEditTextField.text ?? "")
+    }
+    
+    func presentDeleteAlert() {
+        // 1. 반복 퀘스트인 경우
+        if quest.templateId != nil {
+            let actionSheet = UIAlertController(
+                title: "반복 퀘스트 삭제",
+                message: "이 퀘스트는 반복 일정입니다. 삭제 범위를 선택해주세요.",
+                preferredStyle: .actionSheet
+            )
+            
+            // 옵션 1: 이 일정만 삭제
+            let deleteSingleAction = UIAlertAction(
+                title: "이 일정만 삭제",
+                style: .destructive
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                // 현재 반복 퀘스트 중에서 이 일정이 마지막인지 확인
+                if viewModel.isLastRecurringQuest() {
+                    // 마지막 일정일 경우 두 번째 알림창 생성
+                    let lastAlert = UIAlertController(
+                        title: "마지막 일정 삭제",
+                        message: "이 일정을 삭제하면 더 이상 화면에 이 반복 퀘스트가 나타나지 않습니다.",
+                        preferredStyle: .alert
+                    )
+                    
+                    lastAlert.addAction(
+                        UIAlertAction(title: "삭제 진행", style: .destructive) { _ in
+                            self.viewModel.deleteQuest(mode: .all)
+                        }
+                    )
+                    lastAlert.addAction(UIAlertAction(title: "취소", style: .cancel))
+                    
+                    self.present(lastAlert, animated: true)
+                } else {
+                    // 마지막이 아니라면 바로 삭제
+                    self.viewModel.deleteQuest(mode: .single)
+                }
+            }
+            
+            // 옵션 2: 반복 일정 모두 삭제
+            let deleteAllAction = UIAlertAction(
+                title: "반복 일정 모두 삭제",
+                style: .destructive
+            ) { [weak self] _ in
+                self?.viewModel.deleteQuest(mode: .all)
+            }
+            
+            let cancelAction = UIAlertAction(
+                title: "취소",
+                style: .cancel
+            )
+            
+            actionSheet.addAction(deleteSingleAction)
+            actionSheet.addAction(deleteAllAction)
+            actionSheet.addAction(cancelAction)
+            
+            // iPad 대응 (iPad는 actionSheet를 띄울 때 popover 설정이 필요함)
+            if let popoverController = actionSheet.popoverPresentationController {
+                popoverController.sourceView = self.view
+                popoverController.sourceRect = CGRect(
+                    x: self.view.bounds.midX,
+                    y: self.view.bounds.midY,
+                    width: 0,
+                    height: 0
+                )
+                popoverController.permittedArrowDirections = []
+            }
+            
+            self.present(actionSheet, animated: true)
+        }
+        // 2. 일반 퀘스트인 경우 (단순 Alert 사용)
+        else {
+            let alert = UIAlertController(
+                title: "퀘스트 삭제",
+                message: "정말로 이 퀘스트를 삭제하시겠습니까?",
+                preferredStyle: .alert
+            )
+            
+            let deleteAction = UIAlertAction(
+                title: "삭제",
+                style: .destructive
+            ) { [weak self] _ in
+                self?.viewModel.deleteQuest(mode: .all)
+            }
+            
+            let cancelAction = UIAlertAction(
+                title: "취소",
+                style: .cancel
+            )
+            
+            alert.addAction(deleteAction)
+            alert.addAction(cancelAction)
+            
+            self.present(alert, animated: true)
+        }
     }
     
     // MARK: - EditMode에 따른 UI 변경 (수정모드)

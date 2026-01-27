@@ -19,16 +19,20 @@ final class QuestDetailViewModel: ObservableObject {
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
     @Published var starCount: Int = 10
     @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    @Published var errorMessage: String?
     
     var title: String = ""
-    var familyMembers: [User] = []   // 가족 구성원
+    private var description: String = ""
     var recurringEndDate: Date?
     private(set) var recurringType: RecurringType = .none    // 반복 타입
-    private var description: String = ""
+    var familyMembers: [User] = []   // 가족 구성원
+    var allQuests: [Quest] = []
+    var templates: [QuestTemplate] = []
+    var deleteSuccess = PassthroughSubject<Void, Never>()
     
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
-
+    
     // MARK: - init
     
     init(
@@ -40,11 +44,12 @@ final class QuestDetailViewModel: ObservableObject {
         self.questService = questService
         self.userService = userService
         loadQuestData()
+        loadAllQuests()
     }
     
     // MARK: - Data load
     
-    func loadQuestData() {
+    private func loadQuestData() {
         title = quest.title
         description = quest.description ?? ""
         category = quest.category
@@ -66,6 +71,23 @@ final class QuestDetailViewModel: ObservableObject {
         }
         
         self.recurringEndDate = quest.recurringEndDate
+    }
+    
+    private func loadAllQuests() {
+        Task {
+            guard let currentUser = try await userService.getCurrentUser() else {
+                print("현재 사용자를 가져오지 못했습니다.")
+                return
+            }
+            
+            guard let familyId = currentUser.familyId else {
+                print("가족 아이디를 가져오지 못했습니다.")
+                return
+            }
+            
+            self.allQuests = try await questService.getFamilyQuests(familyId: familyId)
+            self.templates = try await questService.fetchQuestTemplates(familyId: familyId)
+        }
     }
     
     func fetchFamilyMembers() {
@@ -134,7 +156,7 @@ final class QuestDetailViewModel: ObservableObject {
         return calendar.date(from: merged) ?? Date()
     }
     
-    // MARK: - 퀘스트 수정, 완료 처리
+    // MARK: - 퀘스트 수정, 완료, 삭제
     
     /// 수정 모드에서 완료 버튼 눌렀을때 (수정 완료)
     func saveChanges() async throws {
@@ -154,23 +176,23 @@ final class QuestDetailViewModel: ObservableObject {
             throw QuestDetailError.questUpdateFail
         }
     }
-
+    
     /// 퀘스트 완료 처리
     func completeQuest() async throws {
         // 현재 사용자 정보 가져오기
         guard let currentUser = try await userService.getCurrentUser() else {
             throw QuestDetailError.userNotFound
         }
-
+        
         // 담당자가 지정되지 않은 퀘스트이거나, 담당자가 현재 사용자인 경우에만 완료 가능
         guard quest.assignedTo == nil || quest.assignedTo == currentUser.id else {
             throw QuestDetailError.notAssignedToQuest
         }
-
+        
         // 퀘스트 상태를 completed로 변경
         try await questService
             .updateQuestStatus(quest: quest, status: .completed)
-
+        
         // 담당자가 지정되지 않은 퀘스트였다면, 완료 시점에 담당자를 현재 사용자로 설정
         var questToUpdate = quest
         if quest.assignedTo == nil {
@@ -178,18 +200,64 @@ final class QuestDetailViewModel: ObservableObject {
             // Firestore에도 담당자 정보 업데이트
             try await questService.updateQuest(questToUpdate)
         }
-
+        
         // 포인트 부여: 퀘스트의 포인트만큼 사용자에게 추가
         let newPoints = currentUser.points + quest.points
         try await userService
             .updateUserPoints(userId: currentUser.id, points: newPoints)
-
+        
         // 로컬 quest 객체도 업데이트
         var updatedQuest = questToUpdate
         updatedQuest.status = .completed
         updatedQuest.completedAt = Date()
         updatedQuest.updatedAt = Date()
         self.quest = updatedQuest
+    }
+    
+    func deleteQuest(mode: DeleteMode) {
+        Task {
+            do {
+                try await questService.deleteQuest(quest: self.quest, mode: mode)
+                await MainActor.run {
+                    deleteSuccess.send()
+                }
+            } catch {
+                errorMessage = QuestDetailError.questDeleteFail.errorDescription
+            }
+        }
+    }
+    
+    /// 마지막 남은 반복 퀘스트인지 확인
+    func isLastRecurringQuest() -> Bool {
+        // 템플릿 정보 가져오기
+        guard let templateId = quest.templateId,
+              let template = templates.first(where: { $0.id == templateId })
+        else { return true }
+        
+        let calendar = Calendar.current
+        let currentQuestDate = calendar.startOfDay(for: quest.dueDate ?? Date())
+        var checkDate = calendar.date(byAdding: .day, value: 1, to: currentQuestDate)!
+        
+        // 종료일이 없으면 1년 뒤까지 확인(보통 recurringEndDate 있음)
+        let endDate = template.recurringEndDate ?? calendar.date(byAdding: .year, value: 1, to: Date())!
+        let normalizedEnd = calendar.startOfDay(for: endDate)
+        
+        while checkDate <= normalizedEnd {
+            let weekday = calendar.component(.weekday, from: checkDate) - 1 // 요일(0~6)
+            
+            // 오늘(checkDate)이 템플릿에서 정한 반복 요일인가?
+            // 이미 '이 일정만 삭제'로 지워둔 날짜(excludedDates)인가?
+            let isRepeatDay = template.selectedRepeatDays.contains(weekday)
+            let isExcluded = template.excludedDates?.contains { calendar.isDate($0, inSameDayAs: checkDate) } ?? false
+            
+            if isRepeatDay && !isExcluded {
+                return false
+            }
+            
+            checkDate = calendar.date(byAdding: .day, value: 1, to: checkDate)!
+        }
+        
+        return true
     }
 }
 
@@ -199,7 +267,8 @@ enum QuestDetailError: LocalizedError {
     case notAssignedToQuest
     case userNotFound
     case questUpdateFail
-
+    case questDeleteFail
+    
     var errorDescription: String? {
         switch self {
             case .notAssignedToQuest:
@@ -208,6 +277,8 @@ enum QuestDetailError: LocalizedError {
                 return "사용자 정보를 찾을 수 없습니다"
             case .questUpdateFail:
                 return "퀘스트 수정에 실패했습니다"
+            case .questDeleteFail:
+                return "퀘스트 삭제에 실패했습니다"
         }
     }
 }

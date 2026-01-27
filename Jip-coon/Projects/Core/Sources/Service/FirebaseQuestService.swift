@@ -125,12 +125,38 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     }
 
     /// 퀘스트 삭제
-    public func deleteQuest(id: String) async throws {
-        do {
-            try await questsCollection.document(id).delete()
-        } catch {
-            throw FirebaseQuestServiceError
-                .deletionFailed(error.localizedDescription)
+    public func deleteQuest(quest: Quest, mode: DeleteMode) async throws {
+        switch mode {
+        case .all:
+            // 전체 삭제: 템플릿과 실제 문서 모두 삭제
+            if let templateId = quest.templateId {
+                try await templatesCollection.document(templateId).delete()
+            }
+            if !quest.id.hasPrefix("virtual_") {
+                try await questsCollection.document(quest.id).delete()
+            }
+
+        case .single:
+            // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
+            guard let templateId = quest.templateId, let dueDate = quest.dueDate else { return }
+            
+            // 1. 템플릿 가져오기
+            let docRef = templatesCollection.document(templateId)
+            let snapshot = try await docRef.getDocument()
+            var template = try snapshot.data(as: QuestTemplate.self)
+            
+            // 2. 제외 목록에 현재 날짜 추가 (시간 제외하고 날짜만)
+            let dateToRemove = Calendar.current.startOfDay(for: dueDate)
+            if template.excludedDates == nil { template.excludedDates = [] }
+            template.excludedDates?.append(dateToRemove)
+            
+            // 3. 템플릿 업데이트
+            try docRef.setData(from: template)
+            
+            // 4. 만약 이미 실제 문서가 생성되어 있었다면 그것도 삭제
+            if !quest.id.hasPrefix("virtual_") {
+                try await questsCollection.document(quest.id).delete()
+            }
         }
     }
 
@@ -183,6 +209,15 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     public func getQuestsByAssignee(userId: String, familyId: String) async throws -> [Quest] {
         let all = try await getFamilyQuests(familyId: familyId)
         return all.filter { $0.assignedTo == userId }
+    }
+    
+    /// 퀘스트 템플릿 조회
+    public func fetchQuestTemplates(familyId: String) async throws -> [QuestTemplate] {
+        let snapshot = try await templatesCollection
+            .whereField(FirestoreFields.QuestTemplate.familyId, isEqualTo: familyId)
+            .getDocuments()
+        
+        return snapshot.documents.compactMap { try? $0.data(as: QuestTemplate.self) }
     }
 
     // MARK: - 상태 관리
@@ -477,6 +512,13 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             while date <= normalizedEnd {
                 let currentDate = calendar.startOfDay(for: date)
                 
+                // 반복 퀘스트에서 단일 삭제(제외)된 날짜인지 확인
+                if let excluded = template.excludedDates,
+                   excluded.contains(where: { calendar.isDate($0, inSameDayAs: currentDate) }) {
+                    date = calendar.date(byAdding: .day, value: 1, to: date)!
+                    continue
+                }
+                
                 // 반복 퀘스트 시작일보다 현재 날짜가 이전이면 다음날로
                 if currentDate < templateStart {
                     date = calendar.date(byAdding: .day, value: 1, to: date)!
@@ -486,7 +528,6 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 // 반복 퀘스트 종료일을 지났는지 확인
                 if let templateEnd = template.recurringEndDate {
                     if currentDate > calendar.startOfDay(for: templateEnd) {
-                        date = calendar.date(byAdding: .day, value: 1, to: date)!
                         break
                     }
                 }

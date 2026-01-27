@@ -26,6 +26,7 @@ public struct QuestTemplate: Codable, Identifiable {
     public var startDate: Date
     public var recurringEndDate: Date?
     public var updatedAt: Date
+    public var excludedDates: [Date]?
     
     /// Quest Template 생성자
     /// - Parameters:
@@ -55,7 +56,8 @@ public struct QuestTemplate: Codable, Identifiable {
         selectedRepeatDays: [Int],
         startDate: Date,
         recurringEndDate: Date? = nil,
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        excludedDates: [Date]?
     ) {
         self.id = id
         self.title = title
@@ -70,5 +72,6 @@ public struct QuestTemplate: Codable, Identifiable {
         self.startDate = startDate
         self.recurringEndDate = recurringEndDate
         self.updatedAt = updatedAt
+        self.excludedDates = excludedDates
     }
 }
