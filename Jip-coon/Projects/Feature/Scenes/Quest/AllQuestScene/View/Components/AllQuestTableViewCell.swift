@@ -28,8 +28,15 @@ final class AllQuestTableViewCell: UITableViewCell {
     
     private let assigneeLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textColor = .textGray
+        return label
+    }()
+    
+    private let dueDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .mainOrange
         return label
     }()
     
@@ -62,11 +69,13 @@ final class AllQuestTableViewCell: UITableViewCell {
         contentView.addSubview(containerView)
         containerView.addSubview(titleLabel)
         containerView.addSubview(assigneeLabel)
+        containerView.addSubview(dueDateLabel)
         containerView.addSubview(statusLabel)
         
         containerView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         assigneeLabel.translatesAutoresizingMaskIntoConstraints = false
+        dueDateLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -90,8 +99,17 @@ final class AllQuestTableViewCell: UITableViewCell {
                 .constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
             assigneeLabel.leadingAnchor
                 .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            assigneeLabel.trailingAnchor
+            assigneeLabel.heightAnchor
+                .constraint(equalToConstant: 16),
+            
+            dueDateLabel.centerYAnchor
+                .constraint(equalTo: assigneeLabel.centerYAnchor),
+            dueDateLabel.leadingAnchor
+                .constraint(equalTo: assigneeLabel.trailingAnchor, constant: 12),
+            dueDateLabel.trailingAnchor
                 .constraint(equalTo: statusLabel.leadingAnchor, constant: -20),
+            dueDateLabel.heightAnchor
+                .constraint(equalToConstant: 16),
             
             statusLabel.centerYAnchor
                 .constraint(equalTo: containerView.centerYAnchor),
@@ -110,9 +128,18 @@ final class AllQuestTableViewCell: UITableViewCell {
         // 담당자 이름 설정
         if let assignedId = quest.assignedTo,
            let member = members.first(where: { $0.id == assignedId }) {
-            assigneeLabel.text = member.name
+            assigneeLabel.text = "담당자: \(member.name)"
         } else {
-            assigneeLabel.text = "없음"
+            assigneeLabel.text = "담당자: 미정"
+        }
+        
+        // 마감일 정보
+        if let dueDate = quest.dueDate {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M/dd HH:mm"
+            dueDateLabel.text = "마감: \(formatter.string(from: dueDate))"
+        } else {
+            dueDateLabel.text = "마감일 없음"
         }
         
         // 상태에 따른 색상 설정

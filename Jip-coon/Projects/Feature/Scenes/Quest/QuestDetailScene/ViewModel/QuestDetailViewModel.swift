@@ -42,7 +42,6 @@ final class QuestDetailViewModel: ObservableObject {
         title = quest.title
         description = quest.description ?? ""
         category = quest.category
-        selectedWorkerName = quest.assignedTo ?? ""
         starCount = quest.points
         recurringType = quest.recurringType
         
@@ -50,6 +49,9 @@ final class QuestDetailViewModel: ObservableObject {
             selectedDate = due
             selectedTime = due
         }
+        
+        // 가족 구성원 정보를 로드한 후 담당자 이름 설정
+        fetchFamilyMembers()
     }
     
     // MARK: - Data Updates
@@ -86,7 +88,14 @@ final class QuestDetailViewModel: ObservableObject {
         quest.title = title
         quest.description = description
         quest.category = category
-        quest.assignedTo = selectedWorkerName
+        
+        // 담당자 이름을 ID로 변환하여 저장
+        if let member = familyMembers.first(where: { $0.name == selectedWorkerName }) {
+            quest.assignedTo = member.id
+        } else {
+            quest.assignedTo = selectedWorkerName
+        }
+        
         quest.points = starCount
         quest.dueDate = combineDateAndTime()
         quest.recurringType = recurringType
@@ -111,7 +120,41 @@ final class QuestDetailViewModel: ObservableObject {
     }
     
     func fetchFamilyMembers() {
-        // TODO: - 가족이름 불러오기
+        Task {
+            do {
+                // 현재 사용자 정보 가져오기
+                let currentUser = try await userService.getCurrentUser()
+                guard let familyId = currentUser?.familyId else {
+                    await MainActor.run {
+                        self.selectedWorkerName = quest.assignedTo ?? "선택해 주세요"
+                    }
+                    return
+                }
+                
+                // 가족 구성원 정보 가져오기
+                let members = try await userService.getFamilyMembers(familyId: familyId)
+                
+                await MainActor.run {
+                    self.familyMembers = members
+                    
+                    // 담당자 ID를 이름으로 변환
+                    if let assignedToId = quest.assignedTo {
+                        if let member = members.first(where: { $0.id == assignedToId }) {
+                            self.selectedWorkerName = member.name
+                        } else {
+                            self.selectedWorkerName = assignedToId
+                        }
+                    } else {
+                        self.selectedWorkerName = "선택해 주세요"
+                    }
+                }
+            } catch {
+                print("가족 구성원 로드 실패: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.selectedWorkerName = quest.assignedTo ?? "선택해 주세요"
+                }
+            }
+        }
     }
 
     // 퀘스트 완료 처리

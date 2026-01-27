@@ -526,10 +526,20 @@ final class QuestDetailViewController: UIViewController {
         Task {
             do {
                 try await viewModel.completeQuest()
-                // 성공 시 메인 화면으로 돌아가기
-                navigationController?.popViewController(animated: true)
+                // 성공 시 화면 닫기
+                await MainActor.run {
+                    // 네비게이션 컨트롤러가 있으면 pop, 없으면 dismiss
+                    if let navigationController = self.navigationController,
+                       navigationController.viewControllers.count > 1 {
+                        navigationController.popViewController(animated: true)
+                    } else {
+                        self.dismiss(animated: true)
+                    }
+                }
             } catch {
-                showErrorAlert(message: error.localizedDescription)
+                await MainActor.run {
+                    self.showErrorAlert(message: error.localizedDescription)
+                }
             }
         }
     }

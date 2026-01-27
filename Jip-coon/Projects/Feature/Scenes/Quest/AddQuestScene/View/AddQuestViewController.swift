@@ -151,8 +151,20 @@ final class AddQuestViewController: UIViewController {
         view.backgroundColor = .backgroundWhite
         navigationItem.title = "퀘스트 추가"
         
+        // 닫기 버튼 추가
+        let closeButton = UIBarButtonItem(
+            barButtonSystemItem: .close,
+            target: self,
+            action: #selector(closeButtonTapped)
+        )
+        navigationItem.leftBarButtonItem = closeButton
+        
         addSubviews()
         setupConstraints()
+    }
+    
+    @objc private func closeButtonTapped() {
+        dismiss(animated: true)
     }
     
     private func addSubviews() {
@@ -539,11 +551,15 @@ final class AddQuestViewController: UIViewController {
                     name: NSNotification.Name("QuestCreated"),
                     object: nil
                 )
-                // 저장 성공 시 이전 화면으로 돌아가기
-                navigationController?.popViewController(animated: true)
+                // 저장 성공 시 화면 닫기
+                await MainActor.run {
+                    self.dismiss(animated: true)
+                }
             } catch {
                 // 에러 처리
-                showErrorAlert(message: error.localizedDescription)
+                await MainActor.run {
+                    self.showErrorAlert(message: error.localizedDescription)
+                }
             }
         }
     }

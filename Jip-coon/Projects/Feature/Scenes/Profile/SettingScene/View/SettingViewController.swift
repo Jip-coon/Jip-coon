@@ -223,6 +223,7 @@ public final class SettingViewController: UIViewController {
         // 로그인은 되어있지만 현재 사용자 정보 없는 경우
         if Auth.auth().currentUser != nil && currentUser == nil {
             showErrorAlert(message: "네트워크 상태를 확인하고 다시 시도해주세요.")
+            return
         }
         
         guard let _ = currentUser else {
@@ -235,9 +236,24 @@ public final class SettingViewController: UIViewController {
         let profileEditViewController = ProfileEditViewController(
             viewModel: profileEditViewModel
         )
-        navigationItem.backButtonTitle = ""
-        navigationController?
-            .pushViewController(profileEditViewController, animated: true)
+        
+        // 네비게이션 컨트롤러로 래핑하여 모달로 표시
+        let navController = UINavigationController(rootViewController: profileEditViewController)
+        
+        // 닫기 버튼 추가
+        let closeButton = UIBarButtonItem(
+            barButtonSystemItem: .close,
+            target: self,
+            action: #selector(dismissProfileEdit)
+        )
+        profileEditViewController.navigationItem.leftBarButtonItem = closeButton
+        
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+    
+    @objc private func dismissProfileEdit() {
+        dismiss(animated: true)
     }
     
     private func showErrorAlert(message: String) {

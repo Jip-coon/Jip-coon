@@ -99,6 +99,10 @@ final class UnderlineSegmentControl: UIView {
     
     private func moveUnderline(animated: Bool) {
         guard buttons.indices.contains(selectedIndex) else { return }
+        
+        // 뷰의 width가 0이면 레이아웃이 아직 완료되지 않은 것이므로 업데이트 스킵
+        guard bounds.width > 0 else { return }
+        
         // 스택뷰가 버튼들을 제자리에 배치하도록 강제
         stackView.layoutIfNeeded()
         
@@ -110,6 +114,10 @@ final class UnderlineSegmentControl: UIView {
         
         // 버튼 내 라벨의 위치를 현재 뷰(self) 기준으로 변환
         let frame = label.convert(label.bounds, to: self)
+        
+        // 라벨의 width가 유효한지 확인
+        guard frame.width > 0 else { return }
+        
         let ratio: CGFloat = 0.9
         let newWidth = frame.width * ratio
         let diff = frame.width - newWidth
@@ -128,7 +136,11 @@ final class UnderlineSegmentControl: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        moveUnderline(animated: false)
+        // layoutSubviews가 여러 번 호출될 수 있으므로, 
+        // 유효한 bounds를 가질 때만 underline 업데이트
+        if bounds.width > 0 {
+            moveUnderline(animated: false)
+        }
     }
     
 }
