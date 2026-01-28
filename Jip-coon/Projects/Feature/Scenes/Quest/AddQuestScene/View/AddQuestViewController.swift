@@ -63,7 +63,7 @@ final class AddQuestViewController: UIViewController {
         label.font = .systemFont(ofSize: 15)
         return InfoRowView(
             leading: label,
-            title: "날짜",
+            title: "마감일",
             value: Date.now.yyyyMMdEE
         )
     }()
@@ -75,7 +75,7 @@ final class AddQuestViewController: UIViewController {
         label.font = .systemFont(ofSize: 15)
         return InfoRowView(
             leading: label,
-            title: "시간",
+            title: "마감시간",
             value: Date.now.aHHmm
         )
     }()
@@ -120,7 +120,7 @@ final class AddQuestViewController: UIViewController {
         label.font = .systemFont(ofSize: 15)
         return InfoRowView(
             leading: label,
-            title: "종료일",
+            title: "반복 종료일",
             value: Date.now.yyyyMMdEE
         )
     }()

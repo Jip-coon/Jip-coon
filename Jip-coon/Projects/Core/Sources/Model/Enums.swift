@@ -168,4 +168,12 @@ public enum UrgencyLevel: String, CaseIterable, Codable {
         case .critical: return "🚨"
         }
     }
+    
+}
+
+// MARK: - 반복 퀘스트 삭제
+
+public enum DeleteMode {
+    case single    // 이 일정만 삭제
+    case all       // 전체 반복 삭제
 }

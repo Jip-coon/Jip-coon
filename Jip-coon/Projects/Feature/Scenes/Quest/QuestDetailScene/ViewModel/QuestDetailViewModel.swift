@@ -10,23 +10,32 @@ import Combine
 import Foundation
 
 final class QuestDetailViewModel: ObservableObject {
+    // MARK: - Properties
+    
     @Published var quest: Quest
-
-    @Published var title: String = ""
-    @Published var description: String = ""
-    @Published var questCreateDate: Date = Date()
     @Published var selectedDate: Date = Date()  // 선택된 날짜
     @Published var selectedTime: Date = Date()  // 선택된 시간
     @Published var category: QuestCategory = .laundry
-    @Published var familyMembers: [User] = []   // 가족 구성원
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
     @Published var starCount: Int = 10
-    @Published private(set) var recurringType: RecurringType = .none    // 반복 타입
     @Published var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
+    @Published var errorMessage: String?
+    @Published var familyMembers: [User] = []   // 가족 구성원
+    
+    var title: String = ""
+    var description: String?
+    var selectedWorkerID: String?
+    var recurringEndDate: Date?
+    private(set) var recurringType: RecurringType = .none    // 반복 타입
+    var allQuests: [Quest] = []
+    var templates: [QuestTemplate] = []
+    var deleteSuccess = PassthroughSubject<Void, Never>()
 
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
 
+    // MARK: - init
+    
     init(
         quest: Quest,
         questService: QuestServiceProtocol,
@@ -35,23 +44,81 @@ final class QuestDetailViewModel: ObservableObject {
         self.quest = quest
         self.questService = questService
         self.userService = userService
+        loadAllQuests()
+        fetchFamilyMembers()
         loadQuestData()
     }
     
+    // MARK: - Data load
+    
     func loadQuestData() {
         title = quest.title
-        description = quest.description ?? ""
+        description = quest.description
         category = quest.category
         starCount = quest.points
         recurringType = quest.recurringType
+        selectedWorkerID = quest.assignedTo
         
         if let due = quest.dueDate {
             selectedDate = due
             selectedTime = due
         }
         
-        // 가족 구성원 정보를 로드한 후 담당자 이름 설정
-        fetchFamilyMembers()
+        
+        // 반복 요일 설정
+        if let days = quest.selectedRepeatDays {
+            self.selectedRepeatDays = Set(days.compactMap { index in
+                // index가 0(일)~6(토)일 경우를 대비한 매핑
+                Day.allCases.first { $0.weekdayIndex == index }
+            })
+        }
+        
+        self.recurringEndDate = quest.recurringEndDate
+    }
+    
+    private func loadAllQuests() {
+        Task {
+            guard let currentUser = try await userService.getCurrentUser() else {
+                print("현재 사용자를 가져오지 못했습니다.")
+                return
+            }
+            
+            guard let familyId = currentUser.familyId else {
+                print("가족 아이디를 가져오지 못했습니다.")
+                return
+            }
+            
+            self.allQuests = try await questService.getFamilyQuests(familyId: familyId)
+            self.templates = try await questService.fetchQuestTemplates(familyId: familyId)
+        }
+    }
+    
+    func fetchFamilyMembers() {
+        Task {
+            do {
+                guard let currentUser = try await userService.getCurrentUser() else {
+                    print("현재 사용자 정보 가져오기 실패")
+                    return
+                }
+                
+                guard let familyId = currentUser.familyId else {
+                    print("가족 아이디 가져오기 실패")
+                    return
+                }
+                
+                let members = try await userService.getFamilyMembers(familyId: familyId)
+                
+                await MainActor.run {
+                    self.familyMembers = members
+                    
+                    if let assignedId = self.quest.assignedTo {
+                        self.selectedWorkerName = members.first(where: { $0.id == assignedId })?.name ?? ""
+                    }
+                }
+            } catch {
+                print("가족 구성원 가져오기 실패: \(error)")
+            }
+        }
     }
     
     // MARK: - Data Updates
@@ -61,7 +128,8 @@ final class QuestDetailViewModel: ObservableObject {
     }
     
     func updateDescription(_ newDescription: String) {
-        description = newDescription
+        let trimmedText = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        description = trimmedText.isEmpty ? nil : trimmedText
     }
     
     func updateDate(_ newDate: Date) {
@@ -84,23 +152,20 @@ final class QuestDetailViewModel: ObservableObject {
         category = newCategory
     }
     
-    func saveChanges() {
-        quest.title = title
-        quest.description = description
-        quest.category = category
+    /// 반복 요일 저장
+    func updateSelectedRepeatDays(_ days: [Day]) {
+        self.selectedRepeatDays = Set(days)
         
-        // 담당자 이름을 ID로 변환하여 저장
-        if let member = familyMembers.first(where: { $0.name == selectedWorkerName }) {
-            quest.assignedTo = member.id
+        if days.isEmpty {
+            recurringType = .none
+        } else if days.count == 7 {
+            recurringType = .daily
         } else {
-            quest.assignedTo = selectedWorkerName
+            recurringType = .weekly
         }
-        
-        quest.points = starCount
-        quest.dueDate = combineDateAndTime()
-        quest.recurringType = recurringType
     }
     
+    /// 시간과 날짜 합쳐서 DueDate로
     func combineDateAndTime() -> Date {
         let calendar = Calendar.current
         let day = calendar.dateComponents(
@@ -119,45 +184,28 @@ final class QuestDetailViewModel: ObservableObject {
         return calendar.date(from: merged) ?? Date()
     }
     
-    func fetchFamilyMembers() {
-        Task {
-            do {
-                // 현재 사용자 정보 가져오기
-                let currentUser = try await userService.getCurrentUser()
-                guard let familyId = currentUser?.familyId else {
-                    await MainActor.run {
-                        self.selectedWorkerName = quest.assignedTo ?? "선택해 주세요"
-                    }
-                    return
-                }
-                
-                // 가족 구성원 정보 가져오기
-                let members = try await userService.getFamilyMembers(familyId: familyId)
-                
-                await MainActor.run {
-                    self.familyMembers = members
-                    
-                    // 담당자 ID를 이름으로 변환
-                    if let assignedToId = quest.assignedTo {
-                        if let member = members.first(where: { $0.id == assignedToId }) {
-                            self.selectedWorkerName = member.name
-                        } else {
-                            self.selectedWorkerName = assignedToId
-                        }
-                    } else {
-                        self.selectedWorkerName = "선택해 주세요"
-                    }
-                }
-            } catch {
-                print("가족 구성원 로드 실패: \(error.localizedDescription)")
-                await MainActor.run {
-                    self.selectedWorkerName = quest.assignedTo ?? "선택해 주세요"
-                }
-            }
+    // MARK: - 퀘스트 수정, 완료, 삭제
+    
+    /// 수정 모드에서 완료 버튼 눌렀을때 (수정 완료)
+    func saveChanges() async throws {
+        quest.title = title
+        quest.description = description
+        quest.category = category
+        quest.assignedTo = selectedWorkerID
+        quest.points = starCount
+        quest.dueDate = combineDateAndTime()
+        quest.recurringType = recurringType
+        quest.recurringEndDate = recurringEndDate
+        quest.selectedRepeatDays = selectedRepeatDays.map { $0.weekdayIndex }
+        
+        do {
+            try await questService.updateQuest(quest)
+        } catch {
+            throw QuestDetailError.questUpdateFail
         }
     }
 
-    // 퀘스트 완료 처리
+    /// 퀘스트 완료 처리
     func completeQuest() async throws {
         // 현재 사용자 정보 가져오기
         guard let currentUser = try await userService.getCurrentUser() else {
@@ -193,19 +241,72 @@ final class QuestDetailViewModel: ObservableObject {
         updatedQuest.updatedAt = Date()
         self.quest = updatedQuest
     }
+    
+    /// 퀘스트 삭제
+    func deleteQuest(mode: DeleteMode) {
+        Task {
+            do {
+                try await questService.deleteQuest(quest: self.quest, mode: mode)
+                await MainActor.run {
+                    deleteSuccess.send()
+                }
+            } catch {
+                errorMessage = QuestDetailError.questDeleteFail.errorDescription
+            }
+        }
+    }
+    
+    /// 마지막 남은 반복 퀘스트인지 확인
+    func isLastRecurringQuest() -> Bool {
+        // 템플릿 정보 가져오기
+        guard let templateId = quest.templateId,
+              let template = templates.first(where: { $0.id == templateId })
+        else { return true }
+        
+        let calendar = Calendar.current
+        let currentQuestDate = calendar.startOfDay(for: quest.dueDate ?? Date())
+        var checkDate = calendar.date(byAdding: .day, value: 1, to: currentQuestDate)!
+        
+        // 종료일이 없으면 1년 뒤까지 확인(보통 recurringEndDate 있음)
+        let endDate = template.recurringEndDate ?? calendar.date(byAdding: .year, value: 1, to: Date())!
+        let normalizedEnd = calendar.startOfDay(for: endDate)
+        
+        while checkDate <= normalizedEnd {
+            let weekday = calendar.component(.weekday, from: checkDate) - 1 // 요일(0~6)
+            
+            // 오늘(checkDate)이 템플릿에서 정한 반복 요일인가?
+            // 이미 '이 일정만 삭제'로 지워둔 날짜(excludedDates)인가?
+            let isRepeatDay = template.selectedRepeatDays.contains(weekday)
+            let isExcluded = template.excludedDates?.contains { calendar.isDate($0, inSameDayAs: checkDate) } ?? false
+            
+            if isRepeatDay && !isExcluded {
+                return false
+            }
+            
+            checkDate = calendar.date(byAdding: .day, value: 1, to: checkDate)!
+        }
+        
+        return true
+    }
 }
 
 // MARK: - Error Types
 enum QuestDetailError: LocalizedError {
     case notAssignedToQuest
     case userNotFound
-
+    case questUpdateFail
+    case questDeleteFail
+    
     var errorDescription: String? {
         switch self {
         case .notAssignedToQuest:
             return "이 퀘스트의 담당자가 아닙니다"
         case .userNotFound:
             return "사용자 정보를 찾을 수 없습니다"
+        case .questUpdateFail:
+            return "퀘스트 수정에 실패했습니다"
+        case .questDeleteFail:
+            return "퀘스트 삭제에 실패했습니다"
         }
     }
 }

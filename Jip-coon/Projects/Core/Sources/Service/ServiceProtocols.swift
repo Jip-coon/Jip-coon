@@ -117,7 +117,7 @@ public protocol QuestServiceProtocol {
     func updateQuest(_ quest: Quest) async throws
     
     /// 퀘스트 삭제
-    func deleteQuest(id: String) async throws
+    func deleteQuest(quest: Quest, mode: DeleteMode) async throws
     
     /// 가족의 모든 퀘스트 조회
     func getFamilyQuests(familyId: String) async throws -> [Quest]
@@ -130,6 +130,9 @@ public protocol QuestServiceProtocol {
     
     /// 담당자별 퀘스트 조회
     func getQuestsByAssignee(userId: String, familyId: String) async throws -> [Quest]
+    
+    /// 퀘스트 템플릿 조회
+    func fetchQuestTemplates(familyId: String) async throws -> [QuestTemplate]
     
     /// 퀘스트 상태 변경
     func updateQuestStatus(quest: Quest, status: QuestStatus) async throws
