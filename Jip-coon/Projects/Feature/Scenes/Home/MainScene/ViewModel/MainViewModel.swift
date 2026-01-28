@@ -42,11 +42,6 @@ public class MainViewModel {
         selectedTabIndex = index
     }
     
-    /// 서비스 제공 여부 확인
-    func hasServices() -> Bool {
-        return userService != nil && questService != nil
-    }
-    
     /// UserService 반환
     func getUserService() -> UserServiceProtocol? {
         return userService

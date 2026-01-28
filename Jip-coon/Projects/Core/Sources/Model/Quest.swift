@@ -34,6 +34,8 @@ public struct Quest: Codable, Identifiable {
     // MARK: - 보상 및 일정 정보
     public var points: Int             // 완료 시 획득 포인트
     public var dueDate: Date?          // 마감 기한 (nil이면 기한 없음)
+    public var selectedRepeatDays: [Int]?   // 선택된 반복 요일
+    public var recurringEndDate: Date?  // 반복 종료일
 
     // MARK: - 타임스탬프 정보
     public let createdAt: Date         // 퀘스트 생성 시각
@@ -76,6 +78,8 @@ public struct Quest: Codable, Identifiable {
         familyId: String,
         points: Int = 10,
         dueDate: Date? = nil,
+        selectedRepeatDays: [Int]? = nil,
+        recurringEndDate: Date? = nil,
         createdAt: Date = Date(),
         startedAt: Date? = nil,
         completedAt: Date? = nil,
@@ -94,6 +98,8 @@ public struct Quest: Codable, Identifiable {
         self.familyId = familyId
         self.points = points
         self.dueDate = dueDate
+        self.selectedRepeatDays = selectedRepeatDays
+        self.recurringEndDate = recurringEndDate
         self.createdAt = createdAt
         self.startedAt = startedAt
         self.completedAt = completedAt

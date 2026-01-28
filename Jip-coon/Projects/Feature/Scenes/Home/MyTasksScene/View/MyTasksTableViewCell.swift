@@ -12,8 +12,6 @@ import UI
 public class MyTasksTableViewCell: UITableViewCell {
     public static let identifier = "MyTasksTableViewCell"
     
-    public var onTap: (() -> Void)?
-    
     // MARK: - UI Components
     
     private let containerView: UIView = {
@@ -93,7 +91,6 @@ public class MyTasksTableViewCell: UITableViewCell {
     public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-        setupTapGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -157,27 +154,33 @@ public class MyTasksTableViewCell: UITableViewCell {
         ])
     }
     
-    private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        containerView.addGestureRecognizer(tapGesture)
-        containerView.isUserInteractionEnabled = true
+    public override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        
+        if selected {
+            UIView.animate(withDuration: 0.1, animations: {
+                self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.containerView.transform = .identity
+                }
+            }
+        }
     }
     
-    @objc private func handleTap() {
-        // 클릭 시 살짝 작아지는 애니메이션
-        UIView.animate(withDuration: 0.1, animations: {
-            self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
-        }) { _ in
-            UIView.animate(withDuration: 0.1) {
+    public override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        
+        UIView.animate(withDuration: 0.1) {
+            if highlighted {
+                self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+            } else {
                 self.containerView.transform = .identity
             }
         }
-        onTap?()
     }
     
-    public func configure(with quest: Quest, familyMembers: [User], onTap: @escaping () -> Void) {
-        self.onTap = onTap
-        
+    public func configure(with quest: Quest, familyMembers: [User]) {
         emojiLabel.text = quest.category.emoji
         titleLabel.text = quest.title
         

@@ -40,18 +40,22 @@ final class UnderlineSegmentControl: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         underlineView.translatesAutoresizingMaskIntoConstraints = false
         
+        let leadingConstraint = stackView.leadingAnchor.constraint(equalTo: leadingAnchor)
+        let trailingConstraint = stackView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        
+        leadingConstraint.priority = .init(999)
+        trailingConstraint.priority = .init(999)
+        
         underlineLeadingConstraint = underlineView.leadingAnchor.constraint(equalTo: leadingAnchor)
         underlineWidthConstraint = underlineView.widthAnchor.constraint(equalToConstant: 0)
         
         NSLayoutConstraint.activate([
             stackView.topAnchor
                 .constraint(equalTo: topAnchor),
-            stackView.leadingAnchor
-                .constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor
-                .constraint(equalTo: trailingAnchor),
             stackView.bottomAnchor
                 .constraint(equalTo: bottomAnchor),
+            leadingConstraint,
+            trailingConstraint,
             
             underlineView.bottomAnchor
                 .constraint(equalTo: bottomAnchor),

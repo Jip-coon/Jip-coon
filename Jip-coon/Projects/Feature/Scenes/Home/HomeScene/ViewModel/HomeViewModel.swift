@@ -16,11 +16,12 @@ public final class HomeViewModel: ObservableObject {
     @Published private(set) var family: Family?
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
+    @Published var selectedFilter: HomeFilterType = .collection
     
     // MARK: - Services
-    private let userService: UserServiceProtocol
-    private let familyService: FamilyServiceProtocol
-    private let questService: QuestServiceProtocol
+    public let userService: UserServiceProtocol
+    public let familyService: FamilyServiceProtocol
+    public let questService: QuestServiceProtocol
     
     private var cancellables = Set<AnyCancellable>()
     private var questSubscription: AnyCancellable?
@@ -81,6 +82,12 @@ public final class HomeViewModel: ObservableObject {
         }
     }
     
+    // MARK: - User Actions
+    
+    func selectFilter(_ filter: HomeFilterType) {
+        selectedFilter = filter
+    }
+    
     // MARK: - Realtime Updates
     
     /// 실시간 퀘스트 관찰 설정
@@ -118,5 +125,17 @@ public final class HomeViewModel: ObservableObject {
     /// 퀘스트 업데이트 알림 전송
     private func notifyQuestUpdate() {
         NotificationCenter.default.post(name: NSNotification.Name("QuestCreated"), object: nil)
+    }
+    
+    // MARK: - Presenter Helpers
+    
+    /// 가족 정보 팝업을 위한 데이터 반환
+    func getFamilyInfoAlertContents() -> (title: String, message: String, inviteCode: String)? {
+        guard let family = family else { return nil }
+        return (
+            title: "가족 정보",
+            message: "가족명: \(family.name)\n초대코드: \(family.inviteCode)",
+            inviteCode: family.inviteCode
+        )
     }
 }

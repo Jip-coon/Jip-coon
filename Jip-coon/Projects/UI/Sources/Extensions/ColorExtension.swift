@@ -128,8 +128,11 @@ public extension UIColor {
         case "purple1": return .purple1
         case "green1": return .green1
         case "textFieldStroke": return .textFieldStroke
+        case "mainOrange": return .mainOrange
+        case "secondaryOrange": return .secondaryOrange
+        case "textRed": return .textRed
+        case "textGray": return .textGray
         default: return .systemGray
-
         }
     }
 }

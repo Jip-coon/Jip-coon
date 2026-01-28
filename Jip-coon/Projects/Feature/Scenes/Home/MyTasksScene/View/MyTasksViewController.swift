@@ -183,11 +183,6 @@ public class MyTasksViewController: UIViewController {
                 }
             } catch {
                 print("데이터 로드 실패: \(error.localizedDescription)")
-                await MainActor.run {
-                    self.myTasks = []
-                    self.updateEmptyState()
-                    self.tableView.reloadData()
-                }
             }
         }
     }
@@ -238,6 +233,7 @@ extension MyTasksViewController: UITableViewDelegate {
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         let quest = myTasks[indexPath.row]
         handleTaskTapped(quest)
     }
@@ -259,9 +255,7 @@ extension MyTasksViewController: UITableViewDataSource {
         }
         
         let quest = myTasks[indexPath.row]
-        cell.configure(with: quest, familyMembers: familyMembers) { [weak self] in
-            self?.handleTaskTapped(quest)
-        }
+        cell.configure(with: quest, familyMembers: familyMembers)
         
         return cell
     }

@@ -62,6 +62,7 @@ public struct FirestoreFields {
         static let familyId = "familyId"
         static let points = "points"
         static let dueDate = "dueDate"
+        static let selectedRepeatDays = "selectedRepeatDays"
         static let recurringType = "recurringType"
         static let recurringEndDate = "recurringEndDate"
         static let createdAt = "createdAt"
@@ -96,7 +97,9 @@ public struct FirestoreFields {
         static let recurringType = "recurringType"
         static let selectedRepeatDays = "selectedRepeatDays"
         static let startDate = "startDate"
-        static let reccuringEndDate = "reccuringEndDate"
+        static let recurringEndDate = "recurringEndDate"
         static let updatedAt = "updatedAt"
+        static let excludedDates = "excludedDates"
+        static let recurringDueTime = "recurringDueTime"
     }
 }

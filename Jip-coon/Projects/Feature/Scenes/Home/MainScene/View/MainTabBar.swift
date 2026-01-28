@@ -218,7 +218,8 @@ class MainTabBar: UIView {
     /// 인디케이터 위치 업데이트
     private func updateIndicatorPosition() {
         guard let constraint = navigationIndicatorLeadingConstraint,
-              let indicator = navigationIndicator else { return }
+              let indicator = navigationIndicator,
+              let superview = indicator.superview else { return }
         
         let position: Int
         switch selectedTab {
@@ -229,20 +230,36 @@ class MainTabBar: UIView {
         default: position = 0
         }
         
-        let leadingConstant: CGFloat
-        if position < 2 {
-            leadingConstant = 8 + CGFloat(position) * (56 + 8)
-        } else {
-            guard let superview = indicator.superview else { return }
-            let totalWidth = superview.bounds.width
-            let rightGroupStart = totalWidth - 8 - (56 * 2 + 8)
-            leadingConstant = rightGroupStart + CGFloat(position - 2) * (56 + 8)
-        }
+        let leadingConstant = calculateLeadingConstant(for: position, totalWidth: superview.bounds.width)
         
         constraint.constant = leadingConstant
         
         UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5, options: .curveEaseInOut) {
             indicator.superview?.layoutIfNeeded()
+        }
+    }
+    
+    /// 인디케이터 위치 계산
+    private func calculateLeadingConstant(for position: Int, totalWidth: CGFloat) -> CGFloat {
+        let itemWidth: CGFloat = 56
+        let itemSpacing: CGFloat = 8
+        let horizontalPadding: CGFloat = 8
+        
+        let itemFullWidth = itemWidth + itemSpacing
+        
+        if position < 2 {
+            // 왼쪽 그룹 (인덱스 0, 1)
+            return horizontalPadding + CGFloat(position) * itemFullWidth
+        } else {
+            // 오른쪽 그룹 (인덱스 2, 3)
+            // 오른쪽 그룹 시작 위치 = 전체 너비 - (우측 여백 + 버튼 2개 너비 + 버튼 사이 간격)
+            let rightGroupWidth = (itemWidth * 2) + itemSpacing
+            let rightGroupStart = totalWidth - horizontalPadding - rightGroupWidth
+            
+            // 오른쪽 그룹 내에서의 인덱스 (0부터 시작하도록 조정)
+            let indexInRightGroup = CGFloat(position - 2)
+            
+            return rightGroupStart + indexInRightGroup * itemFullWidth
         }
     }
 }

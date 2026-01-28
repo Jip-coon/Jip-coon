@@ -199,11 +199,6 @@ public class UrgentQuestViewController: UIViewController {
                 }
             } catch {
                 print("데이터 로드 실패: \(error.localizedDescription)")
-                await MainActor.run {
-                    self.urgentQuests = []
-                    self.updateEmptyState()
-                    self.tableView.reloadData()
-                }
             }
         }
     }
@@ -254,6 +249,7 @@ extension UrgentQuestViewController: UITableViewDelegate {
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         let quest = urgentQuests[indexPath.row]
         handleTaskTapped(quest)
     }
@@ -280,9 +276,7 @@ extension UrgentQuestViewController: UITableViewDataSource {
         cell.configure(
             with: quest,
             urgencyLevel: urgencyLevel
-        ) { [weak self] in
-            self?.handleTaskTapped(quest)
-        }
+        )
         
         return cell
     }

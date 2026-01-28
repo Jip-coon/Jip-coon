@@ -13,8 +13,6 @@ import UI
 public class UrgentTaskTableViewCell: UITableViewCell {
     public static let identifier = "UrgentTaskTableViewCell"
     
-    public var onTap: (() -> Void)?
-    
     // MARK: - UI Components
     
     // 카드 컨테이너
@@ -120,7 +118,6 @@ public class UrgentTaskTableViewCell: UITableViewCell {
     public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-        setupTapGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -192,29 +189,36 @@ public class UrgentTaskTableViewCell: UITableViewCell {
         ])
     }
     
-    private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        containerView.addGestureRecognizer(tapGesture)
-        containerView.isUserInteractionEnabled = true
+    public override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        
+        if selected {
+            UIView.animate(withDuration: 0.1, animations: {
+                self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.containerView.transform = .identity
+                }
+            }
+        }
     }
     
-    @objc private func handleTap() {
-        UIView.animate(withDuration: 0.1, animations: {
-            self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
-        }) { _ in
-            UIView.animate(withDuration: 0.1) {
+    public override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        
+        UIView.animate(withDuration: 0.1) {
+            if highlighted {
+                self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+            } else {
                 self.containerView.transform = .identity
             }
         }
-        onTap?()
     }
     
     public func configure(
         with quest: Quest,
-        urgencyLevel: UrgencyLevel,
-        onTap: @escaping () -> Void
+        urgencyLevel: UrgencyLevel
     ) {
-        self.onTap = onTap
         
         // 이모지
         emojiLabel.text = quest.category.emoji

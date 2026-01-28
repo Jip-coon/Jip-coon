@@ -151,11 +151,17 @@ public class MainViewController: UIViewController {
     }
     
     /// HomeViewController 생성
-    private func createHomeViewController() -> HomeViewController {
+    private func createHomeViewController() -> UIViewController {
+        guard let userService = viewModel.getUserService(),
+              let familyService = viewModel.getFamilyService(),
+              let questService = viewModel.getQuestService() else {
+            return createDefaultViewController(title: "홈", icon: "house")
+        }
+        
         return HomeViewController(
-            userService: viewModel.getUserService(),
-            familyService: viewModel.getFamilyService(),
-            questService: viewModel.getQuestService()
+            userService: userService,
+            familyService: familyService,
+            questService: questService
         )
     }
     
