@@ -79,4 +79,23 @@ final class ScheduleRepeatView: UIView {
         sender.isSelected.toggle()
         onDayButtonTapped?(selectedDays)
     }
+    
+    /// 외부(상세뷰)에서 요일 데이터를 전달받아 UI를 갱신하는 함수
+    func updateDays(_ days: Set<Day>) {
+        // 모든 버튼을 일단 해제
+        Day.allCases.forEach { day in
+            dayButtons[day].isSelected = false
+        }
+        
+        // 전달받은 요일에 해당하는 버튼만 선택 상태로 변경 (색상 변경됨)
+        days.forEach { day in
+            dayButtons[day].isSelected = true
+        }
+    }
+    
+    func setEnabled(_ isEnabled: Bool) {
+        dayButtons.allButtons.forEach { button in
+            button.isUserInteractionEnabled = isEnabled
+        }
+    }
 }

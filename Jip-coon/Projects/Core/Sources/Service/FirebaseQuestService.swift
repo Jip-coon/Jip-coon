@@ -96,25 +96,67 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     /// 퀘스트 업데이트
     public func updateQuest(_ quest: Quest) async throws {
         do {
+            // [공통 로직] 템플릿 ID가 있다면 무조건 템플릿의 반복 규칙도 함께 수정
+            if let templateId = quest.templateId {
+                try await templatesCollection.document(templateId).updateData([
+                    FirestoreFields.QuestTemplate.title: quest.title,
+                    FirestoreFields.QuestTemplate.description: quest.description ?? NSNull(),
+                    FirestoreFields.QuestTemplate.category: quest.category.rawValue,
+                    FirestoreFields.QuestTemplate.points: quest.points,
+                    FirestoreFields.QuestTemplate.assignedTo: quest.assignedTo as Any,
+                    FirestoreFields.QuestTemplate.recurringType: quest.recurringType.rawValue,
+                    FirestoreFields.QuestTemplate.selectedRepeatDays: quest.selectedRepeatDays ?? [] as Any,
+                    FirestoreFields.QuestTemplate.recurringEndDate: quest.recurringEndDate as Any,
+                    FirestoreFields.QuestTemplate.updatedAt: Timestamp(date: Date())
+                ])
+            }
+            
+            // [개별 퀘스트 처리]
             if quest.id.hasPrefix("virtual_") {
-                // 가상 퀘스트를 수정하려고 하면 아예 실제 문서로 등록시켜버림
+                // 가상 퀘스트 -> 상태 변경 등을 위해 실제 문서로 변환
                 _ = try await updateQuestStatus(quest: quest, status: quest.status)
             } else {
+                // 이미 생성된 실제 퀘스트 문서 업데이트
                 try questsCollection.document(quest.id).setData(from: quest)
             }
         } catch {
-            throw FirebaseQuestServiceError
-                .updateFailed(error.localizedDescription)
+            throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
         }
     }
 
     /// 퀘스트 삭제
-    public func deleteQuest(id: String) async throws {
-        do {
-            try await questsCollection.document(id).delete()
-        } catch {
-            throw FirebaseQuestServiceError
-                .deletionFailed(error.localizedDescription)
+    public func deleteQuest(quest: Quest, mode: DeleteMode) async throws {
+        switch mode {
+        case .all:
+            // 전체 삭제: 템플릿과 실제 문서 모두 삭제
+            if let templateId = quest.templateId {
+                try await templatesCollection.document(templateId).delete()
+            }
+            if !quest.id.hasPrefix("virtual_") {
+                try await questsCollection.document(quest.id).delete()
+            }
+
+        case .single:
+            // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
+            guard let templateId = quest.templateId, let dueDate = quest.dueDate else { return }
+            
+            // 1. 템플릿 가져오기
+            let docRef = templatesCollection.document(templateId)
+            let snapshot = try await docRef.getDocument()
+            var template = try snapshot.data(as: QuestTemplate.self)
+            
+            // 2. 제외 목록에 현재 날짜 추가 (시간 제외하고 날짜만)
+            let dateToRemove = Calendar.current.startOfDay(for: dueDate)
+            if template.excludedDates == nil { template.excludedDates = [] }
+            template.excludedDates?.append(dateToRemove)
+            
+            // 3. 템플릿 업데이트
+            try docRef.setData(from: template)
+            
+            // 4. 만약 이미 실제 문서가 생성되어 있었다면 그것도 삭제
+            if !quest.id.hasPrefix("virtual_") {
+                try await questsCollection.document(quest.id).delete()
+            }
         }
     }
 
@@ -168,6 +210,15 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         let all = try await getFamilyQuests(familyId: familyId)
         return all.filter { $0.assignedTo == userId }
     }
+    
+    /// 퀘스트 템플릿 조회
+    public func fetchQuestTemplates(familyId: String) async throws -> [QuestTemplate] {
+        let snapshot = try await templatesCollection
+            .whereField(FirestoreFields.QuestTemplate.familyId, isEqualTo: familyId)
+            .getDocuments()
+        
+        return snapshot.documents.compactMap { try? $0.data(as: QuestTemplate.self) }
+    }
 
     // MARK: - 상태 관리
 
@@ -198,6 +249,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                     familyId: quest.familyId,
                     points: quest.points,
                     dueDate: quest.dueDate,            // 가상 퀘스트가 생성됐을때 그 날짜 유지
+                    selectedRepeatDays: quest.selectedRepeatDays,
+                    recurringEndDate: quest.recurringEndDate,
                     startedAt: status == .inProgress ? Date() : nil,
                     completedAt: status == .completed ? Date() : nil,
                     approvedAt: status == .approved ? Date() : nil,
@@ -356,36 +409,43 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     ///         Publisher가 cancel되면 자동으로 리스너 제거
     ///         메모리 누수 방지를 위해 handleEvents를 사용하여 리스너 정리
     public func observeFamilyQuests(familyId: String) -> AnyPublisher<[Quest], Error> {
-        // 1. 실제 퀘스트 리스너용 서브젝트
+        let calendar = Calendar.current
         let questsPublisher = PassthroughSubject<[Quest], Error>()
+        let templatesPublisher = PassthroughSubject<[QuestTemplate], Error>()
+        
+        // 관찰 범위 설정 (오늘 기준 앞뒤 7일)
+        let today = Date()
+        let obsStart = calendar.date(byAdding: .day, value: -7, to: today)!
+        let obsEnd = calendar.date(byAdding: .day, value: 7, to: today)!
+        
+        // 실제 퀘스트 리스너
         let questsListener = questsCollection
-            .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
+            .whereField("familyId", isEqualTo: familyId)
+            .whereField("dueDate", isGreaterThanOrEqualTo: calendar.startOfDay(for: obsStart))
+            .whereField("dueDate", isLessThanOrEqualTo: obsEnd)
             .addSnapshotListener { snapshot, error in
-                if let error = error {
-                    questsPublisher.send(completion: .failure(error))
-                    return
-                }
+                if let error = error { questsPublisher.send(completion: .failure(error)); return }
                 let quests = snapshot?.documents.compactMap { try? $0.data(as: Quest.self) } ?? []
                 questsPublisher.send(quests)
             }
         
-        // 2. 템플릿 리스너용 서브젝트
-        let templatesPublisher = PassthroughSubject<[QuestTemplate], Error>()
+        // 템플릿 리스너
         let templatesListener = templatesCollection
-            .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
+            .whereField("familyId", isEqualTo: familyId)
             .addSnapshotListener { snapshot, error in
-                if let error = error {
-                    templatesPublisher.send(completion: .failure(error))
-                    return
-                }
+                if let error = error { templatesPublisher.send(completion: .failure(error)); return }
                 let templates = snapshot?.documents.compactMap { try? $0.data(as: QuestTemplate.self) } ?? []
                 templatesPublisher.send(templates)
             }
         
-        // 3. 결합 및 반환 (비즈니스 로직은 메서드로 분리)
         return Publishers.CombineLatest(questsPublisher, templatesPublisher)
             .map { [weak self] realQuests, templates in
-                return self?.mergeRealAndVirtualQuests(realQuests: realQuests, templates: templates) ?? realQuests
+                return self?.mergeRealAndVirtualQuests(
+                    realQuests: realQuests,
+                    templates: templates,
+                    startDate: obsStart,
+                    endDate: obsEnd
+                ) ?? realQuests
             }
             .handleEvents(receiveCancel: {
                 questsListener.remove()
@@ -423,23 +483,59 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     
     // MARK: - 반복 퀘스트 합성 로직 분리 (Private)
     
-    private func mergeRealAndVirtualQuests(realQuests: [Quest], templates: [QuestTemplate]) -> [Quest] {
+    /// 실제 퀘스트와 가상 퀘스트를 합쳐서 Quest 목록을 만들어 줍니다.
+    /// - Parameters:
+    ///   - realQuests: 실제 퀘스트(Firestore Quest에 저장되어 있음)
+    ///   - templates: 가상 퀘스트(Firestore QuestTemplate에 저장되어 있음)
+    ///   - startDate: 조회 시작 날짜
+    ///   - endDate: 조회 종료 날짜
+    /// - Returns: 실제 퀘스트 + 가상 퀘스트 (MainView, AllQuestView에서 사용)
+    private func mergeRealAndVirtualQuests(
+        realQuests: [Quest],
+        templates: [QuestTemplate],
+        startDate: Date,
+        endDate: Date
+    ) -> [Quest] {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
         
-        // 메인 화면 및 일반 관찰 범위 설정
-        let startDate = calendar.date(byAdding: .day, value: -7, to: today)!
-        let endDate = calendar.date(byAdding: .day, value: 7, to: today)!
+        // 시간 오차 제거를 위해 정규화
+        let normalizedStart = calendar.startOfDay(for: startDate)
+        let normalizedEnd = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endDate) ?? endDate
         
         var resultQuests = realQuests
         
+        // 반복 규칙 검사
         for template in templates {
-            var date = startDate
-            while date <= endDate {
-                let weekday = calendar.component(.weekday, from: date) - 1
+            var date = normalizedStart
+            let templateStart = calendar.startOfDay(for: template.startDate)
+            
+            while date <= normalizedEnd {
+                let currentDate = calendar.startOfDay(for: date)
                 
+                // 반복 퀘스트에서 단일 삭제(제외)된 날짜인지 확인
+                if let excluded = template.excludedDates,
+                   excluded.contains(where: { calendar.isDate($0, inSameDayAs: currentDate) }) {
+                    date = calendar.date(byAdding: .day, value: 1, to: date)!
+                    continue
+                }
+                
+                // 반복 퀘스트 시작일보다 현재 날짜가 이전이면 다음날로
+                if currentDate < templateStart {
+                    date = calendar.date(byAdding: .day, value: 1, to: date)!
+                    continue
+                }
+                
+                // 반복 퀘스트 종료일을 지났는지 확인
+                if let templateEnd = template.recurringEndDate {
+                    if currentDate > calendar.startOfDay(for: templateEnd) {
+                        break
+                    }
+                }
+                
+                // 오늘 날짜가 사용자가 선택한 반복 요일에 해당하는지 확인
+                let weekday = calendar.component(.weekday, from: date) - 1 // 0(일)~6(토)
                 if template.selectedRepeatDays.contains(weekday) {
-                    // 중복 체크
+                    // 이미 Firestore에 실제 데이터가 존재하는지
                     let isAlreadyExists = realQuests.contains { real in
                         real.templateId == template.id &&
                         calendar.isDate(real.dueDate ?? Date(), inSameDayAs: date)
@@ -452,12 +548,25 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 date = calendar.date(byAdding: .day, value: 1, to: date)!
             }
         }
-        
         return resultQuests.sorted { ($0.dueDate ?? Date()) < ($1.dueDate ?? Date()) }
     }
     
     /// 가상 퀘스트 객체 생성 헬퍼
     private func createVirtualQuest(from template: QuestTemplate, on date: Date) -> Quest {
+        let calendar = Calendar.current
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: date)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: template.recurringDueTime ?? date)
+        
+        // 반복 날짜와 마감 시간을 합치기
+        var combinedComponents = DateComponents()
+        combinedComponents.year = dateComponents.year
+        combinedComponents.month = dateComponents.month
+        combinedComponents.day = dateComponents.day
+        combinedComponents.hour = timeComponents.hour
+        combinedComponents.minute = timeComponents.minute
+        
+        let finalDueDate = calendar.date(from: combinedComponents) ?? date
+        
         return Quest(
             id: "virtual_\(template.id)_\(date.timeIntervalSince1970)",
             templateId: template.id,
@@ -470,7 +579,9 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             createdBy: template.createdBy,
             familyId: template.familyId,
             points: template.points,
-            dueDate: date
+            dueDate: finalDueDate,
+            selectedRepeatDays: template.selectedRepeatDays,
+            recurringEndDate: template.recurringEndDate
         )
     }
     
@@ -482,79 +593,42 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         try templatesCollection.document(template.id).setData(from: template)
     }
     
-    /// 퀘스트 조회 (병합 로직)
+    /// 실제 퀘스트 + 가상 퀘스트 조회
     /// - Parameters:
     ///   - familyId: 가족 ID
-    ///   - startDate: 퀘스트 시작 날짜
-    ///   - endDate: 퀘스트 종료 날짜
+    ///   - startDate: 조회 시작 날짜
+    ///   - endDate: 조회 종료 날짜
     /// - Returns: 퀘스트
-    /// - Note: 실제 퀘스트와 반복 규칙에 따라 만든 가상 데이터를 하나의 [Quset] 배열로 합칩니다.
+    /// - Note: 실제 퀘스트와 반복 규칙에 따라 만든 가상 데이터를 하나의 [Quset] 배열로 합쳐 조회해줍니다.
     public func fetchQuestsWithRepeat(
         familyId: String,
         startDate: Date,
         endDate: Date
     ) async throws -> [Quest] {
         let calendar = Calendar.current
-        
-        // 시작 날짜와 종료 날짜의 시간을 00:00:00으로 초기화하여 시간 오차 제거
-        let normalizedStart = calendar.startOfDay(for: startDate)
-        let normalizedEnd = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endDate) ?? endDate
-        // 1. 이미 DB에 존재하는 실제 퀘스트(인스턴스) 가져오기
+        // 1. 실제 데이터 가져오기
         let snapshot = try await questsCollection
             .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
-            .whereField(FirestoreFields.Quest.dueDate, isGreaterThanOrEqualTo: normalizedStart)
-            .whereField(FirestoreFields.Quest.dueDate, isLessThanOrEqualTo: normalizedEnd)
+            .whereField(FirestoreFields.Quest.dueDate, isGreaterThanOrEqualTo: calendar.startOfDay(for: startDate))
+            .whereField(FirestoreFields.Quest.dueDate, isLessThanOrEqualTo: calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endDate)!)
             .getDocuments()
         
         let realQuests = snapshot.documents.compactMap { try? $0.data(as: Quest.self) }
-        print("✅ 실제 퀘스트 개수: \(realQuests.count)")
         
-        // 2. 반복 규칙(템플릿) 가져오기
+        // 2. 템플릿 가져오기
         let templateSnapshot = try await templatesCollection
             .whereField(FirestoreFields.QuestTemplate.familyId, isEqualTo: familyId)
             .getDocuments()
         
         let templates = templateSnapshot.documents.compactMap { try? $0.data(as: QuestTemplate.self) }
         
-        var resultQuests = realQuests
-        
-        // 3. 템플릿 기반 가상 퀘스트 생성 및 병합
-        for template in templates {
-            var date = normalizedStart
-            while date <= normalizedEnd {
-                // 요일 일치 여부 확인
-                let weekday = calendar.component(.weekday, from: date) - 1
-                if template.selectedRepeatDays.contains(weekday) {
-                    
-                    // 해당 날짜에 이미 실제 기록(realQuests)이 있는지 확인
-                    let isAlreadyExists = realQuests.contains { real in
-                        real.templateId == template.id &&
-                        calendar.isDate(real.dueDate ?? Date(), inSameDayAs: date)
-                    }
-                    
-                    if !isAlreadyExists {
-                        // 가상 퀘스트 생성
-                        let virtualQuest = Quest(
-                            id: "virtual_\(template.id)_\(date.timeIntervalSince1970)",
-                            templateId: template.id,
-                            title: template.title,
-                            description: template.description,
-                            category: template.category,
-                            status: .pending,
-                            recurringType: template.recurringType,
-                            assignedTo: template.assignedTo,
-                            createdBy: template.createdBy,
-                            familyId: template.familyId,
-                            points: template.points,
-                            dueDate: calendar.startOfDay(for: date)
-                        )
-                        resultQuests.append(virtualQuest)
-                    }
-                }
-                date = calendar.date(byAdding: .day, value: 1, to: date)!
-            }
-        }
-        return resultQuests.sorted { ($0.dueDate ?? Date()) < ($1.dueDate ?? Date()) }
+        // 3. 병합 함수를 사용하여 병합 후 반환
+        return mergeRealAndVirtualQuests(
+            realQuests: realQuests,
+            templates: templates,
+            startDate: startDate,
+            endDate: endDate
+        )
     }
 }
 
