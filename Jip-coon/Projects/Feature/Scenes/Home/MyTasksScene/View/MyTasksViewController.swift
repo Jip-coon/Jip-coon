@@ -157,11 +157,7 @@ public class MyTasksViewController: UIViewController {
                 let currentUser = try await userService.getCurrentUser()
                 guard let userId = currentUser?.id,
                       let familyId = currentUser?.familyId else {
-                    await MainActor.run {
-                        self.myTasks = []
-                        self.updateEmptyState()
-                        self.tableView.reloadData()
-                    }
+                    print("현재 사용자 정보를 불러오기에 실패했습니다.")
                     return
                 }
                 
