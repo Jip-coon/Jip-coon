@@ -534,6 +534,28 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 // 오늘 날짜가 사용자가 선택한 반복 요일에 해당하는지 확인
                 let weekday = calendar.component(.weekday, from: date) - 1 // 0(일)~6(토)
                 
+                // 반복 퀘스트에서 단일 삭제(제외)된 날짜인지 확인
+                if let excluded = template.excludedDates,
+                   excluded.contains(where: { calendar.isDate($0, inSameDayAs: currentDate) }) {
+                    date = calendar.date(byAdding: .day, value: 1, to: date)!
+                    continue
+                }
+                
+                // 반복 퀘스트 시작일보다 현재 날짜가 이전이면 다음날로
+                if currentDate < templateStart {
+                    date = calendar.date(byAdding: .day, value: 1, to: date)!
+                    continue
+                }
+                
+                // 반복 퀘스트 종료일을 지났는지 확인
+                if let templateEnd = template.recurringEndDate {
+                    if currentDate > calendar.startOfDay(for: templateEnd) {
+                        break
+                    }
+                }
+                
+                // 오늘 날짜가 사용자가 선택한 반복 요일에 해당하는지 확인
+                let weekday = calendar.component(.weekday, from: date) - 1 // 0(일)~6(토)
                 if template.selectedRepeatDays.contains(weekday) {
                     // 이미 Firestore에 실제 데이터가 존재하는지
                     let isAlreadyExists = realQuests.contains { real in
