@@ -459,13 +459,13 @@ final class QuestDetailViewController: UIViewController {
             .store(in: &cancellables)
         
         // 가족 이름 가져오기
-               viewModel.$familyMembers
-                   .receive(on: DispatchQueue.main)
-                   .sink { [weak self] members in
-                       guard !members.isEmpty else { return }
-                       self?.setupWorkerRowMenu()
-                   }
-                   .store(in: &cancellables)
+        viewModel.$familyMembers
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] members in
+                guard !members.isEmpty else { return }
+                self?.setupWorkerRowMenu()
+            }
+            .store(in: &cancellables)
         
         // 담당자 변경 구독
         viewModel.$selectedWorkerName
@@ -539,7 +539,6 @@ final class QuestDetailViewController: UIViewController {
     
     /// 담당 버튼 -> UIMenu(담당자 선택)
     private func setupWorkerRowMenu() {
-        
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
                 self?.viewModel.updateWorker(member.name)
