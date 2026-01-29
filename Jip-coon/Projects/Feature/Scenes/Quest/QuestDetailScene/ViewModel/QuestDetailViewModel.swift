@@ -30,10 +30,10 @@ final class QuestDetailViewModel: ObservableObject {
     var allQuests: [Quest] = []
     var templates: [QuestTemplate] = []
     var deleteSuccess = PassthroughSubject<Void, Never>()
-
+    
     private let questService: QuestServiceProtocol
     private let userService: UserServiceProtocol
-
+    
     // MARK: - init
     
     init(
@@ -51,10 +51,11 @@ final class QuestDetailViewModel: ObservableObject {
     
     // MARK: - Data load
     
-    func loadQuestData() {
+    private func loadQuestData() {
         title = quest.title
         description = quest.description
         category = quest.category
+        selectedWorkerName = quest.assignedTo ?? ""
         starCount = quest.points
         recurringType = quest.recurringType
         selectedWorkerID = quest.assignedTo
@@ -63,7 +64,6 @@ final class QuestDetailViewModel: ObservableObject {
             selectedDate = due
             selectedTime = due
         }
-        
         
         // 반복 요일 설정
         if let days = quest.selectedRepeatDays {
@@ -204,23 +204,23 @@ final class QuestDetailViewModel: ObservableObject {
             throw QuestDetailError.questUpdateFail
         }
     }
-
+    
     /// 퀘스트 완료 처리
     func completeQuest() async throws {
         // 현재 사용자 정보 가져오기
         guard let currentUser = try await userService.getCurrentUser() else {
             throw QuestDetailError.userNotFound
         }
-
+        
         // 담당자가 지정되지 않은 퀘스트이거나, 담당자가 현재 사용자인 경우에만 완료 가능
         guard quest.assignedTo == nil || quest.assignedTo == currentUser.id else {
             throw QuestDetailError.notAssignedToQuest
         }
-
+        
         // 퀘스트 상태를 completed로 변경
         try await questService
             .updateQuestStatus(quest: quest, status: .completed)
-
+        
         // 담당자가 지정되지 않은 퀘스트였다면, 완료 시점에 담당자를 현재 사용자로 설정
         var questToUpdate = quest
         if quest.assignedTo == nil {
@@ -228,12 +228,12 @@ final class QuestDetailViewModel: ObservableObject {
             // Firestore에도 담당자 정보 업데이트
             try await questService.updateQuest(questToUpdate)
         }
-
+        
         // 포인트 부여: 퀘스트의 포인트만큼 사용자에게 추가
         let newPoints = currentUser.points + quest.points
         try await userService
             .updateUserPoints(userId: currentUser.id, points: newPoints)
-
+        
         // 로컬 quest 객체도 업데이트
         var updatedQuest = questToUpdate
         updatedQuest.status = .completed
@@ -291,6 +291,7 @@ final class QuestDetailViewModel: ObservableObject {
 }
 
 // MARK: - Error Types
+
 enum QuestDetailError: LocalizedError {
     case notAssignedToQuest
     case userNotFound
@@ -299,14 +300,14 @@ enum QuestDetailError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .notAssignedToQuest:
-            return "이 퀘스트의 담당자가 아닙니다"
-        case .userNotFound:
-            return "사용자 정보를 찾을 수 없습니다"
-        case .questUpdateFail:
-            return "퀘스트 수정에 실패했습니다"
-        case .questDeleteFail:
-            return "퀘스트 삭제에 실패했습니다"
+            case .notAssignedToQuest:
+                return "이 퀘스트의 담당자가 아닙니다"
+            case .userNotFound:
+                return "사용자 정보를 찾을 수 없습니다"
+            case .questUpdateFail:
+                return "퀘스트 수정에 실패했습니다"
+            case .questDeleteFail:
+                return "퀘스트 삭제에 실패했습니다"
         }
     }
 }
