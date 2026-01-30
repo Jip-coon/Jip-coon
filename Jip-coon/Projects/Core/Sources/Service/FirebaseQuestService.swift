@@ -135,7 +135,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             if !quest.id.hasPrefix("virtual_") {
                 try await questsCollection.document(quest.id).delete()
             }
-
+            
         case .single:
             // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
             guard let templateId = quest.templateId, let dueDate = quest.dueDate else { return }
@@ -412,7 +412,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         let calendar = Calendar.current
         let questsPublisher = PassthroughSubject<[Quest], Error>()
         let templatesPublisher = PassthroughSubject<[QuestTemplate], Error>()
-        
+                
         // 관찰 범위 설정 (오늘 기준 앞뒤 7일)
         let today = Date()
         let obsStart = calendar.date(byAdding: .day, value: -7, to: today)!
@@ -482,7 +482,6 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     }
     
     // MARK: - 반복 퀘스트 합성 로직 분리 (Private)
-    
     /// 실제 퀘스트와 가상 퀘스트를 합쳐서 Quest 목록을 만들어 줍니다.
     /// - Parameters:
     ///   - realQuests: 실제 퀘스트(Firestore Quest에 저장되어 있음)
@@ -534,6 +533,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 
                 // 오늘 날짜가 사용자가 선택한 반복 요일에 해당하는지 확인
                 let weekday = calendar.component(.weekday, from: date) - 1 // 0(일)~6(토)
+                
                 if template.selectedRepeatDays.contains(weekday) {
                     // 이미 Firestore에 실제 데이터가 존재하는지
                     let isAlreadyExists = realQuests.contains { real in
@@ -606,6 +606,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         endDate: Date
     ) async throws -> [Quest] {
         let calendar = Calendar.current
+        
+        // 시작 날짜와 종료 날짜의 시간을 00:00:00으로 초기화하여 시간 오차 제거
+        let normalizedStart = calendar.startOfDay(for: startDate)
+        let normalizedEnd = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endDate) ?? endDate
         // 1. 실제 데이터 가져오기
         let snapshot = try await questsCollection
             .whereField(FirestoreFields.Quest.familyId, isEqualTo: familyId)
