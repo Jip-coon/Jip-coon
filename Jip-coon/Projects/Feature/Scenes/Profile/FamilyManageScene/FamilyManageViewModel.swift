@@ -70,13 +70,6 @@ final class FamilyManageViewModel {
         try await loadData()
     }
     
-    // 초대 코드 갱신
-    func refreshInviteCode() async throws {
-        guard let familyId = family?.id else { return }
-        _ = try await familyService.generateNewInviteCode(familyId: familyId)
-        try await loadData()
-    }
-    
     // 본인인지 확인
     func isCurrentUser(userId: String) -> Bool {
         return currentUser?.id == userId

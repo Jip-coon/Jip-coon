@@ -145,8 +145,7 @@ public final class SettingViewController: UIViewController {
             // 아이템 필터링
             var items = section.items
             if section == .account {
-                let hasValidFamily = currentUser?.familyId != nil && currentUser?.familyId != "dummy_family_id"
-                if !hasValidFamily {
+                if currentUser?.familyId == nil {
                     items.removeAll { $0 == .leaveFamily }
                 }
             }
