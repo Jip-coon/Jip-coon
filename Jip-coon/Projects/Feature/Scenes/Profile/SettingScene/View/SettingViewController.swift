@@ -272,7 +272,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
     public func numberOfSections(in tableView: UITableView) -> Int {
         let allSections = SettingSection.allCases
         // 부모인 경우에만 familyManage 섹션 포함
-        if currentUser?.isParent == true {
+        if currentUser?.isParent == true || currentUser?.isAdmin == true {
             return allSections.count
         } else {
             return allSections.count - 1 // familyManage 섹션 제외
@@ -292,7 +292,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
     private func getActualSection(for section: Int) -> SettingSection {
         let allSections = SettingSection.allCases
         
-        if currentUser?.isParent == true {
+        if currentUser?.isParent == true || currentUser?.isAdmin == true {
             return allSections[section]
         } else {
             // 부모가 아닌 경우 familyManage 섹션을 건너뜀
