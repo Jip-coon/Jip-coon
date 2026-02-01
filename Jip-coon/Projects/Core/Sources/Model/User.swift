@@ -19,6 +19,7 @@ public struct User: Codable, Identifiable {
     public var points: Int             // 획득 포인트
     public let createdAt: Date         // 생성일
     public var updatedAt: Date         // 수정일
+    public var admin: Bool           // 관리자 여부
     
     public init(id: String, name: String, email: String, role: UserRole) {
         self.id = id
@@ -30,12 +31,18 @@ public struct User: Codable, Identifiable {
         self.points = 0
         self.createdAt = Date()
         self.updatedAt = Date()
+        self.admin = false
     }
 }
 
 // MARK: - 유저 Extensions
 
 public extension User {
+    /// 사용자가 관리자인지 확인
+    var isAdmin: Bool {
+        return admin
+    }
+
     /// 사용자가 부모인지 확인
     var isParent: Bool {
         return role == .parent

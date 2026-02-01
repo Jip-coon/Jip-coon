@@ -39,11 +39,12 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         let docRef = familyCollection.document(family.id)
         try docRef.setData(from: family)
 
-        // 생성자의 familyId 업데이트
-        try await updateUserFamilyId(
-            userId: createdBy,
-            familyId: family.id
-        )
+        // 생성자의 familyId 및 관리자 권한 업데이트
+        try await userDocument(id: createdBy).updateData([
+            "familyId": family.id,
+            "admin": true,
+            "updatedAt": Timestamp(date: Date())
+        ])
 
         return family
     }
