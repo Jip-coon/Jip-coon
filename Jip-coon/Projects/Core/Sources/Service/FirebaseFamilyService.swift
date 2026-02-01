@@ -295,6 +295,8 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         } else {
             try await userDocRef.updateData([
                 "familyId": FieldValue.delete(),
+                "admin": false,
+                "points": 0,
                 "updatedAt": Timestamp(date: Date())
             ])
         }

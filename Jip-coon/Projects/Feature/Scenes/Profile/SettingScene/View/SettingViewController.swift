@@ -46,7 +46,7 @@ private enum SettingSection: Int, CaseIterable {
         case .support:
             return [.termsOfService, .privacyPolicy, .appVersion]
         case .account:
-            return [.logout, .deleteAccount]
+            return [.leaveFamily, .logout, .deleteAccount]
         }
     }
 }
@@ -58,6 +58,7 @@ private enum SettingItem {
     case termsOfService
     case privacyPolicy
     case appVersion
+    case leaveFamily
     case logout
     case deleteAccount
     
@@ -69,6 +70,7 @@ private enum SettingItem {
         case .termsOfService: return "서비스 이용약관"
         case .privacyPolicy: return "개인정보 처리방침"
         case .appVersion: return "앱 버전"
+        case .leaveFamily: return "가족 탈퇴"
         case .logout: return "로그아웃"
         case .deleteAccount: return "회원 탈퇴"
         }
@@ -85,14 +87,15 @@ public final class SettingViewController: UIViewController {
     }
     
     
+    private var dataSource: [(section: SettingSection, items: [SettingItem])] = []
+    
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView
-            .register(
-                UITableViewCell.self,
-                forCellReuseIdentifier: "settingCell"
-            )
+        tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: "settingCell"
+        )
         return tableView
     }()
     
@@ -125,7 +128,33 @@ public final class SettingViewController: UIViewController {
     
     private func loadCurrentUser() async {
         await viewModel.loadCurrentUser()
+        updateDataSource()
         tableView.reloadData()
+    }
+    
+    private func updateDataSource() {
+        var newDataSource: [(section: SettingSection, items: [SettingItem])] = []
+        
+        for section in SettingSection.allCases {
+            // 섹션 필터링
+            if section == .familyManage {
+                let isParentOrAdmin = currentUser?.isParent == true || currentUser?.isAdmin == true
+                if !isParentOrAdmin { continue }
+            }
+            
+            // 아이템 필터링
+            var items = section.items
+            if section == .account {
+                let hasValidFamily = currentUser?.familyId != nil && currentUser?.familyId != "dummy_family_id"
+                if !hasValidFamily {
+                    items.removeAll { $0 == .leaveFamily }
+                }
+            }
+            
+            newDataSource.append((section, items))
+        }
+        
+        self.dataSource = newDataSource
     }
     
     private func handleLogout() {
@@ -219,6 +248,50 @@ public final class SettingViewController: UIViewController {
         present(deleteAccountAlert, animated: true, completion: nil)
     }
     
+    private func handleLeaveFamily() {
+        let isUserAdmin = currentUser?.isAdmin == true
+        let title = isUserAdmin ? "가족 그룹 삭제" : "가족 탈퇴"
+        let message = isUserAdmin
+        ? "관리자 권한을 가지고 있습니다.\n탈퇴 시 가족 그룹이 영구적으로 삭제되며,\n모든 구성원의 연결이 해제됩니다.\n정말 삭제하시겠습니까?"
+        : "정말 가족을 탈퇴하시겠습니까?\n탈퇴 후에는 가족 정보를 볼 수 없습니다."
+        let actionTitle = isUserAdmin ? "삭제" : "탈퇴"
+        
+        let leaveFamilyAlert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        let okButton = UIAlertAction(title: actionTitle, style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            Task {
+                do {
+                    try await self.viewModel.performLeaveFamily()
+                    
+                    let successAlert = UIAlertController(
+                        title: "탈퇴 완료",
+                        message: "가족 탈퇴가 완료되었습니다.",
+                        preferredStyle: .alert
+                    )
+                    let confirmButton = UIAlertAction(title: "확인", style: .default) { _ in
+                        Task { await self.loadCurrentUser() }
+                    }
+                    successAlert.addAction(confirmButton)
+                    self.present(successAlert, animated: true)
+                } catch {
+                    print("가족 탈퇴 실패: \(error.localizedDescription)")
+                    self.showErrorAlert(message: error.localizedDescription)
+                }
+            }
+        }
+        
+        let cancelButton = UIAlertAction(title: "취소", style: .cancel)
+        leaveFamilyAlert.addAction(okButton)
+        leaveFamilyAlert.addAction(cancelButton)
+        
+        present(leaveFamilyAlert, animated: true)
+    }
+    
     private func handleProfileEdit() {
         // 로그인은 되어있지만 현재 사용자 정보 없는 경우
         if Auth.auth().currentUser != nil && currentUser == nil {
@@ -270,35 +343,15 @@ public final class SettingViewController: UIViewController {
 
 extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
     public func numberOfSections(in tableView: UITableView) -> Int {
-        let allSections = SettingSection.allCases
-        // 부모인 경우에만 familyManage 섹션 포함
-        if currentUser?.isParent == true || currentUser?.isAdmin == true {
-            return allSections.count
-        } else {
-            return allSections.count - 1 // familyManage 섹션 제외
-        }
+        return dataSource.count
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let actualSection = getActualSection(for: section)
-        return actualSection.items.count
+        return dataSource[section].items.count
     }
     
     public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        let actualSection = getActualSection(for: section)
-        return actualSection.title
-    }
-    
-    private func getActualSection(for section: Int) -> SettingSection {
-        let allSections = SettingSection.allCases
-        
-        if currentUser?.isParent == true || currentUser?.isAdmin == true {
-            return allSections[section]
-        } else {
-            // 부모가 아닌 경우 familyManage 섹션을 건너뜀
-            let nonAdminSections = allSections.filter { $0 != .familyManage }
-            return nonAdminSections[section]
-        }
+        return dataSource[section].section.title
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
@@ -308,8 +361,8 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
             withIdentifier: "settingCell",
             for: indexPath
         )
-        let actualSection = getActualSection(for: indexPath.section)
-        let item = actualSection.items[indexPath.row]
+        let sectionData = dataSource[indexPath.section]
+        let item = sectionData.items[indexPath.row]
         
         var content = cell.defaultContentConfiguration()
         content.text = item.title
@@ -319,7 +372,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
             content.secondaryText = viewModel.fullVersionString
             cell.accessoryType = .none
             cell.selectionStyle = .none
-        case .logout, .deleteAccount:
+        case .leaveFamily, .logout, .deleteAccount:
             content.textProperties.color = .systemRed
             cell.accessoryType = .none
         default:
@@ -335,12 +388,14 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let actualSection = getActualSection(for: indexPath.section)
-        let item = actualSection.items[indexPath.row]
+        let sectionData = dataSource[indexPath.section]
+        let item = sectionData.items[indexPath.row]
         
         switch item {
         case .editProfile:
             handleProfileEdit()
+        case .leaveFamily:
+            handleLeaveFamily()
         case .logout:
             handleLogout()
         case .deleteAccount:

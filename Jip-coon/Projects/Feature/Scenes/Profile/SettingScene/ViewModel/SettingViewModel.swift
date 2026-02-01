@@ -14,6 +14,8 @@ final class SettingViewModel {
     private let authService: AuthService
     private let userService: FirebaseUserService
 
+    private let familyService: FirebaseFamilyService
+    
     private(set) var currentUser: Core.User?
 
     var appVersion: String {
@@ -29,9 +31,11 @@ final class SettingViewModel {
     }
 
     init(authService: AuthService = AuthService(),
-         userService: FirebaseUserService = FirebaseUserService()) {
+         userService: FirebaseUserService = FirebaseUserService(),
+         familyService: FirebaseFamilyService = FirebaseFamilyService()) {
         self.authService = authService
         self.userService = userService
+        self.familyService = familyService
     }
 
     // MARK: - 사용자 관리
@@ -59,6 +63,30 @@ final class SettingViewModel {
         try authService.signOut()
     }
 
+    
+    // 가족 탈퇴 수행
+    func performLeaveFamily() async throws {
+        guard let currentUser = currentUser,
+              let familyId = currentUser.familyId else {
+            throw NSError(
+                domain: "Setting",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "가족 정보를 찾을 수 없습니다."]
+            )
+        }
+        
+        if currentUser.isAdmin {
+            // 관리자인 경우 가족 삭제 (모든 구성원 연결 해제 및 가족 문서 삭제)
+            try await familyService.deleteFamily(id: familyId)
+        } else {
+            // 일반 구성원인 경우 본인만 탈퇴
+            try await familyService.removeMemberFromFamily(
+                familyId: familyId,
+                userId: currentUser.id
+            )
+        }
+    }
+    
     // 회원탈퇴 수행 (비밀번호 재인증 포함)
     func performDeleteAccount(password: String) async throws {
         // 현재 사용자 ID 확인
