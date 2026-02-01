@@ -83,7 +83,7 @@ public final class FirebaseUserService: UserServiceProtocol {
                     .split(separator: "@").first
                     .map(String.init) ?? "사용자"
             )
-            // TODO: - 역할 수정하기(일단 child로 설정)
+
             var newUser = User(
                 id: authUser.uid,
                 name: displayName,
@@ -168,6 +168,16 @@ public final class FirebaseUserService: UserServiceProtocol {
         
         try await userDocRef.updateData([
             "name": newName,
+            "updatedAt": Timestamp(date: Date())
+        ])
+    }
+    
+    /// 사용자 역할 업데이트
+    public func updateUserRole(userId: String, role: UserRole) async throws {
+        let userDocRef = usersCollection.document(userId)
+        
+        try await userDocRef.updateData([
+            "role": role.rawValue,
             "updatedAt": Timestamp(date: Date())
         ])
     }

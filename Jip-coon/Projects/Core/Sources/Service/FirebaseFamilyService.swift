@@ -88,6 +88,14 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         try familyCollection.document(family.id).setData(from: family)
     }
     
+    /// 가족 이름 업데이트
+    public func updateFamilyName(familyId: String, newName: String) async throws {
+        try await familyCollection.document(familyId).updateData([
+            "name": newName,
+            "updatedAt": Timestamp(date: Date())
+        ])
+    }
+    
     /// 가족 삭제
     public func deleteFamily(id: String) async throws {
         // 가족 정보 조회
