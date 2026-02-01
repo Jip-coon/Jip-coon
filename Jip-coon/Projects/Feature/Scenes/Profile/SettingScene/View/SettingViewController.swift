@@ -248,6 +248,20 @@ public final class SettingViewController: UIViewController {
         present(deleteAccountAlert, animated: true, completion: nil)
     }
     
+    private func handleManageFamily() {
+        let familyManageVC = FamilyManageViewController()
+        let navController = UINavigationController(rootViewController: familyManageVC)
+        
+        familyManageVC.navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .close,
+            target: self,
+            action: #selector(dismissModal)
+        )
+        
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true)
+    }
+    
     private func handleLeaveFamily() {
         let isUserAdmin = currentUser?.isAdmin == true
         let title = isUserAdmin ? "가족 그룹 삭제" : "가족 탈퇴"
@@ -317,7 +331,7 @@ public final class SettingViewController: UIViewController {
         let closeButton = UIBarButtonItem(
             barButtonSystemItem: .close,
             target: self,
-            action: #selector(dismissProfileEdit)
+            action: #selector(dismissModal)
         )
         profileEditViewController.navigationItem.leftBarButtonItem = closeButton
         
@@ -325,7 +339,7 @@ public final class SettingViewController: UIViewController {
         present(navController, animated: true)
     }
     
-    @objc private func dismissProfileEdit() {
+    @objc private func dismissModal() {
         dismiss(animated: true)
     }
     
@@ -394,6 +408,8 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         switch item {
         case .editProfile:
             handleProfileEdit()
+        case .manageFamily:
+            handleManageFamily()
         case .leaveFamily:
             handleLeaveFamily()
         case .logout:
