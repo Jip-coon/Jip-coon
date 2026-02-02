@@ -39,11 +39,13 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         let docRef = familyCollection.document(family.id)
         try docRef.setData(from: family)
 
-        // 생성자의 familyId 업데이트
-        try await updateUserFamilyId(
-            userId: createdBy,
-            familyId: family.id
-        )
+        // 생성자의 familyId 및 관리자 권한 업데이트
+        try await userDocument(id: createdBy).updateData([
+            "familyId": family.id,
+            "admin": true,
+            "role": "parent",
+            "updatedAt": Timestamp(date: Date())
+        ])
 
         return family
     }
@@ -85,6 +87,14 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
     /// 가족 정보 업데이트
     public func updateFamily(_ family: Family) async throws {
         try familyCollection.document(family.id).setData(from: family)
+    }
+    
+    /// 가족 이름 업데이트
+    public func updateFamilyName(familyId: String, newName: String) async throws {
+        try await familyCollection.document(familyId).updateData([
+            "name": newName,
+            "updatedAt": Timestamp(date: Date())
+        ])
     }
     
     /// 가족 삭제
@@ -294,6 +304,9 @@ public final class FirebaseFamilyService: FamilyServiceProtocol {
         } else {
             try await userDocRef.updateData([
                 "familyId": FieldValue.delete(),
+                "admin": false,
+                "points": 0,
+                "role": "child",
                 "updatedAt": Timestamp(date: Date())
             ])
         }

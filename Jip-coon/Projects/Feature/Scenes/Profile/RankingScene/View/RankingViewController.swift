@@ -45,6 +45,28 @@ public final class RankingViewController: UIViewController {
         indicator.hidesWhenStopped = true
         return indicator
     }()
+    
+    private lazy var emptyStateView: UIView = {
+        let view = UIView()
+        view.isHidden = true
+        view.backgroundColor = .systemGroupedBackground
+        
+        let label = UILabel()
+        label.text = "가족 정보가 없습니다\n가족을 생성하거나 합류하여\n랭킹을 확인해보세요!"
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        
+        view.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        return view
+    }()
 
     // MARK: - Initialization
 
@@ -114,6 +136,15 @@ public final class RankingViewController: UIViewController {
             loadingIndicator.centerYAnchor
                 .constraint(equalTo: view.centerYAnchor)
         ])
+        
+        view.addSubview(emptyStateView)
+        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            emptyStateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     /// ViewModel의 상태 변경을 UI에 바인딩하는 메소드
@@ -126,8 +157,11 @@ public final class RankingViewController: UIViewController {
         // 메인 스레드에서 UI 업데이트를 수행하도록 보장
         viewModel.$familyMembers
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] members in
                 self?.tableView.reloadData()
+                let isEmpty = members.isEmpty
+                self?.tableView.isHidden = isEmpty
+                self?.emptyStateView.isHidden = !isEmpty
             }
             .store(in: &cancellables)
 

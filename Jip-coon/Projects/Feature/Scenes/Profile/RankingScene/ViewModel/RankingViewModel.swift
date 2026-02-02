@@ -57,28 +57,17 @@ public final class RankingViewModel: ObservableObject {
 
             self.currentUser = currentUser
 
-            // 가족 소속 상태 확인 및 자동 복구
-            var familyId = currentUser.familyId
-            if familyId == nil {
-                do {
-                    // Firestore 문서 동기화로 가족 ID 복구 시도
-                    try await userService.syncCurrentUserDocument()
-                    if let updatedUser = try await userService.getCurrentUser() {
-                        self.currentUser = updatedUser
-                        familyId = updatedUser.familyId
-                    }
-                } catch {
-                    errorMessage = "가족 정보 동기화에 실패했습니다."
-                    isLoading = false
-                    return
+            // 가족 ID 확인
+            guard let familyId = currentUser.familyId else {
+                // 가족이 없는 경우 빈 리스트로 설정하여 Empty State 표시
+                await MainActor.run {
+                    self.familyMembers = []
+                    self.isLoading = false
                 }
-            }
-
-            guard let finalFamilyId = familyId else {
-                errorMessage = "가족에 속해있지 않습니다."
-                isLoading = false
                 return
             }
+            
+            let finalFamilyId = familyId
 
             // 가족 구성원 데이터 조회 및 랭킹 계산
             let members = try await userService.getFamilyMembers(
