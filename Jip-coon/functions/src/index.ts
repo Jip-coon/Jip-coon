@@ -112,11 +112,26 @@ export const onquestcreated = onDocumentCreated("quests/{questId}", async (event
     const quest = event.data?.data();
     if (quest?.assignedTo && quest.assignedTo !== quest.createdBy) {
         const emoji = categoryEmojis[quest.category] || "✨";
+        const now = Date.now();
+        const dueDate = quest.dueDate.toDate().getTime();
+        const diffMinutes = (dueDate - now) / (1000 * 60);
+
+        let title = "퀘스트가 도착했어요!";
+        let body = `${emoji} ${quest.title}`;
+
+        // [추가] 생성 시점에 이미 마감이 1시간 이내라면 문구 추가
+        if (diffMinutes <= 0) {
+            title = "마감이 지난 퀘스트가 할당되었습니다! ⚠️";
+        } else if (diffMinutes <= 60) {
+            title = "마감 임박 퀘스트 도착! 🚨";
+            body = `${emoji} ${quest.title} 퀘스트가 1시간도 남지 않았어요!`;
+        }
+
         await sendNotification(
             quest.assignedTo,
             "questAssigned",
-            "퀘스트가 도착했어요!",
-            `${emoji} ${quest.title}`
+            title,
+            body
         );
     }
 });
