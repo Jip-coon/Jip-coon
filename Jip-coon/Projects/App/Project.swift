@@ -35,7 +35,9 @@ let project = Project(
                             "CFBundleTypeRole": "Editor",
                             "CFBundleURLSchemes": ["com.googleusercontent.apps.930536285317-qhv64s0qc5u0peoi1j32vipm75msseau"]
                         ]
-                    ]
+                    ],
+                    "UIBackgroundModes": ["remote-notification"],
+                    "NSUserNotificationsUsageDescription": "퀘스트 알림을 위해 알림 권한이 필요합니다."
                 ]
             ),
             sources: ["Sources/**"],
@@ -44,7 +46,8 @@ let project = Project(
             dependencies: [
                 .project(target: "Feature", path: .relativeToRoot("Projects/Feature")),
                 .external(name: "FirebaseCore"),
-                .external(name: "GoogleSignIn")
+                .external(name: "GoogleSignIn"),
+                .external(name: "FirebaseMessaging")
             ],
             settings: .settings(
                 base: [

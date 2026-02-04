@@ -12,6 +12,7 @@ import PackageDescription
             "FirebaseCore": .staticLibrary,
             "FirebaseAuth": .staticLibrary,
             "FirebaseFirestore": .staticLibrary,
+            "FirebaseMessaging": .staticLibrary
         ]
     )
 #endif
