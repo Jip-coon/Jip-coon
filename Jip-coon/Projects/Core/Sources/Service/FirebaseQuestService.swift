@@ -254,7 +254,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                     startedAt: status == .inProgress ? Date() : nil,
                     completedAt: status == .completed ? Date() : nil,
                     approvedAt: status == .approved ? Date() : nil,
-                    updatedAt: Date()
+                    updatedAt: Date(),
+                    lastNotifiedAt: nil,
                 )
                 
                 // 가상 퀘스트를 실제 문서로 생성

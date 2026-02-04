@@ -34,6 +34,9 @@ public struct FirestoreFields {
         static let points = "points"
         static let createdAt = "createdAt"
         static let updatedAt = "updatedAt"
+        static let fcmTokens = "fcmTokens"
+        static let badgeCount = "badgeCount"
+        static let notificationSetting = "notificationSetting"
     }
     
     struct TempUser {
@@ -70,6 +73,7 @@ public struct FirestoreFields {
         static let startedAt = "startedAt"
         static let completedAt = "completedAt"
         static let approvedAt = "approvedAt"
+        static let lastNotifiedAt = "lastNotifiedAt"
     }
     
     struct QuestSubmission {
