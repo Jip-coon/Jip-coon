@@ -64,6 +64,15 @@ public class MainViewController: UIViewController {
         setupTabBarCallbacks()
     }
     
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        Task {
+            await viewModel.updateTimeZone()
+            viewModel.resetUserBadgeCount()
+        }
+    }
+    
     // MARK: - UI Setup
     
     private func setupUI() {

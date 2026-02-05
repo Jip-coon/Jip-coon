@@ -5,8 +5,8 @@
 //  Created by 심관혁 on 1/28/25.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 /// 앱의 모든 서비스 레이어 인터페이스를 정의하는 프로토콜 파일
 /// - 의존성 주입을 위한 프로토콜 기반 아키텍처 구현
@@ -32,12 +32,6 @@ public protocol UserServiceProtocol {
     
     /// 사용자 삭제
     func deleteUser(id: String) async throws
-    
-    /// 현재 Firebase Auth로 로그인한 사용자의 Firestore 문서 조회
-    /// - Returns: 현재 사용자 정보 또는 nil (로그인하지 않은 경우)
-    /// - Note: Firebase Auth UID를 키로 사용하여 Firestore에서 사용자 문서 검색
-    ///         앱 전반에서 현재 사용자 정보를 얻기 위한 핵심 메소드
-    func getCurrentUser() async throws -> User?
 
     /// 현재 로그인한 사용자의 Firestore 문서 존재 여부 확인 및 자동 생성
     /// - Firebase Auth 사용자이지만 Firestore 문서가 없는 경우 새 문서 생성
@@ -45,14 +39,23 @@ public protocol UserServiceProtocol {
     /// - Note: 사용자 등록 프로세스의 일부로 자동 실행됨
     func syncCurrentUserDocument() async throws
     
-    /// 사용자 포인트 업데이트
-    func updateUserPoints(userId: String, points: Int) async throws
+    /// 현재 Firebase Auth로 로그인한 사용자의 Firestore 문서 조회
+    /// - Returns: 현재 사용자 정보 또는 nil (로그인하지 않은 경우)
+    /// - Note: Firebase Auth UID를 키로 사용하여 Firestore에서 사용자 문서 검색
+    ///         앱 전반에서 현재 사용자 정보를 얻기 위한 핵심 메소드
+    func getCurrentUser() async throws -> User?
     
     /// 가족 구성원 목록 조회
     func getFamilyMembers(familyId: String) async throws -> [User]
     
+    /// 사용자 포인트 업데이트
+    func updateUserPoints(userId: String, points: Int) async throws
+    
     /// 사용자 이름 업데이트
     func updateUserName(userId: String, newName: String) async throws
+    
+    /// 사용자 타임존 업데이트
+    func updateUserTimeZone(userId: String) async
     
     /// 임시 사용자 생성
     func createTempUser(uid: String, email: String) async throws
@@ -142,6 +145,9 @@ public protocol QuestServiceProtocol {
     
     /// 퀘스트 시작
     func startQuest(quest: Quest, userId: String) async throws
+    
+    /// 알림 배지 초기화
+    func resetUserBadgeCount()
     
     /// 퀘스트 완료 제출
     func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws
