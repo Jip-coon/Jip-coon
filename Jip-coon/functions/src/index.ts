@@ -94,7 +94,7 @@ async function sendNotification(
 }
 
 // 1. 새로운 퀘스트 할당 알림
-export const onquestcreated = onDocumentCreated("quests/{questId}", async (event) => {
+export const onquestcreated = onDocumentCreated("quests/{id}", async (event) => {
     const quest = event.data?.data();
     if (quest?.assignedTo && quest.assignedTo !== quest.createdBy) {
         const emoji = categoryEmojis[quest.category] || "✨";
@@ -123,7 +123,7 @@ export const onquestcreated = onDocumentCreated("quests/{questId}", async (event
 });
 
 // 새로운 반복 퀘스트 할당
-export const ontemplatecreated = onDocumentCreated("questTemplates/{templateId}", async (event) => {
+export const ontemplatecreated = onDocumentCreated("quest_templates/{id}", async (event) => {
     const template = event.data?.data();
     if (template?.assignedTo && template.assignedTo !== template.createdBy) {
         const emoji = categoryEmojis[template.category] || "✨";
@@ -181,23 +181,45 @@ export const checkdeadline = onSchedule({
     const templates = await db.collection("questTemplates").get();
     const nowDate = now.toDate();
 
-    templates.docs.forEach(doc => {
+    // B. 가상 퀘스트(템플릿) 체크 부분 (수정본)
+    for (const doc of templates.docs) {
         const t = doc.data();
 
-        // 오늘 반복일인지 확인
         if (t.assignedTo && isDateInRecurringTemplate(t, nowDate)) {
-            // 이미 실제 퀘스트로 변환된 건 스킵
-            const isAlreadyCreated = realQuests.docs.some(q => q.data().templateId === t.id);
-            if (isAlreadyCreated) return;
+            // 오늘 이미 알림을 보냈다면 건너뛰기
+            if (t.lastNotifiedAt) {
+                const lastDate = t.lastNotifiedAt.toDate().toDateString();
+                const todayDate = nowDate.toDateString();
+                if (lastDate === todayDate) continue; // 날짜가 같으면 중복이므로 패스!
+            }
+
+            const isAlreadyCreated = realQuests.docs.some(q => q.data().templateId === doc.id);
+            if (isAlreadyCreated) continue;
 
             if (t.recurringDueTime) {
-                const dueTime = t.recurringDueTime.toDate();
-                const todayDue = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), dueTime.getHours(), dueTime.getMinutes());
+                // 유저의 타임존을 가져와서 정확한 현지 마감 시각 계산
+                const userSnap = await db.collection("users").doc(t.assignedTo).get();
+                const userTimeZone = userSnap.data()?.timeZone || "Asia/Seoul";
 
-                const diffSeconds = (todayDue.getTime() / 1000) - nowSeconds;
-                const diffMinutes = diffSeconds / 60;
+                // 1. 유저 타임존 기준 '오늘' 날짜 문자열 추출 (예: "2026-02-05")
+                const dateStr = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: userTimeZone,
+                    year: 'numeric', month: '2-digit', day: '2-digit'
+                }).format(nowDate);
 
-                // 마감이 0~60분 사이이고, 오늘 이 템플릿으로 알림을 보낸 적이 없는지 체크
+                // 2. 템플릿의 시/분 추출
+                const dueTimeDate = t.recurringDueTime.toDate();
+                const hours = dueTimeDate.getHours().toString().padStart(2, '0');
+                const minutes = dueTimeDate.getMinutes().toString().padStart(2, '0');
+
+                // 3. 유저 타임존 기준의 정확한 마감 ISO 문자열 생성 후 Date 객체화
+                // 예: "2026-02-05T11:45:00" -> 이 시각은 유저 타임존 기준임을 명시
+                const todayDue = new Date(`${dateStr}T${hours}:${minutes}:00`);
+
+                // 4. 현재 시간(nowDate)과의 차이 계산
+                const diffMinutes = (todayDue.getTime() - nowDate.getTime()) / (1000 * 60);
+
+                // 마감이 0~60분 사이일 때만 발송
                 if (diffMinutes > 0 && diffMinutes <= 60) {
                     promises.push(sendNotification(
                         t.assignedTo,
@@ -205,10 +227,15 @@ export const checkdeadline = onSchedule({
                         "마감 1시간 전! ⏰",
                         `${t.title} 잊지 말아주세요 🥺`
                     ));
+
+                    // 알림 발송 후 '오늘 날짜' 기록
+                    promises.push(doc.ref.update({
+                        lastNotifiedAt: now
+                    }));
                 }
             }
         }
-    });
+    }
 
     await Promise.all(promises);
 });
