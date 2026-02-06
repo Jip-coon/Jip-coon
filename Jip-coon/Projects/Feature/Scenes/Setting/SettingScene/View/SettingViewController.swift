@@ -249,16 +249,7 @@ public final class SettingViewController: UIViewController {
     
     private func handleManageFamily() {
         let familyManageVC = FamilyManageViewController()
-        let navController = UINavigationController(rootViewController: familyManageVC)
-        
-        familyManageVC.navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .close,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        navigationController?.pushViewController(familyManageVC, animated: true)
     }
     
     private func handleLeaveFamily() {
@@ -323,19 +314,12 @@ public final class SettingViewController: UIViewController {
             viewModel: profileEditViewModel
         )
         
-        // 네비게이션 컨트롤러로 래핑하여 모달로 표시
-        let navController = UINavigationController(rootViewController: profileEditViewController)
-        
-        // 닫기 버튼 추가
-        let closeButton = UIBarButtonItem(
-            barButtonSystemItem: .close,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        profileEditViewController.navigationItem.leftBarButtonItem = closeButton
-        
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        navigationController?.pushViewController(profileEditViewController, animated: true)
+    }
+    
+    private func handleNotificationSetting() {
+        let notificationSettingViewController = NotificationSettingViewController()
+        navigationController?.pushViewController(notificationSettingViewController, animated: true)
     }
     
     @objc private func dismissModal() {
@@ -405,17 +389,19 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         let item = sectionData.items[indexPath.row]
         
         switch item {
-        case .editProfile:
-            handleProfileEdit()
-        case .manageFamily:
-            handleManageFamily()
-        case .leaveFamily:
-            handleLeaveFamily()
-        case .logout:
-            handleLogout()
-        case .deleteAccount:
-            handleDeleteAccount()
-        default:
+            case .editProfile:
+                handleProfileEdit()
+            case .manageFamily:
+                handleManageFamily()
+            case .leaveFamily:
+                handleLeaveFamily()
+            case .logout:
+                handleLogout()
+            case .deleteAccount:
+                handleDeleteAccount()
+            case .notifications:
+                handleNotificationSetting()
+            default:
             print("\(item.title) 선택됨")
         }
     }
