@@ -102,12 +102,12 @@ export const onquestcreated = onDocumentCreated("quests/{id}", async (event) => 
         const dueDate = quest.dueDate.toDate().getTime();
         const diffMinutes = (dueDate - now) / (1000 * 60);
 
-        let title = "퀘스트가 도착했어요!";
+        let title = "퀘스트가 도착했어요! 🔔";
         let body = `${emoji} ${quest.title}`;
 
         // [추가] 생성 시점에 이미 마감이 1시간 이내라면 문구 추가
         if (diffMinutes <= 0) {
-            title = "마감이 지난 퀘스트가 할당되었습니다! ⚠️";
+            title = "마감이 지난 퀘스트가 할당되었습니다! 🔔";
         } else if (diffMinutes <= 60) {
             title = "마감 임박 퀘스트 도착! 🚨";
             body = `${emoji} ${quest.title} 퀘스트가 1시간도 남지 않았어요!`;
@@ -178,7 +178,7 @@ export const checkdeadline = onSchedule({
     });
 
     // B. 가상 퀘스트(템플릿) 체크
-    const templates = await db.collection("questTemplates").get();
+    const templates = await db.collection("quest_templates").get();
     const nowDate = now.toDate();
 
     // B. 가상 퀘스트(템플릿) 체크 부분 (수정본)
@@ -247,28 +247,38 @@ export const dailysummary = onSchedule({
 }, async (event) => {
     try {
         const now = new Date();
+
+        // 현재 UTC 시간의 시(hour)를 가져옴
+        const currentUTCHour = now.getUTCHours();
+
+        // 모든 타임존 가져오기
         const allTimeZones = (Intl as any).supportedValuesOf
             ? (Intl as any).supportedValuesOf('timeZone')
             : ["Asia/Seoul"];
 
-        // 1. 해당 오프셋을 사용하는 타임존 이름 리스트 가져오기
-        // (Intl을 사용하여 전 세계 타임존 중 현재 9시인 곳들을 필터링)
+        // 현재 9시인 타임존 찾기
         const targetTimeZones = allTimeZones.filter((tz: string) => {
             try {
-                const hour = parseInt(new Intl.DateTimeFormat('en-US', {
+                const formatter = new Intl.DateTimeFormat('en-US', {
                     timeZone: tz,
                     hour: 'numeric',
                     hour12: false
-                }).format(now));
-                return hour === 9;
-            } catch { return false; }
+                });
+                const hour = parseInt(formatter.format(now));
+                return hour === 9; // 9시에 알림 보내기
+            } catch {
+                return false;
+            }
         });
 
-        // 만약 현재 9시인 지역이 없다면 (드물지만) 종료
-        if (targetTimeZones.length === 0) return;
+        if (targetTimeZones.length === 0) {
+            console.log(`현재 UTC ${currentUTCHour}시 - 9시인 타임존 없음`);
+            return;
+        }
 
-        // 2. DB 쿼리 최적화: 9시인 타임존에 속한 유저만 '한 번에' 가져오기
-        // Firestore 'in' 쿼리는 한 번에 최대 30개까지만 가능하므로 나눠서 처리
+        console.log(`현재 UTC ${currentUTCHour}시 - 9시인 타임존: ${targetTimeZones.join(', ')}`);
+
+        // Firestore 'in' 쿼리는 최대 30개까지
         const chunks = [];
         for (let i = 0; i < targetTimeZones.length; i += 30) {
             chunks.push(targetTimeZones.slice(i, i + 30));
@@ -277,7 +287,6 @@ export const dailysummary = onSchedule({
         const snapshots = await Promise.all(
             chunks.map(chunk => {
                 if (!chunk || chunk.length === 0) return Promise.resolve({ docs: [] });
-
                 return db.collection("users")
                     .where("notificationSetting.dailySummary", "==", true)
                     .where("timeZone", "in", chunk)
@@ -286,12 +295,23 @@ export const dailysummary = onSchedule({
         );
 
         const usersToNotify = snapshots.flatMap(s => s.docs);
+        console.log(`알림 대상 사용자: ${usersToNotify.length}명`);
 
-        // 대상자가 있을 때만 실행
-        if (usersToNotify.length > 0) {
-            await Promise.all(usersToNotify.map(userDoc =>
-                sendSummaryToUser(userDoc.id, userDoc.data().timeZone)
-            ));
+        // 중복 방지를 위한 처리 완료 사용자 추적
+        const processedUsers = new Set<string>();
+
+        for (const userDoc of usersToNotify) {
+            const userId = userDoc.id;
+
+            // 이미 처리한 사용자는 스킵
+            if (processedUsers.has(userId)) {
+                console.log(`사용자 ${userId} 이미 처리됨 - 스킵`);
+                continue;
+            }
+
+            const userData = userDoc.data();
+            await sendSummaryToUser(userId, userData.timeZone);
+            processedUsers.add(userId);
         }
 
     } catch (error) {
@@ -299,59 +319,212 @@ export const dailysummary = onSchedule({
     }
 });
 
-// 특정 유저의 타임존에 맞춰 오늘 마감인 퀘스트 개수를 계산하고 알림을 보냅니다.
 async function sendSummaryToUser(userId: string, timeZone: string) {
+    try {
+        console.log(`\n=== 사용자 ${userId} 알림 처리 시작 (타임존: ${timeZone}) ===`);
+
+        // 사용자 타임존 기준 오늘의 시작/끝 계산
+        const { startToday, endToday } = getTodayRange(timeZone);
+
+        console.log(`오늘 범위: ${startToday.toISOString()} ~ ${endToday.toISOString()}`);
+
+        const startTs = admin.firestore.Timestamp.fromDate(startToday);
+        const endTs = admin.firestore.Timestamp.fromDate(endToday);
+
+        // 실제 퀘스트 조회
+        const realQuestsSnapshot = await db.collection("quests")
+            .where("assignedTo", "==", userId)
+            .where("dueDate", ">=", startTs)
+            .where("dueDate", "<=", endTs)
+            .get();
+
+        // 미완료 퀘스트만 필터링 (not-in은 복합 쿼리 제한이 있어서 클라이언트에서 필터링)
+        const realQuests = realQuestsSnapshot.docs.filter(doc => {
+            const status = doc.data().status;
+            return status !== "completed" && status !== "approved";
+        });
+
+        console.log(`실제 퀘스트: ${realQuests.length}개`);
+        realQuests.forEach(doc => {
+            const q = doc.data();
+            console.log(`  - ${q.title} (마감: ${q.dueDate?.toDate().toISOString()})`);
+        });
+
+        let count = realQuests.length;
+
+        // 반복 템플릿 조회
+        const templatesSnapshot = await db.collection("quest_templates")
+            .where("assignedTo", "==", userId)
+            .get();
+
+        console.log(`템플릿: ${templatesSnapshot.size}개`);
+
+        const todayDayOfWeek = getTodayDayOfWeek(timeZone);
+        console.log(`오늘 요일: ${todayDayOfWeek} (0=일요일)`);
+
+        templatesSnapshot.docs.forEach(doc => {
+            const template = doc.data();
+            const templateId = doc.id;
+
+            // 반복 템플릿이 오늘에 해당하는지 확인
+            if (shouldShowTemplateToday(template, startToday, todayDayOfWeek)) {
+                // 이미 오늘 날짜로 실제 퀘스트가 생성되었는지 확인
+                const alreadyCreated = realQuests.some(q => q.data().templateId === templateId);
+
+                if (!alreadyCreated) {
+                    count++;
+                    console.log(`  + 가상 퀘스트 추가: ${template.title}`);
+                } else {
+                    console.log(`  - 이미 생성됨: ${template.title}`);
+                }
+            }
+        });
+
+        console.log(`최종 카운트: ${count}개`);
+
+        // 알림 발송
+        if (count > 0) {
+            await sendNotification(
+                userId,
+                "dailySummary",
+                "오늘의 퀘스트 요약 ☀️",
+                `오늘 마감인 퀘스트가 ${count}개 있어요! 기분 좋게 시작해 볼까요?`
+            );
+            console.log(`✅ 알림 발송 완료`);
+        } else {
+            console.log(`📭 오늘 마감 퀘스트 없음 - 알림 미발송`);
+        }
+
+    } catch (error) {
+        console.error(`사용자 ${userId} 알림 처리 중 에러:`, error);
+    }
+}
+
+/**
+ * 사용자 타임존 기준으로 오늘의 시작(00:00:00)과 끝(23:59:59.999)을 반환
+ */
+function getTodayRange(timeZone: string): { startToday: Date; endToday: Date } {
     const now = new Date();
 
-    // 1. 해당 타임존의 '오늘' 날짜를 YYYY-MM-DD 형식으로 추출
-    const formatter = new Intl.DateTimeFormat('en-CA', {
-        timeZone: timeZone,
+    // 사용자 타임존의 현재 날짜 문자열 (YYYY-MM-DD)
+    const dateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-    });
-    const dateStr = formatter.format(now); // 예: "2026-02-06"
+    }).format(now);
 
-    // 2. 해당 타임존 기준 오늘의 시작(00:00:00)과 끝(23:59:59) 생성
-    const startToday = new Date(`${dateStr}T00:00:00`);
-    const endToday = new Date(`${dateStr}T23:59:59`);
+    // 사용자 타임존의 오늘 00:00:00 ISO 문자열 생성
+    const localMidnight = `${dateStr}T00:00:00`;
 
-    const startTs = admin.firestore.Timestamp.fromDate(startToday);
-    const endTs = admin.firestore.Timestamp.fromDate(endToday);
+    // 이 문자열을 Date로 변환 (타임존 정보 포함)
+    // 예: "2026-02-06T00:00:00" in Asia/Seoul
+    const parts = localMidnight.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
+    if (!parts) throw new Error("날짜 파싱 실패");
 
-    // 3. 실제 퀘스트 조회 (본인에게 할당된 미완료 퀘스트)
-    const realQuests = await db.collection("quests")
-        .where("assignedTo", "==", userId)
-        .where("status", "not-in", ["completed", "approved"])
-        .where("dueDate", ">=", startTs)
-        .where("dueDate", "<=", endTs)
-        .get();
+    const [, year, month, day] = parts;
 
-    let count = realQuests.size;
-
-    // 4. 가상 퀘스트(반복 템플릿) 체크
-    const templates = await db.collection("questTemplates")
-        .where("assignedTo", "==", userId)
-        .get();
-
-    templates.docs.forEach(doc => {
-        const t = doc.data();
-        // 오늘이 반복 요일에 해당하고, 아직 실제 퀘스트로 생성되지 않은 경우 카운트
-        if (isDateInRecurringTemplate(t, now)) {
-            const alreadyCreated = realQuests.docs.some(q => q.data().templateId === t.id);
-            if (!alreadyCreated) {
-                count++;
-            }
-        }
+    // 해당 타임존에서 이 날짜/시간이 의미하는 UTC 시각을 계산
+    // Intl.DateTimeFormat으로 역산
+    const testDate = new Date(`${year}-${month}-${day}T12:00:00Z`);
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
     });
 
-    // 5. 알림 발송 (개수가 0보다 클 때만)
-    if (count > 0) {
-        await sendNotification(
-            userId,
-            "dailySummary",
-            "오늘의 퀘스트 요약 ☀️",
-            `오늘 마감인 퀘스트가 ${count}개 있어요! 기분 좋게 시작해 볼까요?`
-        );
+    const formatted = formatter.format(testDate);
+    const match = formatted.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s*(\d{2}):(\d{2}):(\d{2})/);
+    if (!match) throw new Error("시간 파싱 실패");
+
+    const [, m, d, y, h, min, s] = match;
+    const localDate = new Date(`${y}-${m}-${d}T${h}:${min}:${s}Z`);
+    const offset = testDate.getTime() - localDate.getTime();
+
+    // 자정 계산
+    const midnightUTC = new Date(`${year}-${month}-${day}T00:00:00Z`);
+    const startToday = new Date(midnightUTC.getTime() + offset);
+
+    // 23:59:59.999
+    const endToday = new Date(startToday.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+    return { startToday, endToday };
+}
+
+/**
+ * 사용자 타임존 기준으로 오늘의 요일 반환 (0=일요일, 6=토요일)
+ */
+function getTodayDayOfWeek(timeZone: string): number {
+    const now = new Date();
+    const dateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(now);
+
+    // 임시 Date 객체로 요일 계산 (UTC 기준이지만 날짜만 맞으면 요일은 동일)
+    const tempDate = new Date(dateStr + 'T00:00:00Z');
+    return tempDate.getUTCDay();
+}
+
+/**
+ * 반복 템플릿이 오늘 표시되어야 하는지 확인
+ */
+function shouldShowTemplateToday(
+    template: any,
+    todayStart: Date,
+    todayDayOfWeek: number
+): boolean {
+    const { recurringType, selectedRepeatDays, startDate, recurringEndDate } = template;
+
+    // 반복 타입이 없으면 false
+    if (!recurringType || recurringType === "none") {
+        return false;
     }
+
+    // 시작일 확인
+    const start = startDate?.toDate ? startDate.toDate() : new Date(startDate);
+    if (todayStart < start) {
+        console.log(`    템플릿 ${template.title}: 시작일 이전`);
+        return false;
+    }
+
+    // 종료일 확인
+    if (recurringEndDate) {
+        const end = recurringEndDate.toDate ? recurringEndDate.toDate() : new Date(recurringEndDate);
+        if (todayStart > end) {
+            console.log(`    템플릿 ${template.title}: 종료일 이후`);
+            return false;
+        }
+    }
+
+    // 요일 확인 (주간 반복인 경우)
+    if (recurringType === "weekly" && selectedRepeatDays && selectedRepeatDays.length > 0) {
+        const isMatchingDay = selectedRepeatDays.includes(todayDayOfWeek);
+        console.log(`    템플릿 ${template.title}: 요일 체크 ${isMatchingDay} (오늘=${todayDayOfWeek}, 반복요일=${selectedRepeatDays})`);
+        return isMatchingDay;
+    }
+
+    // 일간 반복
+    if (recurringType === "daily") {
+        console.log(`    템플릿 ${template.title}: 매일 반복`);
+        return true;
+    }
+
+    // 월간 반복 (추가 구현 필요)
+    if (recurringType === "monthly") {
+        // 예: 매월 같은 날짜에 반복
+        const startDay = start.getUTCDate();
+        const todayDay = todayStart.getUTCDate();
+        console.log(`    템플릿 ${template.title}: 월간 반복 체크 ${startDay === todayDay}`);
+        return startDay === todayDay;
+    }
+
+    return false;
 }
