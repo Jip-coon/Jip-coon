@@ -319,6 +319,8 @@ public final class SettingViewController: UIViewController {
     
     private func handleNotificationSetting() {
         let notificationSettingViewController = NotificationSettingViewController()
+        notificationSettingViewController.title = "알림"
+        notificationSettingViewController.navigationItem.largeTitleDisplayMode = .always
         navigationController?.pushViewController(notificationSettingViewController, animated: true)
     }
     
