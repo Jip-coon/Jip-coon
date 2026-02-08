@@ -81,6 +81,46 @@ final class NotificationSettingViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
+        
+        // 알림 권한 설정
+        NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.viewModel.fetchSettings()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func handleToggleAction(type: NotificationSettingType, isOn: Bool) {
+        if !viewModel.isSystemAuthorized {
+            // 권한이 없으면 얼럿 띄우기
+            showPermissionAlert()
+            
+            // UI를 다시 OFF 상태로 되돌리기
+            tableView.reloadData()
+            return
+        }
+        
+        // 권한이 있을 때만 뷰모델에 전달
+        viewModel.toggleSetting(type: type, isOn: isOn)
+    }
+    
+    private func showPermissionAlert() {
+        let alert = UIAlertController(
+            title: "알림 권한 필요",
+            message: "알림을 켜려면 시스템 설정에서 알림 허용을 활성화해야 합니다.",
+            preferredStyle: .alert
+        )
+        
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        }
+        
+        alert.addAction(settingsAction)
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        present(alert, animated: true)
     }
     
 }
@@ -105,7 +145,7 @@ extension NotificationSettingViewController: UITableViewDataSource, UITableViewD
         let value = viewModel.settings[type] ?? true
         
         cell.onToggle = { [weak self] type, isOn in
-            self?.viewModel.toggleSetting(type: type, isOn: isOn)
+            self?.handleToggleAction(type: type, isOn: isOn)
         }
         
         cell.configureUI(type: type, isOn: value)

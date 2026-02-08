@@ -8,12 +8,14 @@
 import Core
 import Combine
 import Foundation
+import UserNotifications
 
 final class NotificationSettingViewModel: ObservableObject {
     private let userService: UserServiceProtocol
     
     @Published var settings: [NotificationSettingType: Bool] = [:]
     private(set) var isDataLoaded = false
+    private(set) var isSystemAuthorized: Bool = false
     
     private let toggleSubject = PassthroughSubject<(NotificationSettingType, Bool), Never>()
     private var cancellables = Set<AnyCancellable>()
@@ -36,8 +38,11 @@ final class NotificationSettingViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func fetchSettings() {
+    func fetchSettings() {
         Task {
+            let notificationSettings = await UNUserNotificationCenter.current().notificationSettings()
+            self.isSystemAuthorized = (notificationSettings.authorizationStatus == .authorized)
+            
             do {
                 // 서버에서 알림 설정 데이터 가져오기
                 guard let user = try await userService.getCurrentUser(),
@@ -51,7 +56,9 @@ final class NotificationSettingViewModel: ObservableObject {
                 let mappedSettings = settingsData.compactMap { (key, value) -> (NotificationSettingType, Bool)? in
                     // (매칭되는게 없으면 nil 반환하여 제외)
                     guard let type = NotificationSettingType(rawValue: key) else { return nil }
-                    return (type, value)
+                    let displayValue = self.isSystemAuthorized ? value : false
+                    
+                    return (type, displayValue)
                 }
                 
                 // 알림 설정 상태 업데이트
