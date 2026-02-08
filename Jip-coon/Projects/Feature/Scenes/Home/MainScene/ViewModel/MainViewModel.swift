@@ -5,9 +5,9 @@
 //  Created by 심관혁 on 1/27/26.
 //
 
-import Foundation
-import Core
 import Combine
+import Core
+import Foundation
 
 /// 메인 화면의 ViewModel
 public class MainViewModel {
@@ -59,17 +59,19 @@ public class MainViewModel {
     
     /// 타임존 업데이트
     func updateTimeZone() async {
-        guard let userService,
-              let user = try? await userService.getCurrentUser()
-        else {
-            print("현재 로그인된 사용자가 없습니다.")
-            return
-        }
+        let currentTimeZone = TimeZone.current.identifier
+        let savedTimeZone = UserDefaults.standard.string(forKey: "lastTimeZone")
         
-        await userService.updateUserTimeZone(userId: user.id)
-    }
-    
-    func resetUserBadgeCount() {
-        questService?.resetUserBadgeCount()
+        if currentTimeZone != savedTimeZone {
+            guard let userService,
+                  let user = try? await userService.getCurrentUser()
+            else {
+                print("현재 로그인된 사용자가 없습니다.")
+                return
+            }
+            
+            await userService.updateUserTimeZone(userId: user.id)
+            UserDefaults.standard.set(currentTimeZone, forKey: "lastTimeZone")
+        }
     }
 }
