@@ -181,9 +181,9 @@ public enum DeleteMode {
 // MARK: - 알림 설정
 
 public enum NotificationSettingType: String, CaseIterable {
-    case deadline = "deadline"
-    case questAssigned = "questAssigned"
-    case dailySummary = "dailySummary"
+    case deadline
+    case questAssigned
+    case dailySummary
     
     public var title: String {
         switch self {
@@ -199,5 +199,9 @@ public enum NotificationSettingType: String, CaseIterable {
             case .questAssigned: return "퀘스트가 할당되면 알림을 보내드립니다."
             case .dailySummary: return "오늘의 퀘스트를 요약해드립니다."
         }
+    }
+    
+    public var firestoreFieldName: String {
+        return rawValue
     }
 }

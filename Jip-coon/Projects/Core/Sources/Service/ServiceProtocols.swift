@@ -57,6 +57,9 @@ public protocol UserServiceProtocol {
     /// 사용자 타임존 업데이트
     func updateUserTimeZone(userId: String) async
     
+    /// 알림 설정 업데이트
+    func updateNotificationSetting(fieldName: String, isOn: Bool) async throws
+    
     /// 임시 사용자 생성
     func createTempUser(uid: String, email: String) async throws
     

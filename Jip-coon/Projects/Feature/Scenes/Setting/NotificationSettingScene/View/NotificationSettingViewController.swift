@@ -6,12 +6,14 @@
 //
 
 import Core
+import Combine
 import UI
 import UIKit
 
 final class NotificationSettingViewController: UIViewController {
     
-    private var testValues: [NotificationSettingType: Bool] = [:]
+    private let viewModel: NotificationSettingViewModel
+    private var cancellables: Set<AnyCancellable> = []
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -28,7 +30,21 @@ final class NotificationSettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bindViewModel()
         setupUI()
+    }
+    
+    // MARK: - init
+    
+    init(
+        viewModel: NotificationSettingViewModel
+    ) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - setupUI
@@ -52,13 +68,24 @@ final class NotificationSettingViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
-        
-        NotificationSettingType.allCases.forEach {
-            testValues[$0] = true
-        }
+    }
+    
+    private func bindViewModel() {
+        viewModel.$settings
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                
+                if !self.viewModel.isDataLoaded {
+                    self.tableView.reloadData()
+                }
+            }
+            .store(in: &cancellables)
     }
     
 }
+
+// MARK: - TableViewDataSource, TableViewDelegate
 
 extension NotificationSettingViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -75,10 +102,10 @@ extension NotificationSettingViewController: UITableViewDataSource, UITableViewD
         }
         
         let type = NotificationSettingType.allCases[indexPath.row]
-        let value = testValues[type] ?? true
+        let value = viewModel.settings[type] ?? true
         
         cell.onToggle = { [weak self] type, isOn in
-            self?.testValues[type] = isOn
+            self?.viewModel.toggleSetting(type: type, isOn: isOn)
         }
         
         cell.configureUI(type: type, isOn: value)

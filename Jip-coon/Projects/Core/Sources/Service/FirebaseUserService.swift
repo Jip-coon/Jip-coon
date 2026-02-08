@@ -146,6 +146,17 @@ public final class FirebaseUserService: UserServiceProtocol {
         }
     }
     
+    /// 사용자의 알림 설정 업데이트
+    public func updateNotificationSetting(fieldName: String, isOn: Bool) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        let userRef = usersCollection.document(userId)
+        
+        try await userRef.updateData([
+            "notificationSetting.\(fieldName)": isOn
+        ])
+    }
+    
     // MARK: - 임시 회원 관리(이메일 인증시 사용)
     
     /// 임시 사용자 생성

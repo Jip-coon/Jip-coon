@@ -77,6 +77,8 @@ private enum SettingItem {
     }
 }
 
+// MARK: - SettingViewController
+
 public final class SettingViewController: UIViewController {
     
     private let viewModel = SettingViewModel()
@@ -85,7 +87,6 @@ public final class SettingViewController: UIViewController {
     private var currentUser: Core.User? {
         return viewModel.currentUser
     }
-    
     
     private var dataSource: [(section: SettingSection, items: [SettingItem])] = []
     
@@ -99,12 +100,16 @@ public final class SettingViewController: UIViewController {
         return tableView
     }()
     
+    // MARK: - Lifecycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
         Task { await loadCurrentUser() }
     }
+    
+    // MARK: - setup
     
     private func setupUI() {
         view.backgroundColor = .systemGroupedBackground
@@ -318,7 +323,11 @@ public final class SettingViewController: UIViewController {
     }
     
     private func handleNotificationSetting() {
-        let notificationSettingViewController = NotificationSettingViewController()
+        let notificationSettingViewModel = NotificationSettingViewModel()
+        let notificationSettingViewController = NotificationSettingViewController(
+            viewModel: notificationSettingViewModel
+        )
+        
         notificationSettingViewController.title = "알림"
         notificationSettingViewController.navigationItem.largeTitleDisplayMode = .always
         navigationController?.pushViewController(notificationSettingViewController, animated: true)
