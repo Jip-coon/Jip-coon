@@ -107,7 +107,7 @@ public final class FirebaseUserService: UserServiceProtocol {
     public func updateUserPoints(userId: String, points: Int) async throws {
         try await usersCollection
             .document(userId)
-            .updateData(["points": points])
+            .updateData(["points": FieldValue.increment(Int64(points))])
     }
     
     /// 사용자 이름 업데이트

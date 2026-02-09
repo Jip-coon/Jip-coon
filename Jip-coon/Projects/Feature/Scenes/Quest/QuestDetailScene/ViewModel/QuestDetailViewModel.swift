@@ -205,6 +205,29 @@ final class QuestDetailViewModel: ObservableObject {
         }
     }
     
+    /// 퀘스트 시작 처리 (대기중 -> 진행중)
+    func startQuest() async throws {
+        // 현재 사용자 정보 가져오기
+        guard let currentUser = try await userService.getCurrentUser() else {
+            throw QuestDetailError.userNotFound
+        }
+        
+        // 담당자가 지정되지 않은 퀘스트이거나, 담당자가 현재 사용자인 경우에만 시작 가능
+        guard quest.assignedTo == nil || quest.assignedTo == currentUser.id else {
+            throw QuestDetailError.notAssignedToQuest
+        }
+        
+        // 퀘스트 상태를 inProgress로 변경
+        try await questService.startQuest(quest: quest, userId: currentUser.id)
+        
+        // 로컬 quest 객체 업데이트
+        var updatedQuest = quest
+        updatedQuest.status = .inProgress
+        updatedQuest.startedAt = Date()
+        updatedQuest.updatedAt = Date()
+        self.quest = updatedQuest
+    }
+
     /// 퀘스트 완료 처리
     func completeQuest() async throws {
         // 현재 사용자 정보 가져오기
@@ -229,10 +252,7 @@ final class QuestDetailViewModel: ObservableObject {
             try await questService.updateQuest(questToUpdate)
         }
         
-        // 포인트 부여: 퀘스트의 포인트만큼 사용자에게 추가
-        let newPoints = currentUser.points + quest.points
-        try await userService
-            .updateUserPoints(userId: currentUser.id, points: newPoints)
+
         
         // 로컬 quest 객체도 업데이트
         var updatedQuest = questToUpdate

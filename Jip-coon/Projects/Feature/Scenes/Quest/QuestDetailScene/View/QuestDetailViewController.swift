@@ -142,6 +142,17 @@ final class QuestDetailViewController: UIViewController {
         return button
     }()
     
+    private let startQuestButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("퀘스트 시작", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .pretendard(ofSize: 20, weight: .semibold)
+        button.layer.cornerRadius = 12
+        button.backgroundColor = .mainOrange
+        button.isHidden = true // 기본적으로 숨김
+        return button
+    }()
+    
     // 반복
     private let scheduleRepeatView: ScheduleRepeatView = {
         let view = ScheduleRepeatView()
@@ -245,6 +256,7 @@ final class QuestDetailViewController: UIViewController {
         contentView.addSubview(questDeleteButton)
         view.addSubview(bottomContainerView)
         bottomContainerView.addSubview(completeQuestButton)
+        bottomContainerView.addSubview(startQuestButton)
         
         [
             scrollView,
@@ -261,6 +273,7 @@ final class QuestDetailViewController: UIViewController {
             memoTextView,
             bottomContainerView,
             completeQuestButton,
+            startQuestButton,
             memoTextViewPlaceholder,
             scheduleRepeatView,
             scheduleEndDateView,
@@ -415,6 +428,15 @@ final class QuestDetailViewController: UIViewController {
                     .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
                 completeQuestButton.heightAnchor
                     .constraint(equalToConstant: 50),
+                
+                startQuestButton.leadingAnchor
+                    .constraint(equalTo: bottomContainerView.leadingAnchor, constant: 20),
+                startQuestButton.trailingAnchor
+                    .constraint(equalTo: bottomContainerView.trailingAnchor, constant: -20),
+                startQuestButton.bottomAnchor
+                    .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+                startQuestButton.heightAnchor
+                    .constraint(equalToConstant: 50),
             ]
         )
     }
@@ -426,6 +448,7 @@ final class QuestDetailViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] updatedQuest in
                 self?.applyEditingModeState()
+                self?.updateButtonState(quest: updatedQuest)
             }
             .store(in: &cancellables)
         
@@ -670,6 +693,12 @@ final class QuestDetailViewController: UIViewController {
             for: .touchUpInside
         )
         
+        startQuestButton.addTarget(
+            self,
+            action: #selector(startQuestButtonTapped),
+            for: .touchUpInside
+        )
+        
         questDeleteButton.addTarget(
             self,
             action: #selector(questDeleteButtonTapped),
@@ -819,6 +848,44 @@ final class QuestDetailViewController: UIViewController {
         }
     }
     
+    /// 퀘스트 시작 버튼 눌렸을 때
+    @objc private func startQuestButtonTapped() {
+        Task {
+            do {
+                try await viewModel.startQuest()
+            } catch {
+                await MainActor.run {
+                    self.showErrorAlert(message: error.localizedDescription)
+                }
+            }
+        }
+    }
+    
+    private func updateButtonState(quest: Quest) {
+        // 담당자가 나이거나, 담당자가 없을 때만 버튼 표시 로직 동작
+        // (단, 완료된 퀘스트는 버튼 숨김)
+        
+        // 현재 사용자가 담당자인지 확인 (ViewModel에 있는 정보 활용이 이상적이나 여기서는 quest 정보로 판단)
+        // 하지만 여기서는 간단히 status만 보고 판단하고, 실제 탭 시 viewModel에서 권한 체크
+        
+        switch quest.status {
+        case .pending:
+            // 대기중 -> 시작 버튼 표시 (완료 버튼 숨김)
+            startQuestButton.isHidden = false
+            completeQuestButton.isHidden = true
+            
+        case .inProgress:
+            // 진행중 -> 완료 버튼 표시 (시작 버튼 숨김)
+            startQuestButton.isHidden = true
+            completeQuestButton.isHidden = false
+            
+        case .completed, .approved, .rejected:
+            // 완료됨 -> 둘 다 숨김
+            startQuestButton.isHidden = true
+            completeQuestButton.isHidden = true
+        }
+    }
+    
     // MARK: - EditMode에 따른 UI 변경 (수정모드)
     
     /// 수정 모드 또는 읽기 모드 적용
@@ -917,8 +984,11 @@ final class QuestDetailViewController: UIViewController {
     private func updateContentForRead() {
         categoryIcon.isHidden = false
         titleLabel.isHidden = false
-        completeQuestButton.isHidden = false
+        // completeQuestButton.isHidden = false // 제거: updateButtonState에서 처리
         bottomContainerView.isHidden = false
+        
+        // 버튼 상태 업데이트
+        updateButtonState(quest: viewModel.quest)
         
         categoryCarouselView.isHidden = true
         titleEditTextField.isHidden = true
