@@ -21,7 +21,8 @@ let project = Project(
             dependencies: [
                 .external(name: "FirebaseFirestore"),
                 .external(name: "FirebaseAuth"),
-                .external(name: "FirebaseCore")
+                .external(name: "FirebaseCore"),
+                .external(name: "FirebaseMessaging")
             ],
             settings: .settings(
                 base: [

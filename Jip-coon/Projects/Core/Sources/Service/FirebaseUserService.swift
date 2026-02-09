@@ -20,6 +20,8 @@ public final class FirebaseUserService: UserServiceProtocol {
     
     public init() { }
     
+    // MARK: - CRUD
+    
     /// 사용자 프로필 생성
     public func createUser(_ user: User) async throws {
         try usersCollection.document(user.id).setData(from: user)
@@ -45,23 +47,6 @@ public final class FirebaseUserService: UserServiceProtocol {
         try await usersCollection.document(id).delete()
     }
     
-    /// 현재 로그인한 사용자 정보 조회
-    public func getCurrentUser() async throws -> User? {
-        // Firebase Auth에서 현재 로그인한 사용자 정보 가져오기
-        if let currentUser = Auth.auth().currentUser {
-            return try await getUser(by: currentUser.uid)
-        } else {
-            // 개발용: 로그인한 사용자가 없으면 더미 사용자 반환
-            var dummyUser = User(
-                id: "dummy_user_id",
-                name: "개발자",
-                email: "dev@example.com",
-                role: .parent
-            )
-            return dummyUser
-        }
-    }
-    
     /// 사용자 정보가 없으면 사용자 생성
     public func syncCurrentUserDocument() async throws {
         guard let authUser = Auth.auth().currentUser else { return }
@@ -70,10 +55,7 @@ public final class FirebaseUserService: UserServiceProtocol {
         if let existingUser = try await getUser(by: authUser.uid) {
             var updatedUser = existingUser
             updatedUser.updatedAt = Date()
-            // 개발 단계에서는 가족 ID가 없으면 더미 가족에 자동 할당
-            if updatedUser.familyId == nil {
-                updatedUser.familyId = "dummy_family_id"
-            }
+            
             try await updateUser(updatedUser)
         } else {
             // 사용자가 Firestore에 없을 경우
@@ -82,7 +64,7 @@ public final class FirebaseUserService: UserServiceProtocol {
                     .split(separator: "@").first
                     .map(String.init) ?? "사용자"
             )
-
+            
             var newUser = User(
                 id: authUser.uid,
                 name: displayName,
@@ -94,23 +76,38 @@ public final class FirebaseUserService: UserServiceProtocol {
         }
     }
     
-    /// 사용자 포인트 업데이트
-    public func updateUserPoints(userId: String, points: Int) async throws {
-        try await usersCollection
-            .document(userId)
-            .updateData(["points": points])
+    // MARK: - Query
+    
+    /// 현재 로그인한 사용자 정보 조회
+    public func getCurrentUser() async throws -> User? {
+        // Firebase Auth에서 현재 로그인한 사용자 정보 가져오기
+        if let currentUser = Auth.auth().currentUser {
+            return try await getUser(by: currentUser.uid)
+        } else {
+            print("현재 로그인한 사용자 정보를 가져올 수 없습니다.")
+            return nil
+        }
     }
     
     /// 가족 구성원 목록 조회
     public func getFamilyMembers(familyId: String) async throws -> [User] {
         // familyId와 일치하는 문서 가져오기
         let snapshot = try await usersCollection.whereField("familyId", isEqualTo: familyId).getDocuments()
-
+        
         let users = snapshot.documents.compactMap { document in
             return try? document.data(as: User.self)
         }
-
+        
         return users
+    }
+    
+    // MARK: - Update
+    
+    /// 사용자 포인트 업데이트
+    public func updateUserPoints(userId: String, points: Int) async throws {
+        try await usersCollection
+            .document(userId)
+            .updateData(["points": points])
     }
     
     /// 사용자 이름 업데이트
@@ -133,6 +130,33 @@ public final class FirebaseUserService: UserServiceProtocol {
         ])
     }
     
+    /// 현재 폰의 타임존을 가져와서 DB에 저장하는 역할
+    public func updateUserTimeZone(userId: String) async {
+        // 폰 설정에서 타임존 식별자 추출 (예: "Asia/Seoul")
+        let timeZoneIdentifier = TimeZone.current.identifier
+        
+        let userRef = usersCollection.document(userId)
+        
+        do {
+            try await userRef.updateData([
+                "timeZone": timeZoneIdentifier
+            ])
+        } catch {
+            print("타임존 업데이트 실패: \(error.localizedDescription)")
+        }
+    }
+    
+    /// 사용자의 알림 설정 업데이트
+    public func updateNotificationSetting(fieldName: String, isOn: Bool) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        let userRef = usersCollection.document(userId)
+        
+        try await userRef.updateData([
+            "notificationSetting.\(fieldName)": isOn
+        ])
+    }
+    
     // MARK: - 임시 회원 관리(이메일 인증시 사용)
     
     /// 임시 사용자 생성
@@ -143,7 +167,7 @@ public final class FirebaseUserService: UserServiceProtocol {
             state: "verification_sent",
             createdAt: Date()
         )
-
+        
         try usersTempCollection.document(uid).setData(from: tempUser)
     }
     

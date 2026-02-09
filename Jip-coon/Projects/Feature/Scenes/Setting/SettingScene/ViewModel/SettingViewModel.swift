@@ -13,7 +13,6 @@ import Core
 final class SettingViewModel {
     private let authService: AuthService
     private let userService: FirebaseUserService
-
     private let familyService: FirebaseFamilyService
     
     private(set) var currentUser: Core.User?
@@ -29,10 +28,12 @@ final class SettingViewModel {
     var fullVersionString: String {
         "\(appVersion).\(buildNumber)"
     }
-
-    init(authService: AuthService = AuthService(),
-         userService: FirebaseUserService = FirebaseUserService(),
-         familyService: FirebaseFamilyService = FirebaseFamilyService()) {
+    
+    init(
+        authService: AuthService = AuthService(),
+        userService: FirebaseUserService = FirebaseUserService(),
+        familyService: FirebaseFamilyService = FirebaseFamilyService()
+    ) {
         self.authService = authService
         self.userService = userService
         self.familyService = familyService

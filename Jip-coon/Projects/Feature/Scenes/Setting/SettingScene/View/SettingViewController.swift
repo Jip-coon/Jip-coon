@@ -77,6 +77,8 @@ private enum SettingItem {
     }
 }
 
+// MARK: - SettingViewController
+
 public final class SettingViewController: UIViewController {
     
     private let viewModel = SettingViewModel()
@@ -85,7 +87,6 @@ public final class SettingViewController: UIViewController {
     private var currentUser: Core.User? {
         return viewModel.currentUser
     }
-    
     
     private var dataSource: [(section: SettingSection, items: [SettingItem])] = []
     
@@ -99,12 +100,16 @@ public final class SettingViewController: UIViewController {
         return tableView
     }()
     
+    // MARK: - Lifecycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
         Task { await loadCurrentUser() }
     }
+    
+    // MARK: - setup
     
     private func setupUI() {
         view.backgroundColor = .systemGroupedBackground
@@ -249,16 +254,7 @@ public final class SettingViewController: UIViewController {
     
     private func handleManageFamily() {
         let familyManageVC = FamilyManageViewController()
-        let navController = UINavigationController(rootViewController: familyManageVC)
-        
-        familyManageVC.navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .close,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        navigationController?.pushViewController(familyManageVC, animated: true)
     }
     
     private func handleLeaveFamily() {
@@ -323,19 +319,18 @@ public final class SettingViewController: UIViewController {
             viewModel: profileEditViewModel
         )
         
-        // 네비게이션 컨트롤러로 래핑하여 모달로 표시
-        let navController = UINavigationController(rootViewController: profileEditViewController)
-        
-        // 닫기 버튼 추가
-        let closeButton = UIBarButtonItem(
-            barButtonSystemItem: .close,
-            target: self,
-            action: #selector(dismissModal)
+        navigationController?.pushViewController(profileEditViewController, animated: true)
+    }
+    
+    private func handleNotificationSetting() {
+        let notificationSettingViewModel = NotificationSettingViewModel()
+        let notificationSettingViewController = NotificationSettingViewController(
+            viewModel: notificationSettingViewModel
         )
-        profileEditViewController.navigationItem.leftBarButtonItem = closeButton
         
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        notificationSettingViewController.title = "알림"
+        notificationSettingViewController.navigationItem.largeTitleDisplayMode = .always
+        navigationController?.pushViewController(notificationSettingViewController, animated: true)
     }
     
     @objc private func dismissModal() {
@@ -405,17 +400,19 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         let item = sectionData.items[indexPath.row]
         
         switch item {
-        case .editProfile:
-            handleProfileEdit()
-        case .manageFamily:
-            handleManageFamily()
-        case .leaveFamily:
-            handleLeaveFamily()
-        case .logout:
-            handleLogout()
-        case .deleteAccount:
-            handleDeleteAccount()
-        default:
+            case .editProfile:
+                handleProfileEdit()
+            case .manageFamily:
+                handleManageFamily()
+            case .leaveFamily:
+                handleLeaveFamily()
+            case .logout:
+                handleLogout()
+            case .deleteAccount:
+                handleDeleteAccount()
+            case .notifications:
+                handleNotificationSetting()
+            default:
             print("\(item.title) 선택됨")
         }
     }

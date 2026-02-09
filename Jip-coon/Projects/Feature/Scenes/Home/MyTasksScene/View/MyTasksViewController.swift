@@ -200,19 +200,7 @@ public class MyTasksViewController: UIViewController {
             userService: userService
         )
         
-        // 네비게이션 컨트롤러가 없으면 모달로 표시
-        let navController = UINavigationController(rootViewController: questDetailVC)
-        
-        // 닫기 버튼 추가
-        let closeButton = UIBarButtonItem(
-            barButtonSystemItem: .close,
-            target: self,
-            action: #selector(dismissQuestDetail)
-        )
-        questDetailVC.navigationItem.leftBarButtonItem = closeButton
-        
-        navController.modalPresentationStyle = .fullScreen
-        present(navController, animated: true)
+        navigationController?.pushViewController(questDetailVC, animated: true)
     }
     
     @objc private func dismissQuestDetail() {

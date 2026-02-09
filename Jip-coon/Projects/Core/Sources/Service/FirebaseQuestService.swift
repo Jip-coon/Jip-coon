@@ -5,10 +5,10 @@
 //  Created by 심관혁 on 12/31/25.
 //
 
-import Foundation
-import FirebaseFirestore
-import FirebaseAuth
 import Combine
+import FirebaseAuth
+import FirebaseFirestore
+import Foundation
 
 /// Firebase Firestore를 사용하여 퀘스트 데이터를 관리하는 서비스 클래스
 /// - CRUD 작업: 퀘스트 생성, 조회, 수정, 삭제 기능 제공
@@ -254,7 +254,8 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                     startedAt: status == .inProgress ? Date() : nil,
                     completedAt: status == .completed ? Date() : nil,
                     approvedAt: status == .approved ? Date() : nil,
-                    updatedAt: Date()
+                    updatedAt: Date(),
+                    lastNotifiedAt: nil,
                 )
                 
                 // 가상 퀘스트를 실제 문서로 생성
@@ -333,6 +334,23 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             throw FirebaseQuestServiceError
                 .updateFailed(error.localizedDescription)
         }
+    }
+    
+    /// 배지 알림 설정(알림 수 리셋)
+    public func resetUserBadgeCount() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        // 기기 배지 초기화
+        UNUserNotificationCenter.current().setBadgeCount(0) { error in
+            if let error = error {
+                print("배지 카운트 초기화 실패: \(error.localizedDescription)")
+            }
+        }
+        
+        // Firestore 서버 배지 초기화
+        db.collection("users").document(userId).updateData([
+            "badgeCount": 0
+        ])
     }
 
     // MARK: - Submission & Review Workflow

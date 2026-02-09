@@ -20,8 +20,22 @@ public struct User: Codable, Identifiable {
     public let createdAt: Date         // 생성일
     public var updatedAt: Date         // 수정일
     public var admin: Bool           // 관리자 여부
+    public var fcmTokens: [String]?          // 여러 기기 대응을 위해 배열로 관리
+    public var badgeCount: Int?             // 현재 읽지 않은 알림 개수
+    public var notificationSetting: [String: Bool]? // 알림 종류별 ON/OFF
     
-    public init(id: String, name: String, email: String, role: UserRole) {
+    /// 사용자 초기화
+    /// - Parameters:
+    ///   - id: Firebase Auth UID
+    ///   - name: 사용자 이름
+    ///   - email: 이메일
+    ///   - role: 사용자 역할
+    public init(
+        id: String,
+        name: String,
+        email: String,
+        role: UserRole
+    ) {
         self.id = id
         self.name = name
         self.email = email
@@ -32,6 +46,9 @@ public struct User: Codable, Identifiable {
         self.createdAt = Date()
         self.updatedAt = Date()
         self.admin = false
+        self.fcmTokens = []
+        self.badgeCount = 0
+        self.notificationSetting = User.defaultSettings() // 기본 알림 ON 설정
     }
 }
 
@@ -42,7 +59,7 @@ public extension User {
     var isAdmin: Bool {
         return admin
     }
-
+    
     /// 사용자가 부모인지 확인
     var isParent: Bool {
         return role == .parent
@@ -67,6 +84,15 @@ public extension User {
     var displayNameWithRole: String {
         return "\(name) (\(role.displayName))"
     }
+    
+    // 기본값 설정 (회원가입 시 사용)
+    static func defaultSettings() -> [String: Bool] {
+        return [
+            "questAssigned": true,
+            "deadline": true,
+            "dailySummary": true
+        ]
+    }
 }
 
 // MARK: - 임시 사용자
@@ -76,7 +102,7 @@ public struct TempUser: Codable {
     public let email: String
     public let state: String
     public let createdAt: Date
-
+    
     public init(id: String, email: String, state: String, createdAt: Date) {
         self.id = id
         self.email = email

@@ -5,9 +5,9 @@
 //  Created by 심관혁 on 1/25/26.
 //
 
-import UIKit
-import Core
 import Combine
+import Core
+import UIKit
 
 /// 메인 화면
 public class MainViewController: UIViewController {
@@ -62,6 +62,13 @@ public class MainViewController: UIViewController {
         setupUI()
         bindViewModel()
         setupTabBarCallbacks()
+    }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        Task {
+            await viewModel.updateTimeZone()
+        }
+        super.viewDidAppear(animated)
     }
     
     // MARK: - UI Setup
@@ -135,16 +142,16 @@ public class MainViewController: UIViewController {
         let viewController: UIViewController
         
         switch index {
-        case 0: // 홈
-            viewController = createHomeViewController()
-        case 1: // 전체 퀘스트
-            viewController = createAllQuestViewController()
-        case 3: // 랭킹
-            viewController = createRankingViewController()
-        case 4: // 설정
-            viewController = createSettingViewController()
-        default:
-            return
+            case 0: // 홈
+                viewController = createHomeViewController()
+            case 1: // 전체 퀘스트
+                viewController = createAllQuestViewController()
+            case 3: // 랭킹
+                viewController = createRankingViewController()
+            case 4: // 설정
+                viewController = createSettingViewController()
+            default:
+                return
         }
         
         switchToViewController(viewController)
@@ -158,11 +165,15 @@ public class MainViewController: UIViewController {
             return createDefaultViewController(title: "홈", icon: "house")
         }
         
-        return HomeViewController(
+        let homeViewController = HomeViewController(
             userService: userService,
             familyService: familyService,
             questService: questService
         )
+        
+        let navigationController = UINavigationController(rootViewController: homeViewController)
+        
+        return navigationController
     }
     
     /// AllQuestViewController 생성
@@ -199,7 +210,9 @@ public class MainViewController: UIViewController {
     
     /// SettingViewController 생성
     private func createSettingViewController() -> UIViewController {
-        return SettingViewController()
+        let settingVC = SettingViewController()
+        let navigationController = UINavigationController(rootViewController: settingVC)
+        return navigationController
     }
     
     /// 자식 ViewController 교체

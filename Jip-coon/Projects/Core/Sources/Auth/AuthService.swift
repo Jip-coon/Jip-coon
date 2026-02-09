@@ -5,14 +5,18 @@
 //  Created by 심관혁 on 8/27/25.
 //
 
-import Foundation
 import FirebaseAuth
+import FirebaseFirestore
+import FirebaseMessaging
+import Foundation
 
 public final class AuthService: AuthServiceProtocol {
     public init() {}
     
     public func signIn(email: String, password: String) async throws {
         try await Auth.auth().signIn(withEmail: email, password: password)
+        // 로그인 후 토큰 동기화
+        syncFCMToken()
     }
     
     public func signUp(email: String, password: String) async throws {
@@ -92,6 +96,32 @@ public final class AuthService: AuthServiceProtocol {
     /// - Parameter email: 이메일
     public func sendPasswordResetEmail(email: String) async throws {
         try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+    
+    /// FCM 토큰 설정
+    private func syncFCMToken() {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("FCM 토큰 가져오기 실패: \(error.localizedDescription)")
+            } else if let token = token {
+                print("현재 기기 토큰: \(token)")
+                
+                // 로그인된 유저 ID 확인
+                guard let userId = Auth.auth().currentUser?.uid else { return }
+                
+                // DB 업데이트 (document로 수정!)
+                let userRef = Firestore.firestore().collection("users").document(userId)
+                userRef.updateData([
+                    "fcmTokens": FieldValue.arrayUnion([token])
+                ]) { error in
+                    if let error = error {
+                        print("토큰 DB 저장 실패: \(error.localizedDescription)")
+                    } else {
+                        print("FCM 토큰 동기화 성공")
+                    }
+                }
+            }
+        }
     }
     
     /// Firebase Auth 에러 처리

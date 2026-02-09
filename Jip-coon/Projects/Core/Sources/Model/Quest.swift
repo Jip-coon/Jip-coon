@@ -43,6 +43,7 @@ public struct Quest: Codable, Identifiable {
     public var startedAt: Date?        // 퀘스트 시작 시각
     public var completedAt: Date?      // 퀘스트 완료 시각
     public var approvedAt: Date?       // 퀘스트 승인 시각
+    public var lastNotifiedAt: Date?   // 마지막으로 알림 보낸 시각
 
     /// 기본 퀘스트 생성자
     /// - Parameters:
@@ -63,6 +64,9 @@ public struct Quest: Codable, Identifiable {
     ///   - completedAt: 퀘스트 완료 시각
     ///   - approvedAt: 퀘스트 승인 시각
     ///   - updatedAt: 마지막 수정 시각
+    ///   - selectedRepeatDays: 반복되는 요일
+    ///   - recurringEndDate: 반복 종료일
+    ///   - lastNotifiedAt: 해당 퀘스트가 마지막으로 알림 보내진 시각
     /// - Note: FirebaseQuestService에서 퀘스트 생성 시 사용
     ///         실제 Firestore 문서 ID를 사용하여 데이터 일관성 보장
     public init(
@@ -84,7 +88,8 @@ public struct Quest: Codable, Identifiable {
         startedAt: Date? = nil,
         completedAt: Date? = nil,
         approvedAt: Date? = nil,
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        lastNotifiedAt: Date? = nil
     ) {
         self.id = id
         self.templateId = templateId
@@ -105,6 +110,7 @@ public struct Quest: Codable, Identifiable {
         self.completedAt = completedAt
         self.approvedAt = approvedAt
         self.updatedAt = updatedAt
+        self.lastNotifiedAt = lastNotifiedAt
     }
 }
 
