@@ -270,7 +270,8 @@ extension AllQuestViewController: UITableViewDataSource {
         
         cell.configureUI(
             with: viewModel.sectionedQuests[indexPath.section].quests[indexPath.row],
-            members: viewModel.familyMembers
+            members: viewModel.familyMembers,
+            segment: viewModel.selectedSegment
         )
         
         return cell
