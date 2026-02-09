@@ -16,6 +16,7 @@ public final class HomeViewModel: ObservableObject {
     @Published private(set) var family: Family?
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
+    @Published private(set) var isParent: Bool = false // 부모 여부
     @Published var selectedFilter: HomeFilterType = .collection
     
     // MARK: - Services
@@ -69,6 +70,7 @@ public final class HomeViewModel: ObservableObject {
                 
                 await MainActor.run {
                     self.family = family
+                    self.isParent = currentUser.role == .parent
                     self.isLoading = false
                 }
                 

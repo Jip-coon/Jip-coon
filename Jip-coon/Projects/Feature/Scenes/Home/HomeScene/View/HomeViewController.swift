@@ -78,6 +78,14 @@ public class HomeViewController: UIViewController {
             }
             .store(in: &cancellables)
             
+        // 부모 여부 바인딩
+        viewModel.$isParent
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isParent in
+                self?.filterBar.setupButtons(isParent: isParent)
+            }
+            .store(in: &cancellables)
+            
         // 필터 선택 바인딩
         viewModel.$selectedFilter
             .receive(on: DispatchQueue.main)
@@ -134,6 +142,8 @@ public class HomeViewController: UIViewController {
             viewController = createMyTasksViewController()
         case .urgent:
             viewController = createUrgentQuestViewController()
+        case .approval:
+            viewController = createApprovalViewController()
         }
         
         switchContentViewController(to: viewController)
@@ -172,6 +182,13 @@ public class HomeViewController: UIViewController {
         return UrgentQuestViewController(
             userService: viewModel.userService,
             questService: viewModel.questService
+        )
+    }
+    
+    private func createApprovalViewController() -> UIViewController {
+        return ApprovalViewController(
+            questService: viewModel.questService,
+            userService: viewModel.userService
         )
     }
     

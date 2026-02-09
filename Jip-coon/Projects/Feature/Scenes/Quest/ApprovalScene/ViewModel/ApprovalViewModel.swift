@@ -56,9 +56,8 @@ final class ApprovalViewModel: ObservableObject {
                 status: .completed
             )
 
-            // 현재 사용자가 생성자이고, 아직 승인되지 않은 퀘스트들만 필터링
             pendingQuests = completedQuests.filter { quest in
-                quest.createdBy == currentUser.id && quest.status == .completed
+                quest.status == .completed
             }
 
             isLoading = false
