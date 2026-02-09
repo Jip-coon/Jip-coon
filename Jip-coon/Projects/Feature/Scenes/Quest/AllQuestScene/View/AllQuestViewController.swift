@@ -269,7 +269,7 @@ extension AllQuestViewController: UITableViewDelegate {
     
     public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
-        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completion in
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
             guard let self = self else { return }
             
             let quest = self.viewModel.sectionedQuests[indexPath.section].quests[indexPath.row]
@@ -285,8 +285,9 @@ extension AllQuestViewController: UITableViewDelegate {
             
             completion(true)
         }
+        deleteAction.backgroundColor = .backgroundWhite
+        deleteAction.image = UIImage(named: "deleteButton", in: uiBundle, compatibleWith: nil)
         
-        deleteAction.image = UIImage(systemName: "trash")
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
