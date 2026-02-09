@@ -198,10 +198,18 @@ public class AllQuestViewController: UIViewController {
     
     /// 퀘스트 삭제
     private func performDelete(at indexPath: IndexPath, for quest: Quest, mode: DeleteMode) {
+        let isLastItemInSection = viewModel.sectionedQuests[indexPath.section].quests.count == 1
+        
         viewModel.removeQuestFromLocal(quest)
         
         tableView.performBatchUpdates({
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            if isLastItemInSection {
+                // 섹션의 마지막 아이템이었다면 섹션 자체를 삭제
+                tableView.deleteSections(IndexSet(integer: indexPath.section), with: .fade)
+            } else {
+                // 섹션 내에 다른 아이템이 남아있다면 해당 로우만 삭제
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }
         }, completion: { [weak self] _ in
             Task {
                 await self?.viewModel.deleteQuest(quest, mode: mode)
