@@ -14,11 +14,14 @@ protocol HomeFilterBarDelegate: AnyObject {
 enum HomeFilterType: Int {
     case collection = 0
     case urgent = 1
+    case approval = 2
+
     
     var title: String {
         switch self {
         case .collection: return "나의할일"
         case .urgent: return "긴급할일"
+        case .approval: return "승인대기"
         }
     }
     
@@ -26,6 +29,7 @@ enum HomeFilterType: Int {
         switch self {
         case .collection: return "archivebox.fill"
         case .urgent: return "light.beacon.max.fill"
+        case .approval: return "checkmark.seal.fill"
         }
     }
 }
@@ -57,8 +61,10 @@ final class HomeFilterBar: UIView {
         addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .horizontal
-        stackView.spacing = 0
-        stackView.distribution = .fillEqually
+        stackView.axis = .horizontal
+        stackView.spacing = 16 // 간격 조절
+        stackView.distribution = .fill
+        stackView.alignment = .leading // 왼쪽 정렬
         
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: topAnchor),
@@ -68,21 +74,28 @@ final class HomeFilterBar: UIView {
         ])
     }
     
-    private func setupButtons() {
-        let filterTypes: [HomeFilterType] = [.collection, .urgent]
+    func setupButtons(isParent: Bool = false) {
+        // 기존 뷰 제거
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        var filterTypes: [HomeFilterType] = [.collection, .urgent]
+        if isParent {
+            filterTypes.append(.approval)
+        }
         
         for (index, type) in filterTypes.enumerated() {
-            let buttonView = createFilterButton(for: type, showSeparator: index == 0)
+            let buttonView = createFilterButton(for: type, showSeparator: type == .collection)
             stackView.addArrangedSubview(buttonView)
+            
+            // 버튼 너비 제약 추가 (필요시)
+            buttonView.widthAnchor.constraint(equalToConstant: 75).isActive = true
         }
         
-        // 레이아웃 균형을 위한 더미 뷰들
-        // TODO: - 승인 탭을 표시하는 것도 좋아보임
-        for _ in 0..<2 {
-            let dummy = UIView()
-            dummy.isUserInteractionEnabled = false
-            stackView.addArrangedSubview(dummy)
-        }
+        // 오른쪽 여백을 채우기 위한 더미 뷰
+        let dummy = UIView()
+        dummy.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        dummy.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        stackView.addArrangedSubview(dummy)
     }
     
     private func createFilterButton(for type: HomeFilterType, showSeparator: Bool) -> UIView {
@@ -131,7 +144,7 @@ final class HomeFilterBar: UIView {
             container.addSubview(separator)
             separator.translatesAutoresizingMaskIntoConstraints = false
             constraints.append(contentsOf: [
-                separator.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                separator.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: 9),
                 separator.centerYAnchor.constraint(equalTo: button.centerYAnchor),
                 separator.widthAnchor.constraint(equalToConstant: 1),
                 separator.heightAnchor.constraint(equalToConstant: 40)

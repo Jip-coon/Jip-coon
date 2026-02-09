@@ -17,13 +17,15 @@ final class ApprovalViewController: UIViewController {
     // MARK: - Properties
 
     private let viewModel: ApprovalViewModel
+    private let questService: QuestServiceProtocol
+    private let userService: UserServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - UI Components
 
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = .headerBeige
+        tableView.backgroundColor = .backgroundWhite
         tableView.separatorStyle = .none
         tableView
             .register(
@@ -39,16 +41,18 @@ final class ApprovalViewController: UIViewController {
         let view = UIView()
         view.isHidden = true
 
+        let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .regular)
         let imageView = UIImageView(
-            image: UIImage(systemName: "checkmark.circle")
+            image: UIImage(systemName: "archivebox", withConfiguration: config)
         )
-        imageView.tintColor = .gray
+        imageView.tintColor = .systemGray
+        imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
 
         let label = UILabel()
-        label.text = "승인 대기 중인 퀘스트가 없습니다"
-        label.font = .pretendard(ofSize: 16, weight: .regular)
-        label.textColor = .gray
+        label.text = "승인중인 집안일이 없어요"
+        label.font = .systemFont(ofSize: 18, weight: .medium)
+        label.textColor = .systemGray
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
 
@@ -57,17 +61,13 @@ final class ApprovalViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            imageView.centerYAnchor
-                .constraint(equalTo: view.centerYAnchor, constant: -20),
-            imageView.widthAnchor.constraint(equalToConstant: 48),
-            imageView.heightAnchor.constraint(equalToConstant: 48),
+            imageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
+            imageView.widthAnchor.constraint(equalToConstant: 60),
+            imageView.heightAnchor.constraint(equalToConstant: 60),
 
             label.topAnchor
-                .constraint(equalTo: imageView.bottomAnchor, constant: 12),
-            label.leadingAnchor
-                .constraint(equalTo: view.leadingAnchor, constant: 20),
-            label.trailingAnchor
-                .constraint(equalTo: view.trailingAnchor, constant: -20)
+                .constraint(equalTo: imageView.bottomAnchor, constant: 16),
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
         return view
@@ -88,6 +88,8 @@ final class ApprovalViewController: UIViewController {
     /// - Note: ApprovalViewModel을 생성하여 승인 로직을 분리하고
     ///         서비스들을 외부에서 주입받아 테스트 용이성을 확보
     init(questService: QuestServiceProtocol, userService: UserServiceProtocol) {
+        self.questService = questService
+        self.userService = userService
         self.viewModel = ApprovalViewModel(
             questService: questService,
             userService: userService
@@ -112,7 +114,7 @@ final class ApprovalViewController: UIViewController {
 
     private func setupUI() {
         title = "승인 대기"
-        view.backgroundColor = .headerBeige
+        view.backgroundColor = .backgroundWhite
 
         view.addSubview(tableView)
         view.addSubview(emptyStateView)
@@ -123,21 +125,16 @@ final class ApprovalViewController: UIViewController {
         }
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             tableView.bottomAnchor
                 .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
-            emptyStateView.centerXAnchor
-                .constraint(equalTo: view.centerXAnchor),
-            emptyStateView.centerYAnchor
-                .constraint(equalTo: view.centerYAnchor),
-            emptyStateView.leadingAnchor
-                .constraint(equalTo: view.leadingAnchor, constant: 40),
-            emptyStateView.trailingAnchor
-                .constraint(equalTo: view.trailingAnchor, constant: -40),
+            emptyStateView.topAnchor.constraint(equalTo: view.topAnchor),
+            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
             loadingIndicator.centerXAnchor
                 .constraint(equalTo: view.centerXAnchor),
@@ -190,7 +187,9 @@ final class ApprovalViewController: UIViewController {
 
     private func updateUI(with quests: [Quest]) {
         tableView.reloadData()
-        emptyStateView.isHidden = !quests.isEmpty
+        let isEmpty = quests.isEmpty
+        tableView.isHidden = isEmpty
+        emptyStateView.isHidden = !isEmpty
     }
 
     private func showErrorAlert(message: String) {
@@ -235,7 +234,19 @@ extension ApprovalViewController: UITableViewDataSource {
 
 extension ApprovalViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 100
+        return 88
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        let quest = viewModel.pendingQuests[indexPath.row]
+        let detailVC = QuestDetailViewController(
+            quest: quest,
+            questService: questService,
+            userService: userService
+        )
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 

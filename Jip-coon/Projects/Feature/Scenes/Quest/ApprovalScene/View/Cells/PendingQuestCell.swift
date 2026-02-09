@@ -10,75 +10,87 @@ import Core
 import UI
 
 /// 승인 대기 중인 퀘스트를 표시하는 커스텀 테이블뷰 셀
-/// - 카테고리 아이콘, 제목, 담당자, 포인트, 완료 시간 정보 표시
-/// - 승인과 거절 버튼을 통해 부모/관리자의 빠른 의사결정 지원
-/// - 클로저 기반 콜백을 통해 승인/거절 액션 처리
 final class PendingQuestCell: UITableViewCell {
     static let identifier = "PendingQuestCell"
 
     // MARK: - UI Components
-
+    
+    // MyTasksTableViewCell과 동일한 컨테이너 스타일 적용
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
-        view.layer.cornerRadius = 12
+        view.layer.cornerRadius = 20
         view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
-        view.layer.shadowOffset = CGSize(width: 0, height: 2)
-        view.layer.shadowRadius = 4
+        view.layer.shadowOffset = CGSize(width: 0, height: 4)
+        view.layer.shadowRadius = 10
+        view.layer.shadowOpacity = 0.05
         return view
     }()
 
-    private let categoryIcon: UILabel = {
+    // 카테고리 이모지 컨테이너
+    private let emojiContainer: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 24
+        view.clipsToBounds = true
+        return view
+    }()
+    
+    private let emojiLabel: UILabel = {
         let label = UILabel()
-        label.font = .pretendard(ofSize: 24, weight: .regular)
+        label.font = .systemFont(ofSize: 24)
         label.textAlignment = .center
-        label.clipsToBounds = true
-        label.layer.cornerRadius = 20
         return label
     }()
 
+    // 제목
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .pretendard(ofSize: 16, weight: .semibold)
-        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 17, weight: .bold)
+        label.textColor = .label
+        label.numberOfLines = 1
         return label
     }()
 
-    private let assigneeLabel: UILabel = {
+    // 날짜/상태 표시 스택 (MyTasksTableViewCell의 dateStack과 유사)
+    private lazy var infoStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 4
+        stack.alignment = .center
+        return stack
+    }()
+    
+    private let infoIcon: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 12, weight: .regular)
+        let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle", withConfiguration: config))
+        imageView.tintColor = .secondaryLabel
+        return imageView
+    }()
+    
+    private let infoLabel: UILabel = {
         let label = UILabel()
-        label.font = .pretendard(ofSize: 14, weight: .regular)
-        label.textColor = .gray
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.textColor = .secondaryLabel
         return label
     }()
-
-    private let pointsLabel: UILabel = {
-        let label = UILabel()
-        label.font = .pretendard(ofSize: 14, weight: .semibold)
-        label.textColor = .mainOrange
-        return label
-    }()
-
-    private let completedDateLabel: UILabel = {
-        let label = UILabel()
-        label.font = .pretendard(ofSize: 12, weight: .regular)
-        label.textColor = .lightGray
-        return label
+    
+    // 버튼 스택 뷰 (오른쪽 배치)
+    private lazy var buttonStackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [rejectButton, approveButton])
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.distribution = .fillEqually
+        return stack
     }()
 
     private lazy var approveButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("승인", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .pretendard(ofSize: 14, weight: .semibold)
-        button.backgroundColor = .systemGreen
-        button.layer.cornerRadius = 8
-        button
-            .addTarget(
-                self,
-                action: #selector(approveButtonTapped),
-                for: .touchUpInside
-            )
+        button.titleLabel?.font = .pretendard(ofSize: 13, weight: .semibold)
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.addTarget(self, action: #selector(approveButtonTapped), for: .touchUpInside)
         return button
     }()
 
@@ -86,15 +98,10 @@ final class PendingQuestCell: UITableViewCell {
         let button = UIButton(type: .system)
         button.setTitle("거절", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .pretendard(ofSize: 14, weight: .semibold)
+        button.titleLabel?.font = .pretendard(ofSize: 13, weight: .semibold)
         button.backgroundColor = .systemRed
-        button.layer.cornerRadius = 8
-        button
-            .addTarget(
-                self,
-                action: #selector(rejectButtonTapped),
-                for: .touchUpInside
-            )
+        button.layer.cornerRadius = 12
+        button.addTarget(self, action: #selector(rejectButtonTapped), for: .touchUpInside)
         return button
     }()
 
@@ -122,127 +129,97 @@ final class PendingQuestCell: UITableViewCell {
         selectionStyle = .none
 
         contentView.addSubview(containerView)
-        containerView.addSubview(categoryIcon)
+        containerView.addSubview(emojiContainer)
+        emojiContainer.addSubview(emojiLabel)
         containerView.addSubview(titleLabel)
-        containerView.addSubview(assigneeLabel)
-        containerView.addSubview(pointsLabel)
-        containerView.addSubview(completedDateLabel)
-        containerView.addSubview(approveButton)
-        containerView.addSubview(rejectButton)
+        containerView.addSubview(infoStack)
+        containerView.addSubview(buttonStackView)
+        
+        infoStack.addArrangedSubview(infoIcon)
+        infoStack.addArrangedSubview(infoLabel)
 
-        [containerView, categoryIcon, titleLabel, assigneeLabel, pointsLabel, completedDateLabel, approveButton, rejectButton].forEach {
+        [containerView, emojiContainer, emojiLabel, titleLabel, infoStack, buttonStackView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
-        NSLayoutConstraint.activate(
-[
-            containerView.topAnchor
-                .constraint(equalTo: contentView.topAnchor, constant: 8),
-            containerView.leadingAnchor
-                .constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            containerView.trailingAnchor
-                .constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            containerView.bottomAnchor
-                .constraint(equalTo: contentView.bottomAnchor, constant: -8),
-
-            categoryIcon.leadingAnchor
-                .constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            categoryIcon.centerYAnchor
-                .constraint(equalTo: containerView.centerYAnchor),
-            categoryIcon.widthAnchor.constraint(equalToConstant: 40),
-            categoryIcon.heightAnchor.constraint(equalToConstant: 40),
-
-            titleLabel.leadingAnchor
-                .constraint(equalTo: categoryIcon.trailingAnchor, constant: 12),
-            titleLabel.topAnchor
-                .constraint(equalTo: containerView.topAnchor, constant: 12),
-            titleLabel.trailingAnchor
-                .constraint(
-                    equalTo: containerView.trailingAnchor,
-                    constant: -12
-                ),
-
-            assigneeLabel.leadingAnchor
-                .constraint(equalTo: titleLabel.leadingAnchor),
-            assigneeLabel.topAnchor
-                .constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-
-            pointsLabel.leadingAnchor
-                .constraint(equalTo: assigneeLabel.trailingAnchor, constant: 8),
-            pointsLabel.centerYAnchor
-                .constraint(equalTo: assigneeLabel.centerYAnchor),
-
-            completedDateLabel.leadingAnchor
-                .constraint(equalTo: titleLabel.leadingAnchor),
-            completedDateLabel.topAnchor
-                .constraint(equalTo: assigneeLabel.bottomAnchor, constant: 4),
-            completedDateLabel.bottomAnchor
-                .constraint(equalTo: containerView.bottomAnchor, constant: -12),
-
-            rejectButton.trailingAnchor
-                .constraint(
-                    equalTo: containerView.trailingAnchor,
-                    constant: -16
-                ),
-            rejectButton.centerYAnchor
-                .constraint(equalTo: containerView.centerYAnchor),
-            rejectButton.widthAnchor.constraint(equalToConstant: 60),
-            rejectButton.heightAnchor.constraint(equalToConstant: 32),
-
-            approveButton.trailingAnchor
-                .constraint(equalTo: rejectButton.leadingAnchor, constant: -8),
-            approveButton.centerYAnchor
-                .constraint(equalTo: containerView.centerYAnchor),
-            approveButton.widthAnchor.constraint(equalToConstant: 60),
-            approveButton.heightAnchor.constraint(equalToConstant: 32)
-]
-        )
+        NSLayoutConstraint.activate([
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 4),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            
+            emojiContainer.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            emojiContainer.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            emojiContainer.widthAnchor.constraint(equalToConstant: 48),
+            emojiContainer.heightAnchor.constraint(equalToConstant: 48),
+            
+            emojiLabel.centerXAnchor.constraint(equalTo: emojiContainer.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: emojiContainer.centerYAnchor),
+            
+            // 버튼 스택뷰를 오른쪽에 배치 (MyTasks의 statusContainer 위치)
+            buttonStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            buttonStackView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            buttonStackView.widthAnchor.constraint(equalToConstant: 110),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 32),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: emojiContainer.trailingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: buttonStackView.leadingAnchor, constant: -12),
+            titleLabel.topAnchor.constraint(equalTo: emojiContainer.topAnchor, constant: 2),
+            
+            infoStack.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            infoStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            infoStack.trailingAnchor.constraint(lessThanOrEqualTo: buttonStackView.leadingAnchor, constant: -12)
+        ])
     }
-
-    // MARK: - 셀 설정
-
-    /// 퀘스트 데이터로 셀을 설정하는 메소드
-    /// - Parameter quest: 표시할 퀘스트 정보
-    /// - Note: 퀘스트의 모든 필수 정보를 UI 컴포넌트에 매핑
-    ///         카테고리에 따른 색상과 이모지 설정
-    ///         완료 시간을 상대적 시간으로 표시 (몇 분 전, 몇 시간 전 등)
-    func configure(with quest: Quest) {
-        self.quest = quest
-
-        // 퀘스트 기본 정보 표시
-        titleLabel.text = quest.title
-        assigneeLabel.text = "담당자: \(quest.assignedTo ?? "미정")"
-        pointsLabel.text = "\(quest.points)P"
-
-        // 카테고리 이모지 및 색상 설정
-        categoryIcon.text = quest.category.emoji
-        categoryIcon.backgroundColor = UIColor(
-            named: quest.category.backgroundColor,
-            in: uiBundle,
-            compatibleWith: nil
-        )
-
-        // 완료 시점 표시: 상대적 시간으로 사용자 친화적 표현
-        if let completedAt = quest.completedAt {
-            completedDateLabel.text = "완료: \(completedAt.timeAgoString)"
-        } else {
-            completedDateLabel.text = "완료 시간 정보 없음"
+    
+    public override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        if selected {
+            UIView.animate(withDuration: 0.1, animations: {
+                self.containerView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.containerView.transform = .identity
+                }
+            }
+        }
+    }
+    
+    public override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        UIView.animate(withDuration: 0.1) {
+            self.containerView.transform = highlighted ? CGAffineTransform(scaleX: 0.96, y: 0.96) : .identity
         }
     }
 
-    // MARK: - 버튼 액션 처리
+    // MARK: - Configuration
 
-    /// 승인 버튼 탭 시 호출되는 메소드
-    /// - 퀘스트 객체를 클로저를 통해 부모 뷰 컨트롤러에 전달
-    /// - 안전성을 위해 quest 객체 존재 여부 확인
+    func configure(with quest: Quest) {
+        self.quest = quest
+
+        // 이모지 및 배경색
+        emojiLabel.text = quest.category.emoji
+        let categoryColor = UIColor.questCategoryColor(for: quest.category.backgroundColor)
+        emojiContainer.backgroundColor = categoryColor.withAlphaComponent(0.2)
+        
+        // 제목
+        titleLabel.text = quest.title
+        
+        // 상세 정보 (완료 시간 표시)
+        if let completedAt = quest.completedAt {
+            infoLabel.text = "완료: " + completedAt.timeAgoString
+        } else {
+            infoLabel.text = "완료된 퀘스트"
+        }
+    }
+
+    // MARK: - Actions
+
     @objc private func approveButtonTapped() {
         guard let quest = quest else { return }
         onApprove?(quest)
     }
 
-    /// 거절 버튼 탭 시 호출되는 메소드
-    /// - 퀘스트 객체를 클로저를 통해 부모 뷰 컨트롤러에 전달
-    /// - 안전성을 위해 quest 객체 존재 여부 확인
     @objc private func rejectButtonTapped() {
         guard let quest = quest else { return }
         onReject?(quest)
