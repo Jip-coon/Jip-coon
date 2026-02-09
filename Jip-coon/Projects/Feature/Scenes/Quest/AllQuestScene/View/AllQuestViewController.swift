@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Core
 import UI
 import UIKit
 
@@ -195,6 +196,54 @@ public class AllQuestViewController: UIViewController {
         emptyLabel.isHidden = !isEmpty
     }
     
+    /// 퀘스트 삭제
+    private func performDelete(at indexPath: IndexPath, for quest: Quest, mode: DeleteMode) {
+        viewModel.removeQuestFromLocal(quest)
+        
+        tableView.performBatchUpdates({
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }, completion: { [weak self] _ in
+            Task {
+                await self?.viewModel.deleteQuest(quest, mode: mode)
+            }
+        })
+    }
+    
+    /// 퀘스트 삭제 알림
+    private func showDeleteOptionAlert(for quest: Quest, indexPath: IndexPath) {
+        // 반복 퀘스트가 아닌 경우 (단일 일반 퀘스트)
+        if quest.templateId == nil {
+            let alert = UIAlertController(title: "퀘스트 삭제", message: "이 퀘스트를 삭제하시겠습니까?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                self?.performDelete(at: indexPath, for: quest, mode: .single)
+            })
+            present(alert, animated: true)
+            return
+        }
+        
+        // 반복 퀘스트인 경우
+        let actionSheet = UIAlertController(title: "반복 퀘스트 삭제", message: "삭제 방식을 선택해주세요.", preferredStyle: .actionSheet)
+        
+        actionSheet.addAction(UIAlertAction(title: "이 일정만 삭제", style: .default) { [weak self] _ in
+            self?.performDelete(at: indexPath, for: quest, mode: .single)
+        })
+        
+        actionSheet.addAction(UIAlertAction(title: "반복 일정 전체 삭제", style: .destructive) { [weak self] _ in
+            self?.performDelete(at: indexPath, for: quest, mode: .all)
+        })
+        
+        actionSheet.addAction(UIAlertAction(title: "취소", style: .cancel))
+        present(actionSheet, animated: true)
+    }
+    
+    /// 퀘스트 삭제 권한 없음 알림
+    private func showPermissionDeniedAlert() {
+        let alert = UIAlertController(title: "권한 없음", message: "본인의 퀘스트또는 부모님만 삭제할 수 있습니다.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
 }
 
 // MARK: - TableView Delegate
@@ -218,6 +267,29 @@ extension AllQuestViewController: UITableViewDelegate {
         navigationController?.pushViewController(questDetailViewController, animated: true)
     }
     
+    public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] _, _, completion in
+            guard let self = self else { return }
+            
+            let quest = self.viewModel.sectionedQuests[indexPath.section].quests[indexPath.row]
+            
+            // 권한 체크 로직 실행
+            Task {
+                if await self.viewModel.canDeleteQuest(quest) {
+                    self.showDeleteOptionAlert(for: quest, indexPath: indexPath)
+                } else {
+                    self.showPermissionDeniedAlert()
+                }
+            }
+            
+            completion(true)
+        }
+        
+        deleteAction.image = UIImage(systemName: "trash")
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
 }
 
 // MARK: - TableView DataSource
@@ -233,27 +305,27 @@ extension AllQuestViewController: UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-
+        
         if viewModel.selectedSegment == .today { return nil }
-
+        
         let container = UIView()
         container.backgroundColor = .backgroundWhite
-
+        
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .semibold)
         label.textColor = .textGray
         label.text = viewModel.sectionedQuests[section].date.mmDDe
-
+        
         container.addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
             label.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -10),
             label.topAnchor.constraint(equalTo: container.topAnchor)
         ])
-
+        
         return container
     }
     

@@ -13,21 +13,6 @@ public final class AllQuestViewModel: ObservableObject {
     let userService: UserServiceProtocol
     let questService: QuestServiceProtocol
     
-    public init(
-        userService: UserServiceProtocol,
-        questService: QuestServiceProtocol
-    ) {
-        self.userService = userService
-        self.questService = questService
-        
-        Task {
-            await fetchFamilyMembers()
-            await fetchAllQuests()
-        }
-        // 초기 데이터 세팅
-        updateCurrentQuests()
-    }
-    
     enum AllQuestSegmentControl {
         case today
         case upcoming
@@ -51,6 +36,24 @@ public final class AllQuestViewModel: ObservableObject {
     private var pastQuests: [Quest] = []
     private var allQuests: [Quest] = [] {
         didSet { filterQuestsByDate() }
+    }
+    private var deletedQuestIds = Set<String>()
+    
+    // MARK: - init
+    
+    public init(
+        userService: UserServiceProtocol,
+        questService: QuestServiceProtocol
+    ) {
+        self.userService = userService
+        self.questService = questService
+        
+        Task {
+            await fetchFamilyMembers()
+            await fetchAllQuests()
+        }
+        // 초기 데이터 세팅
+        updateCurrentQuests()
     }
     
     // MARK: - 서버에서 데이터 가져오기
@@ -99,9 +102,46 @@ public final class AllQuestViewModel: ObservableObject {
                 startDate: startDate,
                 endDate: endDate
             )
-            await MainActor.run { self.allQuests = quests }
+            await MainActor.run {
+                self.allQuests = quests.filter { !deletedQuestIds.contains($0.id) }
+            }
         } catch {
             print("퀘스트를 불러오지 못했습니다.")
+        }
+    }
+    
+    /// 특정 퀘스트를 로컬 배열에서 즉시 제거하여 UI에 반영
+    func removeQuestFromLocal(_ quest: Quest) {
+        // 1. 전체 원본 데이터에서 제거
+        if let index = allQuests.firstIndex(where: { $0.id == quest.id }) {
+            allQuests.remove(at: index)
+        }
+    }
+    
+    /// 퀘스트 삭제 권한 확인
+    func canDeleteQuest(_ quest: Quest) async -> Bool {
+        guard let currentUser = try? await userService.getCurrentUser() else { return false }
+        
+        // 본인이 생성한 퀘스트인 경우
+        if quest.createdBy == currentUser.id { return true }
+        
+        // 본인이 부모(Parent) 역할인 경우 자녀의 퀘스트 삭제 가능
+        if currentUser.role == .parent { return true }
+        
+        return false
+    }
+    
+    /// 실제 서버 삭제 요청
+    func deleteQuest(_ quest: Quest, mode: DeleteMode) async {
+        deletedQuestIds.insert(quest.id)
+        
+        do {
+            try await questService.deleteQuest(quest: quest, mode: mode)
+            await fetchAllQuests() // 목록 새로고침
+        } catch {
+            print("삭제 실패: \(error)")
+            deletedQuestIds.remove(quest.id)
+            await fetchAllQuests()
         }
     }
     

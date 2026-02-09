@@ -127,36 +127,36 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     /// 퀘스트 삭제
     public func deleteQuest(quest: Quest, mode: DeleteMode) async throws {
         switch mode {
-        case .all:
-            // 전체 삭제: 템플릿과 실제 문서 모두 삭제
-            if let templateId = quest.templateId {
-                try await templatesCollection.document(templateId).delete()
-            }
-            if !quest.id.hasPrefix("virtual_") {
-                try await questsCollection.document(quest.id).delete()
-            }
-            
-        case .single:
-            // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
-            guard let templateId = quest.templateId, let dueDate = quest.dueDate else { return }
-            
-            // 1. 템플릿 가져오기
-            let docRef = templatesCollection.document(templateId)
-            let snapshot = try await docRef.getDocument()
-            var template = try snapshot.data(as: QuestTemplate.self)
-            
-            // 2. 제외 목록에 현재 날짜 추가 (시간 제외하고 날짜만)
-            let dateToRemove = Calendar.current.startOfDay(for: dueDate)
-            if template.excludedDates == nil { template.excludedDates = [] }
-            template.excludedDates?.append(dateToRemove)
-            
-            // 3. 템플릿 업데이트
-            try docRef.setData(from: template)
-            
-            // 4. 만약 이미 실제 문서가 생성되어 있었다면 그것도 삭제
-            if !quest.id.hasPrefix("virtual_") {
-                try await questsCollection.document(quest.id).delete()
-            }
+            case .all:
+                // 전체 삭제: 템플릿과 실제 문서 모두 삭제
+                if let templateId = quest.templateId {
+                    try await templatesCollection.document(templateId).delete()
+                }
+                if !quest.id.hasPrefix("virtual_") {
+                    try await questsCollection.document(quest.id).delete()
+                }
+                
+            case .single:
+                // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
+                if let templateId = quest.templateId, let dueDate = quest.dueDate {
+                    // 1. 템플릿 가져오기
+                    let docRef = templatesCollection.document(templateId)
+                    let snapshot = try await docRef.getDocument()
+                    var template = try snapshot.data(as: QuestTemplate.self)
+                    
+                    // 2. 제외 목록에 현재 날짜 추가 (시간 제외하고 날짜만)
+                    let dateToRemove = Calendar.current.startOfDay(for: dueDate)
+                    if template.excludedDates == nil { template.excludedDates = [] }
+                    template.excludedDates?.append(dateToRemove)
+                    
+                    // 3. 템플릿 업데이트
+                    try docRef.setData(from: template)
+                }
+                
+                // 4. 만약 이미 실제 문서가 생성되어 있었다면 그것도 삭제
+                if !quest.id.hasPrefix("virtual_") {
+                    try await questsCollection.document(quest.id).delete()
+                }
         }
     }
 
