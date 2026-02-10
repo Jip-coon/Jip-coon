@@ -13,7 +13,7 @@ final class ProfileEditViewModel: ObservableObject {
     @Published var familyName: String = "우리 가족"
     @Published var user: User?
     @Published var enteredName: String = ""
-    @Published var isNameChanged: Bool = false
+    @Published var isNameChanged: Bool = true
     
     private let familyService: FamilyServiceProtocol
     private let userService: UserServiceProtocol
@@ -42,19 +42,21 @@ final class ProfileEditViewModel: ObservableObject {
     
     private func loadFamilyName() async {
         do {
-            guard let user = self.user else {
+            guard let user = self.user,
+                  let familyId = user.familyId
+            else {
                 print("현재 사용자 정보를 가져올 수 없습니다.")
                 return
             }
             
-            let family = try await familyService.getFamily(by: user.id)
+            let family = try await familyService.getFamily(by: familyId)
             self.familyName = family?.name ?? "우리 가족"
         } catch {
             print("가족 정보 로드 실패: \(error.localizedDescription)")
         }
     }
     
-    func updateProfleName(newName: String) async {
+    func updateProfileName(newName: String) async {
         do {
             guard let user = self.user else {
                 print("현재 사용자 정보를 가져올 수 없습니다.")
