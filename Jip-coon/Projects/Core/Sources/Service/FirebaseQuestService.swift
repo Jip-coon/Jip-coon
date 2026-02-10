@@ -25,11 +25,11 @@ import Foundation
 ///     - virtual_ 로 시작하는지 확인하기!
 public final class FirebaseQuestService: QuestServiceProtocol {
     private let db = Firestore.firestore()
-
+    
     private var questsCollection: CollectionReference {
         return db.collection(FirestoreCollections.quests)
     }
-
+    
     private var submissionsCollection: CollectionReference {
         return db.collection(FirestoreCollections.questSubmissions)
     }
@@ -37,11 +37,11 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     private var templatesCollection: CollectionReference {
         return db.collection(FirestoreCollections.questTemplates)
     }
-
+    
     public init() { }
-
+    
     // MARK: - CRUD 작업
-
+    
     /// 새로운 퀘스트를 Firestore에 생성하는 메소드
     /// - Parameter quest: 생성할 퀘스트 정보 (id는 자동 생성됨)
     /// - Returns: 생성된 퀘스트 객체 (자동 생성된 ID 포함)
@@ -52,7 +52,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             // Firestore에서 자동 생성된 ID 사용
             let documentRef = questsCollection.document()
             let documentId = documentRef.documentID
-
+            
             // 새로운 Quest 객체 생성 (document ID 사용)
             let questToSave = Quest(
                 id: documentId,
@@ -65,23 +65,23 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 points: quest.points,
                 dueDate: quest.dueDate
             )
-
+            
             // Firestore에 저장
             try documentRef.setData(from: questToSave)
-
+            
             return questToSave
         } catch {
             throw FirebaseQuestServiceError
                 .creationFailed(error.localizedDescription)
         }
     }
-
+    
     /// 퀘스트 조회
     /// 가상 퀘스트는 가져올 수 없음
     public func getQuest(by id: String) async throws -> Quest? {
         do {
             let document = try await questsCollection.document(id).getDocument()
-
+            
             if document.exists {
                 return try document.data(as: Quest.self)
             } else {
@@ -92,76 +92,116 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 .fetchFailed(error.localizedDescription)
         }
     }
-
+    
     /// 퀘스트 업데이트
     public func updateQuest(_ quest: Quest) async throws {
+        var finalQuest = quest
+        
         do {
-            // [공통 로직] 템플릿 ID가 있다면 무조건 템플릿의 반복 규칙도 함께 수정
-            if let templateId = quest.templateId {
+            // 단일 -> 반복으로 변경된 경우 (템플릿 생성)
+            if finalQuest.templateId == nil && finalQuest.recurringType != .none {
+                let newTemplateRef = templatesCollection.document()
+                let templateId = newTemplateRef.documentID
+                
+                let templateData: [String: Any] = [
+                    FirestoreFields.QuestTemplate.id: templateId,
+                    FirestoreFields.QuestTemplate.familyId: finalQuest.familyId,
+                    FirestoreFields.QuestTemplate.title: finalQuest.title,
+                    FirestoreFields.QuestTemplate.description: finalQuest.description ?? NSNull(),
+                    FirestoreFields.QuestTemplate.category: finalQuest.category.rawValue,
+                    FirestoreFields.QuestTemplate.points: finalQuest.points,
+                    FirestoreFields.QuestTemplate.assignedTo: finalQuest.assignedTo as Any,
+                    FirestoreFields.QuestTemplate.recurringType: finalQuest.recurringType.rawValue,
+                    FirestoreFields.QuestTemplate.selectedRepeatDays: finalQuest.selectedRepeatDays ?? [] as Any,
+                    FirestoreFields.QuestTemplate.recurringEndDate: finalQuest.recurringEndDate as Any,
+                    FirestoreFields.QuestTemplate.createdBy: finalQuest.createdBy,
+                    FirestoreFields.QuestTemplate.updatedAt: Timestamp(date: Date())
+                ]
+                
+                try await newTemplateRef.setData(templateData)
+                finalQuest.templateId = templateId // 퀘스트에 생성된 템플릿 ID 부여
+            }
+            
+            // 반복 퀘스트였는데 단일 퀘스트로 변경된 경우 -> 기존 템플릿 삭제
+            else if let templateId = finalQuest.templateId, finalQuest.recurringType == .none {
+                // 미래의 가상 퀘스트가 더 이상 생성되지 않도록 템플릿 삭제
+                try await templatesCollection.document(templateId).delete()
+                finalQuest.templateId = nil // 퀘스트에서 템플릿 연결 끊기
+            }
+            
+            // 이미 반복 퀘스트인 상태에서 내용이나 반복 규칙만 수정된 경우 (기존 템플릿 수정)
+            else if let templateId = finalQuest.templateId {
                 try await templatesCollection.document(templateId).updateData([
-                    FirestoreFields.QuestTemplate.title: quest.title,
-                    FirestoreFields.QuestTemplate.description: quest.description ?? NSNull(),
-                    FirestoreFields.QuestTemplate.category: quest.category.rawValue,
-                    FirestoreFields.QuestTemplate.points: quest.points,
-                    FirestoreFields.QuestTemplate.assignedTo: quest.assignedTo as Any,
-                    FirestoreFields.QuestTemplate.recurringType: quest.recurringType.rawValue,
-                    FirestoreFields.QuestTemplate.selectedRepeatDays: quest.selectedRepeatDays ?? [] as Any,
-                    FirestoreFields.QuestTemplate.recurringEndDate: quest.recurringEndDate as Any,
+                    FirestoreFields.QuestTemplate.title: finalQuest.title,
+                    FirestoreFields.QuestTemplate.description: finalQuest.description ?? NSNull(),
+                    FirestoreFields.QuestTemplate.category: finalQuest.category.rawValue,
+                    FirestoreFields.QuestTemplate.points: finalQuest.points,
+                    FirestoreFields.QuestTemplate.assignedTo: finalQuest.assignedTo as Any,
+                    FirestoreFields.QuestTemplate.recurringType: finalQuest.recurringType.rawValue,
+                    FirestoreFields.QuestTemplate.selectedRepeatDays: finalQuest.selectedRepeatDays ?? [] as Any,
+                    FirestoreFields.QuestTemplate.recurringEndDate: finalQuest.recurringEndDate as Any,
                     FirestoreFields.QuestTemplate.updatedAt: Timestamp(date: Date())
                 ])
             }
             
-            // [개별 퀘스트 처리]
-            if quest.id.hasPrefix("virtual_") {
+            // 개별 퀘스트 처리
+            if finalQuest.id.hasPrefix("virtual_") {
                 // 가상 퀘스트 -> 상태 변경 등을 위해 실제 문서로 변환
-                _ = try await updateQuestStatus(quest: quest, status: quest.status)
+                _ = try await updateQuestStatus(quest: finalQuest, status: finalQuest.status)
             } else {
                 // 이미 생성된 실제 퀘스트 문서 업데이트
-                try questsCollection.document(quest.id).setData(from: quest)
+                try questsCollection.document(finalQuest.id).setData(from: finalQuest)
             }
+            
         } catch {
             throw FirebaseQuestServiceError.updateFailed(error.localizedDescription)
         }
     }
-
+    
     /// 퀘스트 삭제
     public func deleteQuest(quest: Quest, mode: DeleteMode) async throws {
         switch mode {
-        case .all:
-            // 전체 삭제: 템플릿과 실제 문서 모두 삭제
-            if let templateId = quest.templateId {
+            case .all:
+                guard let templateId = quest.templateId else { return }
+                
+                // 해당 템플릿 자체를 삭제
                 try await templatesCollection.document(templateId).delete()
-            }
-            if !quest.id.hasPrefix("virtual_") {
-                try await questsCollection.document(quest.id).delete()
-            }
-            
-        case .single:
-            // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
-            guard let templateId = quest.templateId, let dueDate = quest.dueDate else { return }
-            
-            // 1. 템플릿 가져오기
-            let docRef = templatesCollection.document(templateId)
-            let snapshot = try await docRef.getDocument()
-            var template = try snapshot.data(as: QuestTemplate.self)
-            
-            // 2. 제외 목록에 현재 날짜 추가 (시간 제외하고 날짜만)
-            let dateToRemove = Calendar.current.startOfDay(for: dueDate)
-            if template.excludedDates == nil { template.excludedDates = [] }
-            template.excludedDates?.append(dateToRemove)
-            
-            // 3. 템플릿 업데이트
-            try docRef.setData(from: template)
-            
-            // 4. 만약 이미 실제 문서가 생성되어 있었다면 그것도 삭제
-            if !quest.id.hasPrefix("virtual_") {
-                try await questsCollection.document(quest.id).delete()
-            }
+                
+                // 이미 생성된 실제 퀘스트 문서들도 모두 찾아서 삭제
+                let relatedQuests = try await questsCollection
+                    .whereField(FirestoreFields.Quest.templateId, isEqualTo: templateId)
+                    .getDocuments()
+                
+                for doc in relatedQuests.documents {
+                    try await doc.reference.delete()
+                }
+                
+            case .single:
+                // 이 일정만 삭제: 템플릿의 제외 목록에 날짜 추가
+                if let templateId = quest.templateId, let dueDate = quest.dueDate {
+                    // 1. 템플릿 가져오기
+                    let docRef = templatesCollection.document(templateId)
+                    let snapshot = try await docRef.getDocument()
+                    var template = try snapshot.data(as: QuestTemplate.self)
+                    
+                    // 2. 제외 목록에 현재 날짜 추가 (시간 제외하고 날짜만)
+                    let dateToRemove = Calendar.current.startOfDay(for: dueDate)
+                    if template.excludedDates == nil { template.excludedDates = [] }
+                    template.excludedDates?.append(dateToRemove)
+                    
+                    // 3. 템플릿 업데이트
+                    try docRef.setData(from: template)
+                }
+                
+                // 4. 만약 이미 실제 문서가 생성되어 있었다면 그것도 삭제
+                if !quest.id.hasPrefix("virtual_") {
+                    try await questsCollection.document(quest.id).delete()
+                }
         }
     }
-
+    
     // MARK: - 쿼리 작업
-
+    
     /// 특정 가족의 모든 퀘스트를 조회하는 메소드
     /// - Parameter familyId: 조회할 가족의 ID
     /// - Returns: 해당 가족의 모든 퀘스트 목록 (생성일 기준 내림차순 정렬)
@@ -192,19 +232,19 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             return $0.createdAt > $1.createdAt
         }
     }
-
+    
     /// 상태별 퀘스트 조회
     public func getQuestsByStatus(familyId: String, status: QuestStatus) async throws -> [Quest] {
         let all = try await getFamilyQuests(familyId: familyId)
         return all.filter { $0.status == status }
     }
-
+    
     /// 카테고리별 퀘스트 조회
     public func getQuestsByCategory(familyId: String, category: QuestCategory) async throws -> [Quest] {
         let all = try await getFamilyQuests(familyId: familyId)
         return all.filter { $0.category == category }
     }
-
+    
     /// 담당자별 퀘스트 조회
     public func getQuestsByAssignee(userId: String, familyId: String) async throws -> [Quest] {
         let all = try await getFamilyQuests(familyId: familyId)
@@ -219,9 +259,9 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         
         return snapshot.documents.compactMap { try? $0.data(as: QuestTemplate.self) }
     }
-
+    
     // MARK: - 상태 관리
-
+    
     /// 퀘스트의 진행 상태를 변경하는 메소드
     /// - Parameters:
     ///   - quest: 상태를 변경할 퀘스트
@@ -293,7 +333,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 .updateFailed(error.localizedDescription)
         }
     }
-
+    
     /// 퀘스트 담당자 지정
     public func assignQuest(quest: Quest, userId: String) async throws {
         do {
@@ -313,7 +353,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 .updateFailed(error.localizedDescription)
         }
     }
-
+    
     /// 퀘스트 시작
     public func startQuest(quest: Quest, userId: String) async throws {
         do {
@@ -321,12 +361,12 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             guard quest.assignedTo == userId else {
                 throw FirebaseQuestServiceError.permissionDenied
             }
-
+            
             guard quest.status == .pending else {
                 throw FirebaseQuestServiceError
                     .invalidStatus("대기중인 퀘스트만 시작할 수 있습니다")
             }
-
+            
             try await updateQuestStatus(quest: quest, status: .inProgress)
         } catch let error as FirebaseQuestServiceError {
             throw error
@@ -352,15 +392,15 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             "badgeCount": 0
         ])
     }
-
+    
     // MARK: - Submission & Review Workflow
-
+    
     /// 퀘스트 완료 제출
     public func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws {
         do {
             // 1. 퀘스트 상태를 completed로 변경
             try await updateQuestStatus(quest: quest, status: .completed)
-
+            
             // 2. 제출 데이터 생성 (나중에 QuestSubmissionService로 분리 가능)
             try submissionsCollection
                 .document(submission.id)
@@ -370,7 +410,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 .submissionFailed(error.localizedDescription)
         }
     }
-
+    
     /// 퀘스트 승인/거절
     public func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws {
         do {
@@ -378,11 +418,11 @@ public final class FirebaseQuestService: QuestServiceProtocol {
             guard let quest = try await getQuest(by: questId) else {
                 throw FirebaseQuestServiceError.questNotFound
             }
-
+            
             // 2. 퀘스트 상태 변경
             let newStatus: QuestStatus = isApproved ? .approved : .rejected
             try await updateQuestStatus(quest: quest, status: newStatus)
-
+            
             // 3. 승인 시 포인트 지급
             if isApproved && quest.status == .completed {
                 try await userService
@@ -391,25 +431,25 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                         points: quest.points
                     )
             }
-
+            
             // 2. 제출 데이터 업데이트 (해당 제출이 있다면)
             let submissionQuery = submissionsCollection
                 .whereField("questId", isEqualTo: questId)
                 .whereField("isApproved", isEqualTo: NSNull()) // 검토되지 않은 제출만
-
+            
             let snapshot = try await submissionQuery.getDocuments()
-
+            
             if let submissionDoc = snapshot.documents.first {
                 var updateData: [String: Any] = [
                     "isApproved": isApproved,
                     "reviewedBy": reviewerId,
                     "reviewedAt": Timestamp(date: Date())
                 ]
-
+                
                 if let reviewComment = reviewComment {
                     updateData["reviewComment"] = reviewComment
                 }
-
+                
                 try await submissionDoc.reference.updateData(updateData)
             }
         } catch {
@@ -417,9 +457,9 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 .reviewFailed(error.localizedDescription)
         }
     }
-
+    
     // MARK: - 실시간 데이터 관찰
-
+    
     /// 가족의 퀘스트 목록을 실시간으로 관찰하는 메소드
     /// - Parameter familyId: 관찰할 가족의 ID
     /// - Returns: 퀘스트 배열을 방출하는 Combine Publisher
@@ -430,7 +470,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         let calendar = Calendar.current
         let questsPublisher = PassthroughSubject<[Quest], Error>()
         let templatesPublisher = PassthroughSubject<[QuestTemplate], Error>()
-                
+        
         // 관찰 범위 설정 (오늘 기준 앞뒤 7일)
         let today = Date()
         let obsStart = calendar.date(byAdding: .day, value: -7, to: today)!

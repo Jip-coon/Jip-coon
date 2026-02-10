@@ -175,7 +175,11 @@ final class AllQuestTableViewCell: UITableViewCell {
         ])
     }
     
-    func configureUI(with quest: Quest, members: [User]) {
+    func configureUI(
+        with quest: Quest,
+        members: [User],
+        segment: AllQuestViewModel.AllQuestSegmentControl
+    ) {
         emojiLabel.text = quest.category.emoji
         titleLabel.text = quest.title
         
@@ -193,7 +197,11 @@ final class AllQuestTableViewCell: UITableViewCell {
         // 마감일 정보
         if let dueDate = quest.dueDate {
             let formatter = DateFormatter()
-            formatter.dateFormat = "M/dd HH:mm"
+            if segment == .today {
+                formatter.dateFormat = "HH:mm"
+            } else {
+                formatter.dateFormat = "M/dd HH:mm"
+            }
             dueDateLabel.text = formatter.string(from: dueDate)
             dateIcon.isHidden = false
             separatorLabel.isHidden = false

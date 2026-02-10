@@ -5,10 +5,10 @@
 //  Created by 심관혁 on 1/26/26.
 //
 
-import UIKit
-import Core
 import Combine
+import Core
 import UI
+import UIKit
 
 /// 나의 할일 목록을 표시하는 뷰 컨트롤러
 public class MyTasksViewController: UIViewController {
@@ -164,7 +164,7 @@ public class MyTasksViewController: UIViewController {
                 // 나의 할일 가져오기 (assignedTo가 현재 사용자인 퀘스트)
                 let familyQuests = try await questService.getFamilyQuests(familyId: familyId)
                 let myQuests = familyQuests.filter { quest in
-                    quest.assignedTo == userId && 
+                    quest.assignedTo == userId &&
                     (quest.status == .pending || quest.status == .inProgress)
                 }
                 
@@ -206,6 +206,51 @@ public class MyTasksViewController: UIViewController {
     @objc private func dismissQuestDetail() {
         dismiss(animated: true)
     }
+    
+    private func performDelete(at indexPath: IndexPath, for quest: Quest, mode: DeleteMode) {
+        self.myTasks.remove(at: indexPath.row)
+        
+        tableView.performBatchUpdates({
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }, completion: { [weak self] _ in
+            guard let self = self else { return }
+            
+            Task {
+                do {
+                    try await self.questService.deleteQuest(quest: quest, mode: mode)
+                } catch {
+                    print("서버 삭제 실패: \(error)")
+                }
+            }
+        })
+    }
+    
+    private func showDeleteOptionAlert(for quest: Quest, at indexPath: IndexPath) {
+        // 일반 퀘스트인 경우
+        if quest.templateId == nil {
+            let alert = UIAlertController(title: "퀘스트 삭제", message: "이 퀘스트를 삭제하시겠습니까?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                self?.performDelete(at: indexPath, for: quest, mode: .single)
+            })
+            present(alert, animated: true)
+            return
+        }
+        
+        // 반복 퀘스트인 경우
+        let actionSheet = UIAlertController(title: "반복 퀘스트 삭제", message: "삭제 방식을 선택해주세요.", preferredStyle: .actionSheet)
+        
+        actionSheet.addAction(UIAlertAction(title: "이 일정만 삭제", style: .default) { [weak self] _ in
+            self?.performDelete(at: indexPath, for: quest, mode: .single)
+        })
+        
+        actionSheet.addAction(UIAlertAction(title: "반복 일정 전체 삭제", style: .destructive) { [weak self] _ in
+            self?.performDelete(at: indexPath, for: quest, mode: .all)
+        })
+        
+        actionSheet.addAction(UIAlertAction(title: "취소", style: .cancel))
+        present(actionSheet, animated: true)
+    }
 }
 
 // MARK: - UITableViewDelegate
@@ -220,6 +265,22 @@ extension MyTasksViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let quest = myTasks[indexPath.row]
         handleTaskTapped(quest)
+    }
+    
+    public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
+            guard let self = self else { return }
+            let quest = self.myTasks[indexPath.row]
+            
+            // 삭제 확인 및 실행
+            self.showDeleteOptionAlert(for: quest, at: indexPath)
+            completion(true)
+        }
+        
+        deleteAction.backgroundColor = .backgroundWhite
+        deleteAction.image = UIImage(named: "deleteButton", in: uiBundle, with: nil)
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 
