@@ -71,6 +71,8 @@ async function sendNotification(
 
     // Notifications 서브 컬렉션에 알림 내역 저장
     const notificationRef = userRef.collection("notifications").doc(); // 자동 ID 생성
+    const expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
     const notificationData = {
         id: notificationRef.id,
         questId: questId || null,
@@ -80,7 +82,8 @@ async function sendNotification(
         type: type,
         category: category || null,
         isRead: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp() // 서버 시간 기준
+        createdAt: admin.firestore.FieldValue.serverTimestamp(), // 서버 시간 기준
+        expireAt: admin.firestore.Timestamp.fromDate(expireDate)
     };
 
     try {
