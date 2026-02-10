@@ -5,9 +5,9 @@
 //  Created by 심관혁 on 1/2/26.
 //
 
+import Combine
 import Core
 import UIKit
-import Combine
 
 /// 가족 구성원들의 포인트 기반 랭킹을 표시하는 뷰 컨트롤러
 /// - 가족 서비스와 사용자 서비스를 통해 랭킹 데이터를 조회하고 표시
@@ -19,6 +19,13 @@ public final class RankingViewController: UIViewController {
     private let familyService: FamilyServiceProtocol
 
     // MARK: - UI Components
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 34, weight: .bold)
+        label.text = "랭킹"
+        return label
+    }()
+    
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView
@@ -109,8 +116,8 @@ public final class RankingViewController: UIViewController {
 
     // MARK: - Setup
     private func setupUI() {
-        title = "가족 랭킹"
         view.backgroundColor = .systemGroupedBackground
+        view.addSubview(titleLabel)
 
         // TableView 설정
         view.addSubview(tableView)
@@ -121,12 +128,16 @@ public final class RankingViewController: UIViewController {
         loadingIndicator.center = view.center
 
         // 제약조건 설정
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            
             tableView.topAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                .constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
