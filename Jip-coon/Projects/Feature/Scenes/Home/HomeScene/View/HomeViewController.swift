@@ -148,7 +148,7 @@ public class HomeViewController: UIViewController {
         let viewController: UIViewController
         
         switch filter {
-        case .collection:
+        case .myTask:
             viewController = createMyTasksViewController()
         case .urgent:
             viewController = createUrgentQuestViewController()
@@ -258,7 +258,10 @@ public class HomeViewController: UIViewController {
     }
     
     private func showNotificationView() {
-        let notificationViewModel = NotificationViewModel(userService: viewModel.userService)
+        let notificationViewModel = NotificationViewModel(
+            userService: viewModel.userService,
+            questService: viewModel.questService
+        )
         let notificationViewController = NotificationViewController(viewModel: notificationViewModel)
         notificationViewController.title = "알림"
         

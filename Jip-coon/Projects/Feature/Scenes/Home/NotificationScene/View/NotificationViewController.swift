@@ -87,6 +87,15 @@ final class NotificationViewController: UIViewController {
                 self?.tableView.reloadData()
             }
             .store(in: &cancellables)
+        
+        // 이동 이벤트 구독
+        viewModel.$navigationDestination
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] destination in
+                self?.handleNavigation(to: destination)
+            }
+            .store(in: &cancellables)
     }
     
     private func setupNavigationRightItem() {
@@ -105,6 +114,32 @@ final class NotificationViewController: UIViewController {
             viewModel: notificationSettingViewModel
         )
         navigationController?.pushViewController(notificationSettingViewController, animated: true)
+    }
+    
+    private func handleNavigation(to destination: NotificationDestination) {
+        switch destination {
+            case .questDetail(let quest):
+                let questDetailVC = QuestDetailViewController(
+                    quest: quest,
+                    questService: viewModel.questService,
+                    userService: viewModel.userService
+                )
+                navigationController?.pushViewController(questDetailVC, animated: true)
+                
+            case .myTask:
+                navigationController?.popViewController(animated: true)
+                
+                // 홈 화면의 필터를 '나의 할일'로 변경
+                if let homeVC = navigationController?.topViewController as? HomeViewController {
+                    homeVC.didSelectFilter(.myTask)
+                    print("home")
+                } else if let mainVC = navigationController?.topViewController as? MainViewController {
+                    if let homeVC = mainVC.children.first(where: { $0 is HomeViewController }) as? HomeViewController {
+                        homeVC.didSelectFilter(.myTask)
+                        print("main")
+                    }
+                }
+        }
     }
     
 }
@@ -165,6 +200,10 @@ extension NotificationViewController: UITableViewDelegate, UITableViewDataSource
         cell.selectionStyle = .none
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        viewModel.didSelectNotification(at: indexPath)
     }
     
 }

@@ -33,4 +33,12 @@ public final class FirebaseNotificationService: NotificationServiceProtocol {
         
         return items
     }
+    
+    public func updateReadStatus(userId: String, notificationId: String) async throws {
+        try await usersCollection
+            .document(userId)
+            .collection(FirestoreCollections.notifications)
+            .document(notificationId)
+            .updateData(["isRead": true])
+    }
 }
