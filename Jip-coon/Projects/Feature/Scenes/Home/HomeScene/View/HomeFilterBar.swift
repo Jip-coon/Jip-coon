@@ -184,4 +184,10 @@ final class HomeFilterBar: UIView {
     func refreshStyles() {
         updateAllButtons()
     }
+    
+    /// 외부에서 강제로 필터를 변경할 때 사용 (UI 업데이트용)
+    func setFilter(_ filterType: HomeFilterType) {
+        self.selectedFilter = filterType
+        updateAllButtons()
+    }
 }

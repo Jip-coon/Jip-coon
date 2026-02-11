@@ -268,6 +268,14 @@ public class HomeViewController: UIViewController {
         navigationController?.pushViewController(notificationViewController, animated: true)
     }
     
+    public func forceSwitchToMyTask() {
+        // 1. 뷰모델 데이터 변경
+        viewModel.selectFilter(.myTask)
+        
+        // 2. 필터바 UI 변경 (버튼 테두리 등)
+        filterBar.setFilter(.myTask)
+    }
+    
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
