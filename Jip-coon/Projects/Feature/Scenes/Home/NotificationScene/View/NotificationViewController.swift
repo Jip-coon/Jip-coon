@@ -13,7 +13,11 @@ final class NotificationViewController: UIViewController {
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .backgroundWhite
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.separatorStyle = .none
+        tableView.register(
+            NotificationTableViewCell.self,
+            forCellReuseIdentifier: NotificationTableViewCell.identifier
+        )
         return tableView
     }()
     
@@ -55,6 +59,9 @@ final class NotificationViewController: UIViewController {
             tableView.bottomAnchor
                 .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+        
+        tableView.dataSource = self
+        tableView.delegate = self
     }
     
     private func setupNavigationRightItem() {
@@ -77,3 +84,22 @@ final class NotificationViewController: UIViewController {
     
 }
 
+extension NotificationViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 2
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 92
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: NotificationTableViewCell.identifier) else {
+            return UITableViewCell()
+        }
+        
+        return cell
+    }
+
+
+}
