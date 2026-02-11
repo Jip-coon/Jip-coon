@@ -258,7 +258,8 @@ public class HomeViewController: UIViewController {
     }
     
     private func showNotificationView() {
-        let notificationViewController = NotificationViewController()
+        let notificationViewModel = NotificationViewModel(userService: viewModel.userService)
+        let notificationViewController = NotificationViewController(viewModel: notificationViewModel)
         notificationViewController.title = "알림"
         
         navigationController?.pushViewController(notificationViewController, animated: true)

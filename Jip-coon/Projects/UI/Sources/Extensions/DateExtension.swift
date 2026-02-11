@@ -15,7 +15,7 @@ public extension Date {
         return formatter.string(from: self)
     }
     
-    var aHHmm: String {
+    var aHmm: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "a h시 mm분"
@@ -26,6 +26,20 @@ public extension Date {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "MM월 dd일 E요일"
+        return formatter.string(from: self)
+    }
+    
+    var hhMM: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: self)
+    }
+    
+    var mmDD: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "MM/dd"
         return formatter.string(from: self)
     }
 

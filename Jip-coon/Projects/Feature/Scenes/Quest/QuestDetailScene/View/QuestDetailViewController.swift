@@ -73,7 +73,7 @@ final class QuestDetailViewController: UIViewController {
             return imageView
         }(),
         title: "마감시간",
-        value: quest.dueDate?.aHHmm ?? "",
+        value: quest.dueDate?.aHmm ?? "",
         buttonStyle: isEditingMode ? .rightArrowAction : .textOnly
     )
     
@@ -477,7 +477,7 @@ final class QuestDetailViewController: UIViewController {
         viewModel.$selectedTime
             .receive(on: DispatchQueue.main)
             .sink { [weak self] time in
-                self?.timeRowView.setValueText(time.aHHmm)
+                self?.timeRowView.setValueText(time.aHmm)
             }
             .store(in: &cancellables)
         
@@ -921,7 +921,7 @@ final class QuestDetailViewController: UIViewController {
     /// (수정모드) 날짜, 시간, 별 UI 변경
     private func updateRowViewsForEdit() {
         dateRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedDate.yyyyMMdEE)
-        timeRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedTime.aHHmm)
+        timeRowView.updateButtonStyle(.rightArrowAction, viewModel.selectedTime.aHmm)
         starRowView.updateButtonStyle(.rightArrowMenu, "\(viewModel.starCount) 개")
         scheduleEndDateView.updateButtonStyle(.rightArrowAction, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
         workerRowView.isUserInteractionEnabled = true
@@ -975,7 +975,7 @@ final class QuestDetailViewController: UIViewController {
     /// (읽기모드) 날짜, 시간, 별 UI 변경
     private func updateRowViewsForRead() {
         dateRowView.updateButtonStyle(.textOnly, viewModel.selectedDate.yyyyMMdEE)
-        timeRowView.updateButtonStyle(.textOnly, viewModel.selectedTime.aHHmm)
+        timeRowView.updateButtonStyle(.textOnly, viewModel.selectedTime.aHmm)
         starRowView.updateButtonStyle(.textOnly, "\(viewModel.starCount) 개")
         scheduleEndDateView.updateButtonStyle(.textOnly, viewModel.recurringEndDate?.yyyyMMdEE ?? Date().yyyyMMdEE)
         workerRowView.isUserInteractionEnabled = false

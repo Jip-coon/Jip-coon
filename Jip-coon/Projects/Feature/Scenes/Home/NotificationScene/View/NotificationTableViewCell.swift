@@ -5,6 +5,7 @@
 //  Created by 예슬 on 2/11/26.
 //
 
+import Core
 import UI
 import UIKit
 
@@ -31,6 +32,7 @@ final class NotificationTableViewCell: UITableViewCell {
         label.font = .systemFont(ofSize: 14, weight: .medium)
         label.textColor = .label
         label.numberOfLines = 1
+        label.lineBreakMode = .byTruncatingTail
         return label
     }()
     
@@ -39,7 +41,17 @@ final class NotificationTableViewCell: UITableViewCell {
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = .label
         label.numberOfLines = 2
+        label.lineBreakMode = .byCharWrapping
         return label
+    }()
+    
+    private let textStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        return stackView
     }()
     
     private let dateLabel: UILabel = {
@@ -57,11 +69,10 @@ final class NotificationTableViewCell: UITableViewCell {
     }()
     
     // MARK: - init
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-        dummyData()
     }
     
     required init?(coder: NSCoder) {
@@ -72,59 +83,83 @@ final class NotificationTableViewCell: UITableViewCell {
     
     private func setupUI() {
         contentView.addSubview(emojiContainer)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(bodyLabel)
+        contentView.addSubview(textStackView)
         contentView.addSubview(dateLabel)
         contentView.addSubview(separatorView)
+        
         emojiContainer.addSubview(emojiLabel)
+        
+        textStackView.addArrangedSubview(titleLabel)
+        textStackView.addArrangedSubview(bodyLabel)
         
         emojiContainer.translatesAutoresizingMaskIntoConstraints = false
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        bodyLabel.translatesAutoresizingMaskIntoConstraints = false
+        textStackView.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         separatorView.translatesAutoresizingMaskIntoConstraints = false
         
+        // Priority
+        dateLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        dateLabel.setContentHuggingPriority(.required, for: .horizontal)
+        
+        titleLabel.setContentHuggingPriority(.required, for: .vertical)
+        bodyLabel.setContentHuggingPriority(.required, for: .vertical)
+        
         NSLayoutConstraint.activate([
-            emojiContainer.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
-            emojiContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            emojiContainer.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            emojiContainer.widthAnchor.constraint(equalToConstant: 56),
-            emojiContainer.heightAnchor.constraint(equalToConstant: 56),
+            emojiContainer.topAnchor
+                .constraint(equalTo: contentView.topAnchor, constant: 18),
+            emojiContainer.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            emojiContainer.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor, constant: -19),
+            emojiContainer.widthAnchor
+                .constraint(equalToConstant: 56),
+            emojiContainer.heightAnchor
+                .constraint(equalToConstant: 56),
             
-            emojiLabel.centerXAnchor.constraint(equalTo: emojiContainer.centerXAnchor),
-            emojiLabel.centerYAnchor.constraint(equalTo: emojiContainer.centerYAnchor),
+            emojiLabel.centerXAnchor
+                .constraint(equalTo: emojiContainer.centerXAnchor),
+            emojiLabel.centerYAnchor
+                .constraint(equalTo: emojiContainer.centerYAnchor),
             
-            titleLabel.topAnchor.constraint(equalTo: emojiContainer.topAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: emojiContainer.trailingAnchor, constant: 19),
-            titleLabel.trailingAnchor.constraint(equalTo: dateLabel.leadingAnchor, constant: -15),
+            dateLabel.topAnchor
+                .constraint(equalTo: emojiContainer.topAnchor),
+            dateLabel.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor, constant: -27),
             
-            bodyLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            bodyLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            bodyLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+            textStackView.leadingAnchor
+                .constraint(equalTo: emojiContainer.trailingAnchor, constant: 19),
+            textStackView.trailingAnchor
+                .constraint(lessThanOrEqualTo: dateLabel.leadingAnchor, constant: -15),
+            textStackView.centerYAnchor
+                .constraint(equalTo: emojiContainer.centerYAnchor),
             
-            dateLabel.topAnchor.constraint(equalTo: emojiContainer.topAnchor),
-            dateLabel.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 15),
-            dateLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -27),
-            
-            separatorView.topAnchor.constraint(equalTo: bodyLabel.bottomAnchor, constant: 18),
-            separatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            separatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            separatorView.heightAnchor.constraint(equalToConstant: 1)
+            separatorView.topAnchor
+                .constraint(equalTo: emojiContainer.bottomAnchor, constant: 18),
+            separatorView.leadingAnchor
+                .constraint(equalTo: contentView.leadingAnchor),
+            separatorView.trailingAnchor
+                .constraint(equalTo: contentView.trailingAnchor),
+            separatorView.bottomAnchor
+                .constraint(equalTo: contentView.bottomAnchor),
+            separatorView.heightAnchor
+                .constraint(equalToConstant: 1)
         ])
     }
     
-    func configureUI() {
+    func configureUI(notification: NotificationItem, isToday: Bool) {
+        emojiContainer.backgroundColor = UIColor.questCategoryColor(
+            for: notification.category?.backgroundColor ?? "yellow1"
+        )
+        emojiLabel.text = notification.category?.emoji ?? "🍀"
+        titleLabel.text = notification.title
+        bodyLabel.text = notification.body
         
-    }
-    
-    private func dummyData() {
-        emojiContainer.backgroundColor = .blue1
-        emojiLabel.text = "😀"
-        titleLabel.text = "Hello, World!"
-        bodyLabel.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-        dateLabel.text = "1d ago"
+        if isToday {
+            dateLabel.text = notification.createdAt.hhMM
+        } else {
+            dateLabel.text = notification.createdAt.mmDD
+        }
     }
     
 }

@@ -248,3 +248,9 @@ public protocol StatisticsServiceProtocol {
     /// 카테고리별 완료 횟수 조회
     func getCategoryCompletionCounts(userId: String) async throws -> [QuestCategory: Int]
 }
+
+// MARK: - 알림 서비스 프로토콜
+
+public protocol NotificationServiceProtocol {
+    func fetchNotifications(userId: String) async throws -> [NotificationItem]
+}
