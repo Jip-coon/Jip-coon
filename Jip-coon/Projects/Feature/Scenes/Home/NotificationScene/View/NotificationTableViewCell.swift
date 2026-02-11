@@ -160,6 +160,12 @@ final class NotificationTableViewCell: UITableViewCell {
         } else {
             dateLabel.text = notification.createdAt.mmDD
         }
+        
+        if notification.isRead {
+            titleLabel.textColor = .gray
+            bodyLabel.textColor = .gray
+            contentView.backgroundColor = .gray1
+        }
     }
     
 }
