@@ -165,6 +165,10 @@ final class NotificationTableViewCell: UITableViewCell {
             titleLabel.textColor = .gray
             bodyLabel.textColor = .gray
             contentView.backgroundColor = .gray1
+        } else {
+            titleLabel.textColor = .black
+            bodyLabel.textColor = .black
+            contentView.backgroundColor = .backgroundWhite
         }
     }
     
