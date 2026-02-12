@@ -79,9 +79,6 @@ public protocol FamilyServiceProtocol {
     /// 가족 정보 조회
     func getFamily(by id: String) async throws -> Family?
     
-    /// 초대코드로 가족 조회
-    func getFamilyByInviteCode(_ inviteCode: String) async throws -> Family?
-    
     /// 가족 정보 업데이트
     func updateFamily(_ family: Family) async throws
     
@@ -90,18 +87,9 @@ public protocol FamilyServiceProtocol {
     
     /// 초대코드로 가족 참여
     func joinFamily(inviteCode: String, userId: String) async throws -> Family
-
-    /// 가족에 구성원 추가
-    func addMemberToFamily(familyId: String, userId: String) async throws
     
     /// 가족에서 구성원 제거
     func removeMemberFromFamily(familyId: String, userId: String) async throws
-    
-    /// 사용자의 가족 정보 조회
-    func getUserFamily(userId: String) async throws -> Family?
-    
-    /// 새로운 초대코드 생성
-    func generateNewInviteCode(familyId: String) async throws -> String
 }
 
 // MARK: - 퀘스트 데이터 관리 서비스 프로토콜
@@ -113,6 +101,9 @@ public protocol FamilyServiceProtocol {
 /// - 퀘스트 생명주기 관리 (생성 → 할당 → 진행 → 완료 → 승인)
 /// - 반복 퀘스트 및 제출/승인 워크플로우 지원
 public protocol QuestServiceProtocol {
+    
+    // MARK: - CRUD
+    
     /// 퀘스트 생성
     func createQuest(_ quest: Quest) async throws -> Quest
     
@@ -125,69 +116,44 @@ public protocol QuestServiceProtocol {
     /// 퀘스트 삭제
     func deleteQuest(quest: Quest, mode: DeleteMode) async throws
     
+    // MARK: - 조회
+    
     /// 가족의 모든 퀘스트 조회
     func getFamilyQuests(familyId: String) async throws -> [Quest]
     
     /// 상태별 퀘스트 조회
     func getQuestsByStatus(familyId: String, status: QuestStatus) async throws -> [Quest]
     
-    /// 카테고리별 퀘스트 조회
-    func getQuestsByCategory(familyId: String, category: QuestCategory) async throws -> [Quest]
-    
-    /// 담당자별 퀘스트 조회
-    func getQuestsByAssignee(userId: String, familyId: String) async throws -> [Quest]
-    
     /// 퀘스트 템플릿 조회
     func fetchQuestTemplates(familyId: String) async throws -> [QuestTemplate]
+    
+    // MARK: - 상태 변경
     
     /// 퀘스트 상태 변경
     func updateQuestStatus(quest: Quest, status: QuestStatus) async throws
     
-    /// 퀘스트 담당자 지정
-    func assignQuest(quest: Quest, userId: String) async throws
-    
     /// 퀘스트 시작
     func startQuest(quest: Quest, userId: String) async throws
-    
-    /// 알림 배지 초기화
-    func resetUserBadgeCount()
     
     /// 퀘스트 완료 제출
     func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws
     
-    /// 퀘스트 완료를 승인하거나 거절하는 메소드
-    /// - Parameters:
-    ///   - questId: 검토할 퀘스트 ID
-    ///   - isApproved: 승인 여부 (true: 승인, false: 거절)
-    ///   - reviewComment: 검토 의견 (거절 시 선택사항)
-    ///   - reviewerId: 검토자(부모/관리자) ID
-    ///   - userService: 포인트 지급을 위한 사용자 서비스
-    /// - Note: 승인 시 해당 퀘스트의 포인트를 담당자에게 자동 지급
-    ///         부모의 승인을 통한 포인트 시스템의 핵심 기능
+    /// 퀘스트 승인/거절
     func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws
+    
+    // MARK: - 반복 퀘스트
     
     /// 반복 퀘스트 생성
     func createQuestTemplate(_ template: QuestTemplate) async throws
     
     /// 퀘스트 조회 (병합 로직)
-    /// - Parameters:
-    ///   - familyId: 가족 ID
-    ///   - startDate: 퀘스트 시작 날짜
-    ///   - endDate: 퀘스트 종료 날짜
-    /// - Returns: 퀘스트
-    /// - Note: 실제 퀘스트와 반복 규칙에 따라 만든 가상 데이터를 하나의 [Quset] 배열로 합칩니다.
     func fetchQuestsWithRepeat(familyId: String, startDate: Date, endDate: Date) async throws -> [Quest]
     
+    // MARK: - 실시간 관찰 & 알림
+    
     /// 가족의 퀘스트 목록을 실시간으로 관찰하는 Publisher 제공
-    /// - Parameter familyId: 관찰할 가족 ID
-    /// - Returns: 퀘스트 배열을 방출하는 Combine Publisher
-    /// - Note: Firestore 실시간 업데이트를 통해 가족 구성원들의 변경사항 즉시 반영
-    ///         메인 화면의 데이터 동기화에 핵심적으로 사용됨
     func observeFamilyQuests(familyId: String) -> AnyPublisher<[Quest], Error>
-
-    /// 특정 퀘스트의 상태 변화를 실시간으로 관찰하는 Publisher 제공
-    /// - Parameter questId: 관찰할 퀘스트 ID
-    /// - Returns: 퀘스트 상태를 방출하는 Combine Publisher
-    /// - Note: 퀘스트 진행 상황 모니터링 및 UI 실시간 업데이트에 사용
-    func observeQuestStatus(questId: String) -> AnyPublisher<QuestStatus, Error>
+    
+    /// 알림 배지 초기화
+    func resetUserBadgeCount()
 }
