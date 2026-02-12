@@ -68,6 +68,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 }
 
+// MARK: - MessagingDelegate
+
 extension AppDelegate: MessagingDelegate {
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
@@ -100,6 +102,8 @@ extension AppDelegate: MessagingDelegate {
         }
     }
 }
+
+// MARK: - UNUserNotificationCenterDelegate
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     /// 앱이 포그라운드 상태일 때 알림이 오면 호출

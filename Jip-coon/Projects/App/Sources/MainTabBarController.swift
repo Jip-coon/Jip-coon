@@ -9,16 +9,13 @@ import Core
 import Feature
 import UIKit
 
-/// 앱의 주요 네비게이션 구조를 제공하는 탭바 컨트롤러
-/// - 홈, 랭킹, 설정 탭으로 구성된 3탭 구조
-/// - 각 탭에 해당하는 뷰 컨트롤러들을 네비게이션 컨트롤러로 래핑
-/// - 서비스 의존성을 주입받아 각 화면에 필요한 데이터 서비스 제공
-/// - UITabBarControllerDelegate를 통해 탭 선택 이벤트 처리
+/// MainViewContoller를 메인 화면으로 설정
+/// 기본 탭바 숨김
 final class MainTabBarController: UITabBarController {
     private let userService: UserServiceProtocol
     private let familyService: FamilyServiceProtocol
     private let questService: QuestServiceProtocol
-
+    
     /// 의존성 주입을 통한 탭바 컨트롤러 초기화
     /// - Parameters:
     ///   - userService: 사용자 데이터 관리를 위한 서비스
@@ -40,7 +37,7 @@ final class MainTabBarController: UITabBarController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupMainViewController()

@@ -12,12 +12,12 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
-
+    
     private let userService: UserServiceProtocol
     private let familyService: FamilyServiceProtocol
     private let questService: QuestServiceProtocol
     private let authService: AuthServiceProtocol
-
+    
     override init() {
         self.userService = FirebaseUserService()
         self.familyService = FirebaseFamilyService()
@@ -42,16 +42,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             userService: userService
         )
         let appleLoginViewModel = AppleLoginViewModel(userService: userService)
-        let googleLoginViewModel = GoogleLoginViewModel(
-            userService: userService
-        )
+        let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
         
         let loginViewController = LoginViewController(
             viewModel: loginViewModel,
             appleLoginViewModel: appleLoginViewModel,
             googleLoginViewModel: googleLoginViewModel
         )
-      
+        
         let navigationController = UINavigationController(
             rootViewController: loginViewController
         )
@@ -121,6 +119,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
     
+    // MARK: - Helper
+    
+    /// 로그인 성공시
     @objc private func handleLoginSuccess() {
         // 로그인 성공 시 사용자 정보 동기화
         Task {
@@ -130,10 +131,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             } catch {
                 print("로그인 후 사용자 정보 동기화 실패: \(error.localizedDescription)")
             }
-
+            
             await MainActor.run { [weak self] in
                 guard let self = self else { return }
-
+                
                 self.window?.rootViewController = MainTabBarController(
                     userService: self.userService,
                     familyService: self.familyService,
@@ -144,15 +145,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
+    /// 로그아웃 성공시
     @objc private func handleLogoutSuccess() {
         let loginViewModel = LoginViewModel(
             authService: authService,
             userService: userService
         )
         let appleLoginViewModel = AppleLoginViewModel(userService: userService)
-        let googleLoginViewModel = GoogleLoginViewModel(
-            userService: userService
-        )
+        let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
         
         DispatchQueue.main.async { [weak self] in
             let loginVC = LoginViewController(
@@ -166,6 +166,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
+    /// 임시 계정 삭제
     private func cleanupTempAccountOnAppLaunch() async {
         guard let user = authService.currentUser else { return }
         
