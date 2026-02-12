@@ -32,7 +32,7 @@ public protocol UserServiceProtocol {
     
     /// 사용자 삭제
     func deleteUser(id: String) async throws
-
+    
     /// 사용자 정보가 없으면 사용자 생성
     func syncCurrentUserDocument() async throws
     
@@ -90,14 +90,11 @@ public protocol FamilyServiceProtocol {
 
 /// 퀘스트의 생성, 조회, 상태 관리, 실시간 관찰을 담당하는 서비스 인터페이스
 /// - Firebase Firestore 기반 퀘스트 CRUD 작업
-/// - 가족별/상태별/카테고리별 필터링 및 정렬 지원
+/// - 가족별/상태별 필터링 및 정렬 지원
 /// - 실시간 데이터 동기화를 위한 Combine Publisher 제공
 /// - 퀘스트 생명주기 관리 (생성 → 할당 → 진행 → 완료 → 승인)
 /// - 반복 퀘스트 및 제출/승인 워크플로우 지원
 public protocol QuestServiceProtocol {
-    
-    // MARK: - CRUD
-    
     /// 퀘스트 생성
     func createQuest(_ quest: Quest) async throws -> Quest
     
@@ -110,8 +107,6 @@ public protocol QuestServiceProtocol {
     /// 퀘스트 삭제
     func deleteQuest(quest: Quest, mode: DeleteMode) async throws
     
-    // MARK: - 조회
-    
     /// 가족의 모든 퀘스트 조회
     func getFamilyQuests(familyId: String) async throws -> [Quest]
     
@@ -120,8 +115,6 @@ public protocol QuestServiceProtocol {
     
     /// 퀘스트 템플릿 조회
     func fetchQuestTemplates(familyId: String) async throws -> [QuestTemplate]
-    
-    // MARK: - 상태 변경
     
     /// 퀘스트 상태 변경
     func updateQuestStatus(quest: Quest, status: QuestStatus) async throws
@@ -135,15 +128,11 @@ public protocol QuestServiceProtocol {
     /// 퀘스트 승인/거절
     func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws
     
-    // MARK: - 반복 퀘스트
-    
     /// 반복 퀘스트 생성
     func createQuestTemplate(_ template: QuestTemplate) async throws
     
     /// 퀘스트 조회 (병합 로직)
     func fetchQuestsWithRepeat(familyId: String, startDate: Date, endDate: Date) async throws -> [Quest]
-    
-    // MARK: - 실시간 관찰 & 알림
     
     /// 가족의 퀘스트 목록을 실시간으로 관찰하는 Publisher 제공
     func observeFamilyQuests(familyId: String) -> AnyPublisher<[Quest], Error>
