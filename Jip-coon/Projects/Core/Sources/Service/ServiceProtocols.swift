@@ -33,16 +33,10 @@ public protocol UserServiceProtocol {
     /// 사용자 삭제
     func deleteUser(id: String) async throws
 
-    /// 현재 로그인한 사용자의 Firestore 문서 존재 여부 확인 및 자동 생성
-    /// - Firebase Auth 사용자이지만 Firestore 문서가 없는 경우 새 문서 생성
-    /// - 앱 시작 시 또는 로그인 후 사용자 데이터 일관성 확보를 위해 사용
-    /// - Note: 사용자 등록 프로세스의 일부로 자동 실행됨
+    /// 사용자 정보가 없으면 사용자 생성
     func syncCurrentUserDocument() async throws
     
-    /// 현재 Firebase Auth로 로그인한 사용자의 Firestore 문서 조회
-    /// - Returns: 현재 사용자 정보 또는 nil (로그인하지 않은 경우)
-    /// - Note: Firebase Auth UID를 키로 사용하여 Firestore에서 사용자 문서 검색
-    ///         앱 전반에서 현재 사용자 정보를 얻기 위한 핵심 메소드
+    /// 현재 로그인한 사용자 정보 조회
     func getCurrentUser() async throws -> User?
     
     /// 가족 구성원 목록 조회
@@ -54,6 +48,9 @@ public protocol UserServiceProtocol {
     /// 사용자 이름 업데이트
     func updateUserName(userId: String, newName: String) async throws
     
+    /// 사용자 역할 업데이트
+    func updateUserRole(userId: String, role: UserRole) async throws
+    
     /// 사용자 타임존 업데이트
     func updateUserTimeZone(userId: String) async
     
@@ -62,9 +59,6 @@ public protocol UserServiceProtocol {
     
     /// 임시 사용자 생성
     func createTempUser(uid: String, email: String) async throws
-    
-    /// 임시 사용자 조회
-    func getTempUser(by uid: String) async throws -> TempUser?
     
     /// 임시 사용자 삭제
     func deleteTempUser(uid: String) async throws

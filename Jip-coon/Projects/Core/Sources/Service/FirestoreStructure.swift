@@ -14,7 +14,6 @@ public struct FirestoreCollections {
     public static let families = "families"
     public static let quests = "quests"
     public static let questSubmissions = "quest_submissions"
-    public static let statistics = "statistics"
     public static let notifications = "notifications"
     public static let questTemplates = "quest_templates"
 }
