@@ -12,23 +12,23 @@ import Foundation
 /// - 실제 인스턴스가 필요할 경우(퀘스트 완료 했을 때) Quest 문서를 Firestore에 생성
 /// - 동적 생성: 뷰에서 보여줄 때만 Template을 읽어서 "가짜 퀘스트"를 리스트에 섞어줍니다.
 public struct QuestTemplate: Codable, Identifiable {
-    public let id: String
-    public var title: String
-    public var description: String?
-    public var category: QuestCategory
-    public var points: Int
-    public let createdBy: String
-    public let familyId: String
-    public var assignedTo: String?
+    public let id: String                   // Firestore 문서 ID
+    public var title: String                // 퀘스트 제목
+    public var description: String?         // 퀘스트 메모
+    public var category: QuestCategory      // 퀘스트 카테고리
+    public var points: Int                  // 퀘스트 포인트
+    public let createdBy: String            // 퀘스트 생성자 ID
+    public let familyId: String             // 가족 ID
+    public var assignedTo: String?          // 퀘스트 담당자
     
-    public var recurringType: RecurringType
-    public var selectedRepeatDays: [Int] // 0(일) ~ 6(토)
-    public var startDate: Date
-    public var recurringEndDate: Date?
-    public var updatedAt: Date
-    public var excludedDates: [Date]?
-    public var recurringDueTime: Date?
-    public var lastNotifiedAt: Date?
+    public var recurringType: RecurringType // 퀘스트 반복 타입
+    public var selectedRepeatDays: [Int]    // 퀘스트 반복 요일 0(일) ~ 6(토)
+    public var startDate: Date              // 퀘스트 시작일(퀘스트 생성시 마감일)
+    public var recurringEndDate: Date?      // 퀘스트 반복 종료일
+    public var updatedAt: Date              // 업데이트 시각
+    public var excludedDates: [Date]?       // 반복에서 제외된 날짜
+    public var recurringDueTime: Date?      // 퀘스트 반복 종료일
+    public var lastNotifiedAt: Date?        // 퀘스트 마감 알림이 보내졌는지
     
     /// Quest Template 생성자
     /// - Parameters:
