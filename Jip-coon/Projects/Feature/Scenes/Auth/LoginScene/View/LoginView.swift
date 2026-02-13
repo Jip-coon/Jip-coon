@@ -5,8 +5,8 @@
 //  Created by 예슬 on 8/23/25.
 //
 
-import UIKit
 import UI
+import UIKit
 
 final class LoginView: UIView {
     let scrollView = UIScrollView()
@@ -24,6 +24,7 @@ final class LoginView: UIView {
         placeholder: "이메일",
         keyboardType: .emailAddress
     )
+    
     lazy var passwordTextField: UITextField = makeTextField(
         placeholder: "비밀번호",
         isSecure: true
@@ -100,6 +101,8 @@ final class LoginView: UIView {
         return button
     }()
     
+    // MARK: - init
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setUpView()
@@ -109,6 +112,8 @@ final class LoginView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - setup
     
     private func setUpView() {
         self.backgroundColor = .backgroundWhite
@@ -146,8 +151,7 @@ final class LoginView: UIView {
     }
     
     private func setUpConstraints() {
-        NSLayoutConstraint.activate(
-[
+        NSLayoutConstraint.activate([
             scrollView.topAnchor
                 .constraint(equalTo: self.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor
@@ -160,17 +164,11 @@ final class LoginView: UIView {
             contentView.topAnchor
                 .constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentView.leadingAnchor
-                .constraint(
-                    equalTo: scrollView.contentLayoutGuide.leadingAnchor
-                ),
+                .constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             contentView.trailingAnchor
-                .constraint(
-                    equalTo: scrollView.contentLayoutGuide.trailingAnchor
-                ),
+                .constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             contentView.bottomAnchor
-                .constraint(
-                    equalTo: scrollView.contentLayoutGuide.bottomAnchor
-                ),
+                .constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             contentView.widthAnchor
                 .constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
@@ -185,7 +183,8 @@ final class LoginView: UIView {
                 .constraint(equalTo: contentView.leadingAnchor, constant: 20),
             emailTextField.trailingAnchor
                 .constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            emailTextField.heightAnchor.constraint(equalToConstant: 56),
+            emailTextField.heightAnchor
+                .constraint(equalToConstant: 56),
             
             passwordTextField.topAnchor
                 .constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
@@ -196,10 +195,7 @@ final class LoginView: UIView {
             passwordTextField.heightAnchor.constraint(equalToConstant: 56),
             
             findPasswordButton.topAnchor
-                .constraint(
-                    equalTo: passwordTextField.bottomAnchor,
-                    constant: 16
-                ),
+                .constraint(equalTo: passwordTextField.bottomAnchor,constant: 16),
             findPasswordButton.centerXAnchor
                 .constraint(equalTo: contentView.centerXAnchor),
             
@@ -209,7 +205,8 @@ final class LoginView: UIView {
                 .constraint(equalTo: contentView.leadingAnchor, constant: 20),
             loginButton.trailingAnchor
                 .constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            loginButton.heightAnchor.constraint(equalToConstant: 56),
+            loginButton.heightAnchor
+                .constraint(equalToConstant: 56),
             
             noAccountLabel.topAnchor
                 .constraint(equalTo: loginButton.bottomAnchor, constant: 17),
@@ -219,10 +216,7 @@ final class LoginView: UIView {
             signUpButton.topAnchor
                 .constraint(equalTo: noAccountLabel.topAnchor),
             signUpButton.leadingAnchor
-                .constraint(
-                    equalTo: noAccountLabel.trailingAnchor,
-                    constant: 18
-                ),
+                .constraint(equalTo: noAccountLabel.trailingAnchor,constant: 18),
             
             loginWithLabel.topAnchor
                 .constraint(equalTo: signUpButton.bottomAnchor, constant: 70),
@@ -240,8 +234,7 @@ final class LoginView: UIView {
                 .constraint(equalTo: loginWithLabel.bottomAnchor, constant: 14),
             appleLoginButton.leadingAnchor
                 .constraint(equalTo: contentView.centerXAnchor, constant: 26)
-]
-        )
+        ])
     }
     
     private func makeTextField(

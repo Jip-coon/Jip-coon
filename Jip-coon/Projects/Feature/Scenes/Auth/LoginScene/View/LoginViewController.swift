@@ -9,7 +9,7 @@ import Combine
 import UI
 import UIKit
 
-public class LoginViewController: UIViewController {
+public final class LoginViewController: UIViewController {
     private let loginView = LoginView()
     
     private var activeField: UIView?
@@ -20,6 +20,8 @@ public class LoginViewController: UIViewController {
     private let googleLoginViewModel: GoogleLoginViewModel
     
     private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - init
     
     public init(
         viewModel: LoginViewModel,
@@ -136,19 +138,17 @@ public class LoginViewController: UIViewController {
     
     @objc private func signUpButtonTapped() {
         let signUpViewController = SignUpViewController()
-        navigationController?
-            .pushViewController(signUpViewController, animated: true)
+        navigationController?.pushViewController(signUpViewController, animated: true)
     }
     
     @objc private func googleLoginTapped() {
-        print("google login button tapped")
         googleLoginViewModel.signIn(presentingVC: self)
     }
     
     @objc private func appleLoginTapped() {
-        print("apple login button tapped")
-        appleLoginViewModel.startSignInWithAppleFlow()
+        appleLoginViewModel.login()
     }
+    
     // MARK: - Keyboard
     
     // 키보드 숨기기
@@ -272,8 +272,10 @@ public class LoginViewController: UIViewController {
     
     private func navigateToMainScreen() {
         // 로그인 성공 알림 전송
-        NotificationCenter.default
-            .post(name: NSNotification.Name("LoginSuccess"), object: nil)
+        NotificationCenter.default.post(
+            name: NSNotification.Name("LoginSuccess"),
+            object: nil
+        )
     }
     
     private func showErrorAlert(message: String) {

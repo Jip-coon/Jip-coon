@@ -73,7 +73,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: MessagingDelegate {
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
         guard let token = fcmToken else { return }
         
         // 서버 DB에 토큰 저장 시도

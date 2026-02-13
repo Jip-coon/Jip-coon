@@ -52,11 +52,6 @@ final class FindPasswordViewController: UIViewController {
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
         button.layer.shadowOpacity = 0.15
         button.layer.cornerRadius = 15
-        button.addTarget(
-            self,
-            action: #selector(sendMailButtonTapped),
-            for: .touchUpInside
-        )
         return button
     }()
     
@@ -64,7 +59,10 @@ final class FindPasswordViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
+        addTarget()
     }
+    
+    // MARK: - init
     
     init(viewModel: LoginViewModel) {
         self.viewModel = viewModel
@@ -74,6 +72,8 @@ final class FindPasswordViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - setup
     
     private func bindViewModel() {
         // 에러 메시지 표시
@@ -124,6 +124,10 @@ final class FindPasswordViewController: UIViewController {
             sendMailButton.heightAnchor
                 .constraint(equalToConstant: 50),
         ])
+    }
+    
+    private func addTarget() {
+        sendMailButton.addTarget(self, action: #selector(sendMailButtonTapped), for: .touchUpInside)
     }
     
     @objc private func sendMailButtonTapped() {
