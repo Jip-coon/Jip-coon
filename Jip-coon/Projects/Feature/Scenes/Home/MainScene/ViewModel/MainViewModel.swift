@@ -62,7 +62,7 @@ public class MainViewModel {
         let currentTimeZone = TimeZone.current.identifier
         let savedTimeZone = UserDefaults.standard.string(forKey: "lastTimeZone")
         
-        if currentTimeZone != savedTimeZone {
+        if savedTimeZone == nil || currentTimeZone != savedTimeZone {
             guard let userService,
                   let user = try? await userService.getCurrentUser()
             else {

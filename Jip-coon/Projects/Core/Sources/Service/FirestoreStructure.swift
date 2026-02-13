@@ -107,4 +107,16 @@ public struct FirestoreFields {
         static let excludedDates = "excludedDates"
         static let recurringDueTime = "recurringDueTime"
     }
+    
+    struct Notification {
+        static let id = "id"
+        static let questId = "questId"
+        static let templateId = "templateId"
+        static let title = "title"
+        static let body = "body"
+        static let type = "type"
+        static let category = "category"
+        static let isRead = "isRead"
+        static let createdAt = "createdAt"
+    }
 }

@@ -169,6 +169,9 @@ public protocol QuestServiceProtocol {
     /// 반복 퀘스트 생성
     func createQuestTemplate(_ template: QuestTemplate) async throws
     
+    /// 알림을 위한 퀘스트 생성
+    func createVirtualQuestFromTemplate(notification: NotificationItem) async throws -> Quest
+    
     /// 퀘스트 조회 (병합 로직)
     /// - Parameters:
     ///   - familyId: 가족 ID
@@ -247,4 +250,14 @@ public protocol StatisticsServiceProtocol {
     
     /// 카테고리별 완료 횟수 조회
     func getCategoryCompletionCounts(userId: String) async throws -> [QuestCategory: Int]
+}
+
+// MARK: - 알림 서비스 프로토콜
+
+public protocol NotificationServiceProtocol {
+    /// 알림 가져오기
+    func fetchNotifications(userId: String) async throws -> [NotificationItem]
+    
+    /// 알림 읽음 상태 수정
+    func updateReadStatus(userId: String, notificationId: String) async throws
 }

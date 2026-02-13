@@ -65,10 +65,11 @@ public class MainViewController: UIViewController {
     }
     
     public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
         Task {
             await viewModel.updateTimeZone()
         }
-        super.viewDidAppear(animated)
     }
     
     // MARK: - UI Setup

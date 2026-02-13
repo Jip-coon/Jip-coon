@@ -5,9 +5,9 @@
 //  Created by 심관혁 on 1/27/26.
 //
 
-import UIKit
-import Core
 import Combine
+import Core
+import UIKit
 
 /// 홈 화면 (나의할일 목록)
 public class HomeViewController: UIViewController {
@@ -67,6 +67,16 @@ public class HomeViewController: UIViewController {
         bindViewModel()
     }
     
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
     // MARK: - Binding
     
     private func bindViewModel() {
@@ -107,7 +117,7 @@ public class HomeViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             // 헤더 뷰 (상단 네비게이션 영역)
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 60),
@@ -138,7 +148,7 @@ public class HomeViewController: UIViewController {
         let viewController: UIViewController
         
         switch filter {
-        case .collection:
+        case .myTask:
             viewController = createMyTasksViewController()
         case .urgent:
             viewController = createUrgentQuestViewController()
@@ -247,6 +257,25 @@ public class HomeViewController: UIViewController {
         self.present(alert, animated: true)
     }
     
+    private func showNotificationView() {
+        let notificationViewModel = NotificationViewModel(
+            userService: viewModel.userService,
+            questService: viewModel.questService
+        )
+        let notificationViewController = NotificationViewController(viewModel: notificationViewModel)
+        notificationViewController.title = "알림"
+        
+        navigationController?.pushViewController(notificationViewController, animated: true)
+    }
+    
+    public func forceSwitchToMyTask() {
+        // 1. 뷰모델 데이터 변경
+        viewModel.selectFilter(.myTask)
+        
+        // 2. 필터바 UI 변경 (버튼 테두리 등)
+        filterBar.setFilter(.myTask)
+    }
+    
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
@@ -259,7 +288,7 @@ public class HomeViewController: UIViewController {
 extension HomeViewController: HomeHeaderViewDelegate {
     func didTapCreateFamily() { showFamilyCreationScreen() }
     func didTapFamilyName() { showFamilyInfoPopup() }
-    func didTapNotification() { /* TODO: 알림 화면 이동 */ }
+    func didTapNotification() { showNotificationView() }
 }
 
 extension HomeViewController: HomeFilterBarDelegate {

@@ -17,7 +17,7 @@ public final class HomeViewModel: ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var isParent: Bool = false // 부모 여부
-    @Published var selectedFilter: HomeFilterType = .collection
+    @Published var selectedFilter: HomeFilterType = .myTask
     
     // MARK: - Services
     public let userService: UserServiceProtocol
