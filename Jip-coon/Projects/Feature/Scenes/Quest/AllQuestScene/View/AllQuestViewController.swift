@@ -343,14 +343,14 @@ extension AllQuestViewController: UITableViewDataSource {
             label.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -10),
-            label.topAnchor.constraint(equalTo: container.topAnchor)
+            label.topAnchor.constraint(equalTo: container.topAnchor, constant: 20)
         ])
         
         return container
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        viewModel.selectedSegment == .today ? 0 : 27
+        viewModel.selectedSegment == .today ? 0 : 47
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
