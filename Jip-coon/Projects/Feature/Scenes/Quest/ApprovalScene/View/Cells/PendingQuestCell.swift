@@ -5,14 +5,14 @@
 //  Created by 심관혁 on 12/31/25.
 //
 
-import UIKit
 import Core
 import UI
+import UIKit
 
 /// 승인 대기 중인 퀘스트를 표시하는 커스텀 테이블뷰 셀
 final class PendingQuestCell: UITableViewCell {
     static let identifier = "PendingQuestCell"
-
+    
     // MARK: - UI Components
     
     // MyTasksTableViewCell과 동일한 컨테이너 스타일 적용
@@ -26,7 +26,7 @@ final class PendingQuestCell: UITableViewCell {
         view.layer.shadowOpacity = 0.05
         return view
     }()
-
+    
     // 카테고리 이모지 컨테이너
     private let emojiContainer: UIView = {
         let view = UIView()
@@ -41,7 +41,7 @@ final class PendingQuestCell: UITableViewCell {
         label.textAlignment = .center
         return label
     }()
-
+    
     // 제목
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -50,7 +50,7 @@ final class PendingQuestCell: UITableViewCell {
         label.numberOfLines = 1
         return label
     }()
-
+    
     // 날짜/상태 표시 스택 (MyTasksTableViewCell의 dateStack과 유사)
     private lazy var infoStack: UIStackView = {
         let stack = UIStackView()
@@ -82,7 +82,7 @@ final class PendingQuestCell: UITableViewCell {
         stack.distribution = .fillEqually
         return stack
     }()
-
+    
     private lazy var approveButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("승인", for: .normal)
@@ -93,7 +93,7 @@ final class PendingQuestCell: UITableViewCell {
         button.addTarget(self, action: #selector(approveButtonTapped), for: .touchUpInside)
         return button
     }()
-
+    
     private lazy var rejectButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("거절", for: .normal)
@@ -104,30 +104,30 @@ final class PendingQuestCell: UITableViewCell {
         button.addTarget(self, action: #selector(rejectButtonTapped), for: .touchUpInside)
         return button
     }()
-
+    
     // MARK: - Properties
-
+    
     private var quest: Quest?
     var onApprove: ((Quest) -> Void)?
     var onReject: ((Quest) -> Void)?
-
+    
     // MARK: - Initialization
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Setup
-
+    
     private func setupUI() {
         backgroundColor = .clear
         selectionStyle = .none
-
+        
         contentView.addSubview(containerView)
         containerView.addSubview(emojiContainer)
         emojiContainer.addSubview(emojiLabel)
@@ -137,11 +137,17 @@ final class PendingQuestCell: UITableViewCell {
         
         infoStack.addArrangedSubview(infoIcon)
         infoStack.addArrangedSubview(infoLabel)
-
-        [containerView, emojiContainer, emojiLabel, titleLabel, infoStack, buttonStackView].forEach {
+        
+        [containerView,
+         emojiContainer,
+         emojiLabel,
+         titleLabel,
+         infoStack,
+         buttonStackView
+        ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-
+        
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 4),
@@ -172,7 +178,7 @@ final class PendingQuestCell: UITableViewCell {
         ])
     }
     
-    public override func setSelected(_ selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         if selected {
             UIView.animate(withDuration: 0.1, animations: {
@@ -185,18 +191,18 @@ final class PendingQuestCell: UITableViewCell {
         }
     }
     
-    public override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         super.setHighlighted(highlighted, animated: animated)
         UIView.animate(withDuration: 0.1) {
             self.containerView.transform = highlighted ? CGAffineTransform(scaleX: 0.96, y: 0.96) : .identity
         }
     }
-
+    
     // MARK: - Configuration
-
+    
     func configure(with quest: Quest) {
         self.quest = quest
-
+        
         // 이모지 및 배경색
         emojiLabel.text = quest.category.emoji
         let categoryColor = UIColor.questCategoryColor(for: quest.category.backgroundColor)
@@ -212,14 +218,14 @@ final class PendingQuestCell: UITableViewCell {
             infoLabel.text = "완료된 퀘스트"
         }
     }
-
+    
     // MARK: - Actions
-
+    
     @objc private func approveButtonTapped() {
         guard let quest = quest else { return }
         onApprove?(quest)
     }
-
+    
     @objc private func rejectButtonTapped() {
         guard let quest = quest else { return }
         onReject?(quest)

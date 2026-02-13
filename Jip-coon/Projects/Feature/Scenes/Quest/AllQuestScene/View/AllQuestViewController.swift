@@ -10,7 +10,7 @@ import Core
 import UI
 import UIKit
 
-public class AllQuestViewController: UIViewController {
+class AllQuestViewController: UIViewController {
     private let viewModel: AllQuestViewModel
     private var cancellables: Set<AnyCancellable> = []
     
@@ -43,7 +43,7 @@ public class AllQuestViewController: UIViewController {
     
     // MARK: - init
     
-    public init(viewModel: AllQuestViewModel) {
+    init(viewModel: AllQuestViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -58,7 +58,7 @@ public class AllQuestViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
@@ -69,7 +69,7 @@ public class AllQuestViewController: UIViewController {
         setupFilterButton()
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         Task { [weak self] in
@@ -99,7 +99,8 @@ public class AllQuestViewController: UIViewController {
         NSLayoutConstraint.activate([
             segmentControl.topAnchor
                 .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
-            segmentControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            segmentControl.leadingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             segmentControl.heightAnchor
                 .constraint(equalToConstant: 30),
             
@@ -221,7 +222,11 @@ public class AllQuestViewController: UIViewController {
     private func showDeleteOptionAlert(for quest: Quest, indexPath: IndexPath) {
         // 반복 퀘스트가 아닌 경우 (단일 일반 퀘스트)
         if quest.templateId == nil {
-            let alert = UIAlertController(title: "퀘스트 삭제", message: "이 퀘스트를 삭제하시겠습니까?", preferredStyle: .alert)
+            let alert = UIAlertController(
+                title: "퀘스트 삭제",
+                message: "이 퀘스트를 삭제하시겠습니까?",
+                preferredStyle: .alert
+            )
             alert.addAction(UIAlertAction(title: "취소", style: .cancel))
             alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
                 self?.performDelete(at: indexPath, for: quest, mode: .single)
@@ -231,7 +236,11 @@ public class AllQuestViewController: UIViewController {
         }
         
         // 반복 퀘스트인 경우
-        let actionSheet = UIAlertController(title: "반복 퀘스트 삭제", message: "삭제 방식을 선택해주세요.", preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(
+            title: "반복 퀘스트 삭제",
+            message: "삭제 방식을 선택해주세요.",
+            preferredStyle: .actionSheet
+        )
         
         actionSheet.addAction(UIAlertAction(title: "이 일정만 삭제", style: .default) { [weak self] _ in
             self?.performDelete(at: indexPath, for: quest, mode: .single)
@@ -247,23 +256,26 @@ public class AllQuestViewController: UIViewController {
     
     /// 퀘스트 삭제 권한 없음 알림
     private func showPermissionDeniedAlert() {
-        let alert = UIAlertController(title: "권한 없음", message: "본인의 퀘스트또는 부모님만 삭제할 수 있습니다.", preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: "권한 없음",
+            message: "본인의 퀘스트또는 부모님만 삭제할 수 있습니다.",
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
-    
 }
 
 // MARK: - TableView Delegate
 
 extension AllQuestViewController: UITableViewDelegate {
     
-    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         // Cell ContainerView Height = 75, Padding = 15
         return 90
     }
     
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let quest = viewModel.sectionedQuests[indexPath.section].quests[indexPath.row]
         
         let questDetailViewController = QuestDetailViewController(
@@ -275,7 +287,7 @@ extension AllQuestViewController: UITableViewDelegate {
         navigationController?.pushViewController(questDetailViewController, animated: true)
     }
     
-    public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
             guard let self = self else { return }
@@ -298,22 +310,21 @@ extension AllQuestViewController: UITableViewDelegate {
         
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
-    
 }
 
 // MARK: - TableView DataSource
 
 extension AllQuestViewController: UITableViewDataSource {
     
-    public func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return viewModel.sectionedQuests.count
     }
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.sectionedQuests[section].quests.count
     }
     
-    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
         if viewModel.selectedSegment == .today { return nil }
         
@@ -338,11 +349,11 @@ extension AllQuestViewController: UITableViewDataSource {
         return container
     }
     
-    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         viewModel.selectedSegment == .today ? 0 : 27
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: AllQuestTableViewCell.identifier) as? AllQuestTableViewCell
         else {
@@ -357,5 +368,4 @@ extension AllQuestViewController: UITableViewDataSource {
         
         return cell
     }
-    
 }

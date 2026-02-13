@@ -5,8 +5,8 @@
 //  Created by 예슬 on 9/12/25.
 //
 
-import UIKit
 import UI
+import UIKit
 
 final class DatePickerViewController: UIViewController {
     var onDidTapDone: ((Date) -> Void)?
@@ -41,12 +41,10 @@ final class DatePickerViewController: UIViewController {
         view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([
-            datePicker.topAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            datePicker.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             datePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             datePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            datePicker.bottomAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            datePicker.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     

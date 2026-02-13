@@ -5,9 +5,9 @@
 //  Created by 예슬 on 9/9/25.
 //
 
-import UIKit
 import Core
 import UI
+import UIKit
 
 final class CategoryCarouselViewCell: UICollectionViewCell {
     static let identifier = CategoryCarouselViewCell.self.description()
@@ -57,16 +57,13 @@ final class CategoryCarouselViewCell: UICollectionViewCell {
         
         NSLayoutConstraint.activate([
             categoryIcon.topAnchor.constraint(equalTo: contentView.topAnchor),
-            categoryIcon.centerXAnchor
-                .constraint(equalTo: contentView.centerXAnchor),
+            categoryIcon.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             categoryIconWidthConstraint,
             categoryIconHeightConstraint,
             
             categoryLabelTopConstraint,
-            categoryLabel.centerXAnchor
-                .constraint(equalTo: contentView.centerXAnchor),
-            categoryLabel.bottomAnchor
-                .constraint(equalTo: contentView.bottomAnchor)
+            categoryLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            categoryLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
     }
     

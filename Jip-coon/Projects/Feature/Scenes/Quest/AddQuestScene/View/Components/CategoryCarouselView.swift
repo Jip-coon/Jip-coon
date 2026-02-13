@@ -5,8 +5,8 @@
 //  Created by 예슬 on 9/9/25.
 //
 
-import UIKit
 import Core
+import UIKit
 
 final class CategoryCarouselView: UIView {
     private var previousCellIndex = 0
@@ -49,6 +49,10 @@ final class CategoryCarouselView: UIView {
         setupView()
     }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -82,10 +86,6 @@ final class CategoryCarouselView: UIView {
                 }
             }
         }
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
     
     private func setupView() {
@@ -130,13 +130,9 @@ final class CategoryCarouselView: UIView {
         let targetOffset = cellCenter - halfWidth
         
         let maxOffset = collectionView.contentSize.width + collectionView.contentInset.right - collectionView.bounds.width
-        let finalOffset = max(
-            min(targetOffset, maxOffset),
-            -collectionView.contentInset.left
-        )
+        let finalOffset = max(min(targetOffset, maxOffset), -collectionView.contentInset.left)
         
-        collectionView
-            .setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
+        collectionView.setContentOffset(CGPoint(x: finalOffset, y: 0), animated: animated)
     }
     
     private func updateFocusedCell() {
@@ -169,6 +165,8 @@ final class CategoryCarouselView: UIView {
     }
 }
 
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegate
+
 extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return QuestCategory.allCases.count
@@ -186,10 +184,7 @@ extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDele
         return cell
     }
     
-    func collectionView(
-        _ collectionView: UICollectionView,
-        didSelectItemAt indexPath: IndexPath
-    ) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         scrollToCenterOffset(for: indexPath.item, animated: true)
         
         if focusedIndex != indexPath.item {
@@ -200,6 +195,8 @@ extension CategoryCarouselView: UICollectionViewDataSource, UICollectionViewDele
     }
 }
 
+// MARK: - 내용UICollectionViewDelegateFlowLayout
+
 extension CategoryCarouselView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if indexPath.item == focusedIndex {
@@ -209,6 +206,8 @@ extension CategoryCarouselView: UICollectionViewDelegateFlowLayout {
         }
     }
 }
+
+// MARK: - UIScrollViewDelegate
 
 extension CategoryCarouselView: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -242,7 +241,8 @@ extension CategoryCarouselView: UIScrollViewDelegate {
     // 스크롤 종료 시, 포커스된 셀 중앙정렬
     func scrollViewWillEndDragging(_ scrollView: UIScrollView,
                                    withVelocity velocity: CGPoint,
-                                   targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+                                   targetContentOffset: UnsafeMutablePointer<CGPoint>
+    ) {
         let proposedX = targetContentOffset.pointee.x
         let boundsWidth = collectionView.bounds.width
         let proposedCenterX = proposedX + boundsWidth / 2
@@ -259,9 +259,7 @@ extension CategoryCarouselView: UIScrollViewDelegate {
         ),
               !attributesArray.isEmpty else { return }
         
-        let nearest = attributesArray.min {
- a,
-            b in
+        let nearest = attributesArray.min {a, b in
             abs(a.center.x - proposedCenterX) < abs(
                 b.center.x - proposedCenterX
             )
@@ -275,10 +273,7 @@ extension CategoryCarouselView: UIScrollViewDelegate {
         targetContentOffset.pointee = CGPoint(x: newX, y: 0)
     }
     
-    func scrollViewDidEndDragging(
-        _ scrollView: UIScrollView,
-        willDecelerate decelerate: Bool
-    ) {
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
             scrollToCenterOffset(for: focusedIndex, animated: true)
         }

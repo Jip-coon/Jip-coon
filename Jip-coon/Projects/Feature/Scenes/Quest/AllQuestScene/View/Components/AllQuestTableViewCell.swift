@@ -116,6 +116,13 @@ final class AllQuestTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        UIView.animate(withDuration: 0.1) {
+            self.containerView.transform = highlighted ? CGAffineTransform(scaleX: 0.96, y: 0.96) : .identity
+        }
+    }
+    
     // MARK: - Method
     
     private func setupUI() {
@@ -124,7 +131,11 @@ final class AllQuestTableViewCell: UITableViewCell {
         
         contentView.addSubview(containerView)
         
-        [emojiContainer, titleLabel, infoStack, statusContainer].forEach {
+        [emojiContainer,
+         titleLabel,
+         infoStack,
+         statusContainer
+        ].forEach {
             containerView.addSubview($0)
         }
         
@@ -138,7 +149,14 @@ final class AllQuestTableViewCell: UITableViewCell {
         infoStack.addArrangedSubview(separatorLabel)
         infoStack.addArrangedSubview(assigneeLabel)
         
-        [containerView, emojiContainer, emojiLabel, titleLabel, infoStack, statusContainer, statusLabel].forEach {
+        [containerView,
+         emojiContainer,
+         emojiLabel,
+         titleLabel,
+         infoStack,
+         statusContainer,
+         statusLabel
+        ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
@@ -226,12 +244,5 @@ final class AllQuestTableViewCell: UITableViewCell {
         
         statusContainer.backgroundColor = statusColor.withAlphaComponent(0.1)
         statusLabel.textColor = statusColor
-    }
-    
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        super.setHighlighted(highlighted, animated: animated)
-        UIView.animate(withDuration: 0.1) {
-            self.containerView.transform = highlighted ? CGAffineTransform(scaleX: 0.96, y: 0.96) : .identity
-        }
     }
 }

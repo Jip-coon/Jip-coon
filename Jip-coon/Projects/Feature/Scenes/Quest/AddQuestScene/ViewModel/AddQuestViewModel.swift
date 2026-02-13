@@ -5,11 +5,11 @@
 //  Created by 예슬 on 9/12/25.
 //
 
-import Foundation
 import Combine
 import Core
+import Foundation
 
-final class AddQuestViewModel: ObservableObject {
+final class AddQuestViewModel {
     private let userService: UserServiceProtocol
     private let familyService: FamilyServiceProtocol
     private let questService: QuestServiceProtocol
@@ -36,8 +36,10 @@ final class AddQuestViewModel: ObservableObject {
     var selectedTime: Date = Date()  // 선택된 시간
     var questDueDate: Date? // 최종 마감 시간 (선택된 날짜 + 시간)
     var category: QuestCategory = .cleaning
+    
     @Published var familyMembers: [User] = []   // 가족 구성원
     @Published var selectedWorkerName: String = "선택해 주세요"   // 선택된 담당자
+    
     var starCount: Int = 10
     private(set) var recurringType: RecurringType = .none    // 반복 타입
     var selectedRepeatDays: Set<Day> = []    // 선택된 반복 요일
@@ -166,7 +168,6 @@ final class AddQuestViewModel: ObservableObject {
             _ = try await questService.createQuest(quest)
         }
     }
-    
 }
 
 // MARK: - Error Types

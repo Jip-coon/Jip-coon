@@ -5,8 +5,8 @@
 //  Created by 예슬 on 9/13/25.
 //
 
-import UIKit
 import UI
+import UIKit
 
 enum Day: String, CaseIterable {
     case mon = "월"
@@ -49,9 +49,12 @@ final class DayButton: UIButton {
         config.baseForegroundColor = .label
         config.background.backgroundColor = .textFieldStroke
         config.cornerStyle = .large
-        config.attributedTitle = AttributedString(day.rawValue, attributes: AttributeContainer([
-            .font: UIFont.pretendard(ofSize: 16, weight: .regular)
-        ]))
+        config.attributedTitle = AttributedString(
+            day.rawValue,
+            attributes: AttributeContainer([
+                .font: UIFont.pretendard(ofSize: 16, weight: .regular)
+            ])
+        )
         
         // 디바이스에 맞게 inset 변경
         let isSmallDevice = UIScreen.main.bounds.width <= 375 // iPhone SE2, 8, 13 mini width
