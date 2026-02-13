@@ -30,9 +30,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         return db.collection(FirestoreCollections.quests)
     }
     
-    private var submissionsCollection: CollectionReference {
-        return db.collection(FirestoreCollections.questSubmissions)
-    }
+
     
     private var templatesCollection: CollectionReference {
         return db.collection(FirestoreCollections.questTemplates)
@@ -349,38 +347,10 @@ public final class FirebaseQuestService: QuestServiceProtocol {
     
     // MARK: - Submission & Review Workflow
     
-    /// 퀘스트 완료 제출
-    public func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws {
-        do {
-            // 1. 퀘스트 상태를 completed로 변경
-            try await updateQuestStatus(quest: quest, status: .completed)
-            
-            // 2. 제출 데이터 생성 (나중에 QuestSubmissionService로 분리 가능)
-            try submissionsCollection
-                .document(submission.id)
-                .setData(from: submission)
-        } catch {
-            throw FirebaseQuestServiceError
-                .submissionFailed(error.localizedDescription)
-        }
-    }
+    // MARK: - Review Workflow
     
-    /// 퀘스트 완료를 승인하거나 거절하는 메소드
-    /// - Parameters:
-    ///   - questId: 검토할 퀘스트 ID
-    ///   - isApproved: 승인 여부 (true: 승인, false: 거절)
-    ///   - reviewComment: 검토 의견 (거절 시 선택사항)
-    ///   - reviewerId: 검토자(부모/관리자) ID
-    ///   - userService: 포인트 지급을 위한 사용자 서비스
-    /// - Note: 승인 시 해당 퀘스트의 포인트를 담당자에게 자동 지급
-    ///         부모의 승인을 통한 포인트 시스템의 핵심 기능
-    public func reviewQuest(
-        questId: String,
-        isApproved: Bool,
-        reviewComment: String?,
-        reviewerId: String,
-        userService: UserServiceProtocol
-    ) async throws {
+    /// 퀘스트 승인/거절
+    public func reviewQuest(questId: String, isApproved: Bool, reviewerId: String, userService: UserServiceProtocol) async throws {
         do {
             // 1. 퀘스트 정보 조회
             guard let quest = try await getQuest(by: questId) else {
@@ -398,27 +368,6 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                         userId: quest.assignedTo ?? "",
                         points: quest.points
                     )
-            }
-            
-            // 2. 제출 데이터 업데이트 (해당 제출이 있다면)
-            let submissionQuery = submissionsCollection
-                .whereField("questId", isEqualTo: questId)
-                .whereField("isApproved", isEqualTo: NSNull()) // 검토되지 않은 제출만
-            
-            let snapshot = try await submissionQuery.getDocuments()
-            
-            if let submissionDoc = snapshot.documents.first {
-                var updateData: [String: Any] = [
-                    "isApproved": isApproved,
-                    "reviewedBy": reviewerId,
-                    "reviewedAt": Timestamp(date: Date())
-                ]
-                
-                if let reviewComment = reviewComment {
-                    updateData["reviewComment"] = reviewComment
-                }
-                
-                try await submissionDoc.reference.updateData(updateData)
             }
         } catch {
             throw FirebaseQuestServiceError

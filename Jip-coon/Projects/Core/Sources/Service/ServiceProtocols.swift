@@ -121,12 +121,9 @@ public protocol QuestServiceProtocol {
     
     /// 퀘스트 시작
     func startQuest(quest: Quest, userId: String) async throws
-    
-    /// 퀘스트 완료 제출
-    func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws
-    
-    /// 퀘스트 승인/거절
-    func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws
+
+    /// 퀘스트의 완료 여부를 검토(승인/거절)합니다.
+    func reviewQuest(questId: String, isApproved: Bool, reviewerId: String, userService: UserServiceProtocol) async throws
     
     /// 반복 퀘스트 생성
     func createQuestTemplate(_ template: QuestTemplate) async throws

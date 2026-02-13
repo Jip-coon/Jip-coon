@@ -78,15 +78,18 @@ final class ApprovalViewModel: ObservableObject {
             try await questService.reviewQuest(
                 questId: quest.id,
                 isApproved: true,
-                reviewComment: nil,
                 reviewerId: (try await userService.getCurrentUser())?.id ?? "",
                 userService: userService
             )
-
+            
             // 로컬에서 제거
-            pendingQuests.removeAll { $0.id == quest.id }
+            await MainActor.run {
+                self.pendingQuests.removeAll { $0.id == quest.id }
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+            }
         }
     }
 
@@ -97,20 +100,28 @@ final class ApprovalViewModel: ObservableObject {
     /// - Note: questService의 reviewQuest를 호출하여 거절 처리
     ///         선택적으로 거절 사유를 저장할 수 있음
     ///         거절 완료 후 로컬 목록에서 제거하여 UI 즉시 업데이트
-    func rejectQuest(_ quest: Quest, reason: String?) async {
+    /// 퀘스트를 거절하는 메소드
+    /// - Parameters:
+    ///   - quest: 거절할 퀘스트 객체
+    /// - Note: questService의 reviewQuest를 호출하여 거절 처리
+    ///         거절 완료 후 로컬 목록에서 제거하여 UI 즉시 업데이트
+    func rejectQuest(_ quest: Quest) async {
         do {
             try await questService.reviewQuest(
                 questId: quest.id,
                 isApproved: false,
-                reviewComment: reason,
                 reviewerId: (try await userService.getCurrentUser())?.id ?? "",
                 userService: userService
             )
-
+            
             // 로컬에서 제거
-            pendingQuests.removeAll { $0.id == quest.id }
+            await MainActor.run {
+                self.pendingQuests.removeAll { $0.id == quest.id }
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+            }
         }
     }
 }
