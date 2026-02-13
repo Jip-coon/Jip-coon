@@ -287,19 +287,12 @@ extension ApprovalViewController {
             preferredStyle: .alert
         )
 
-        alert.addTextField { textField in
-            textField.placeholder = "거절 사유 (선택사항)"
-        }
-
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert
-            .addAction(
-                UIAlertAction(title: "거절", style: .destructive) { [weak self] _ in
-                    let reason = alert.textFields?.first?.text
-                    Task {
-                        await self?.viewModel.rejectQuest(quest, reason: reason)
-                    }
-                })
+        alert.addAction(UIAlertAction(title: "거절", style: .destructive) { [weak self] _ in
+            Task {
+                await self?.viewModel.rejectQuest(quest)
+            }
+        })
 
         present(alert, animated: true)
     }
