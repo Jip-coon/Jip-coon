@@ -41,7 +41,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             authService: authService,
             userService: userService
         )
-        let appleLoginViewModel = AppleLoginViewModel(userService: userService)
+        let appleLoginViewModel = AppleLoginViewModel(
+            authService: authService,
+            userService: userService
+        )
         let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
         
         let loginViewController = LoginViewController(
@@ -151,7 +154,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             authService: authService,
             userService: userService
         )
-        let appleLoginViewModel = AppleLoginViewModel(userService: userService)
+        let appleLoginViewModel = AppleLoginViewModel(
+            authService: authService,
+            userService: userService
+        )
         let googleLoginViewModel = GoogleLoginViewModel(userService: userService)
         
         DispatchQueue.main.async { [weak self] in

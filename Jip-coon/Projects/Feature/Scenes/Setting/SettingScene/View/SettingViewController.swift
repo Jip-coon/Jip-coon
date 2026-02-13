@@ -191,7 +191,8 @@ public final class SettingViewController: UIViewController {
         present(signoutAlert, animated: true, completion: nil)
     }
     
-    private func handleDeleteAccount() {
+    /// 이메일 로그인 알림창
+    private func showPasswordDeleteAlert() {
         let deleteAccountAlert = UIAlertController(
             title: "회원탈퇴",
             message: "회원탈퇴를 위해 비밀번호를 다시 입력해주세요.",
@@ -213,8 +214,7 @@ public final class SettingViewController: UIViewController {
             
             Task {
                 do {
-                    try await self.viewModel
-                        .performDeleteAccount(password: password)
+                    try await self.viewModel.performDeleteAccount(password: password)
                     
                     // 회원탈퇴 성공 Alert 표시
                     let successAlert = UIAlertController(
@@ -250,6 +250,65 @@ public final class SettingViewController: UIViewController {
         deleteAccountAlert.addAction(okButton)
         deleteAccountAlert.addAction(cancelButton)
         present(deleteAccountAlert, animated: true, completion: nil)
+    }
+    
+    // 소셜로그인 알림창
+    private func showSocialDeleteAlert() {
+        let alert = UIAlertController(
+            title: "회원탈퇴",
+            message: "정말로 회원탈퇴 하시겠습니까?\n재인증이 진행됩니다.",
+            preferredStyle: .alert
+        )
+
+        let ok = UIAlertAction(title: "회원탈퇴", style: .destructive) { [weak self] _ in
+            guard let self else { return }
+
+            Task {
+                do {
+                    try await self.viewModel.performDeleteAccount(password: nil)
+                    
+                    // 회원탈퇴 성공 Alert 표시
+                    let successAlert = UIAlertController(
+                        title: "회원탈퇴 완료",
+                        message: "회원탈퇴가 성공적으로 처리되었습니다.",
+                        preferredStyle: .alert
+                    )
+                    let confirmButton = UIAlertAction(
+                        title: "확인",
+                        style: .default
+                    ) { _ in
+                        // 확인 버튼을 누르면 로그인 화면으로 이동
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("LogoutSuccess"),
+                            object: nil
+                        )
+                    }
+                    successAlert.addAction(confirmButton)
+                    self.present(successAlert, animated: true, completion: nil)
+                } catch {
+                    print("회원 탈퇴 실패: \(error.localizedDescription)")
+                    self.showErrorAlert(message: "회원탈퇴에 실패했습니다. 다시 시도해주세요.")
+                }
+            }
+        }
+
+        alert.addAction(ok)
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        present(alert, animated: true)
+    }
+    
+    /// 회원탈퇴
+    private func handleDeleteAccount() {
+        guard let providerID = viewModel.currentProviderID else {
+            showErrorAlert(message: "로그인 정보를 확인할 수 없습니다.")
+            return
+        }
+
+        if providerID == "password" {
+            showPasswordDeleteAlert()
+        } else {
+            showSocialDeleteAlert()
+        }
     }
     
     private func handleManageFamily() {

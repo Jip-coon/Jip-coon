@@ -22,7 +22,8 @@ let project = Project(
                 .external(name: "FirebaseFirestore"),
                 .external(name: "FirebaseAuth"),
                 .external(name: "FirebaseCore"),
-                .external(name: "FirebaseMessaging")
+                .external(name: "FirebaseMessaging"),
+                .external(name: "GoogleSignIn"),
             ],
             settings: .settings(
                 base: [

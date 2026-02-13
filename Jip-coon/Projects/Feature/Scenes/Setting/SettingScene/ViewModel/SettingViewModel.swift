@@ -16,6 +16,9 @@ final class SettingViewModel {
     private let familyService: FirebaseFamilyService
     
     private(set) var currentUser: Core.User?
+    var currentProviderID: String? {
+        authService.currentUser?.providerData.first?.providerID
+    }
 
     var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -63,7 +66,6 @@ final class SettingViewModel {
     func performLogout() async throws {
         try authService.signOut()
     }
-
     
     // 가족 탈퇴 수행
     func performLeaveFamily() async throws {
@@ -89,7 +91,7 @@ final class SettingViewModel {
     }
     
     // 회원탈퇴 수행 (비밀번호 재인증 포함)
-    func performDeleteAccount(password: String) async throws {
+    func performDeleteAccount(password: String?) async throws {
         // 현재 사용자 ID 확인
         guard let userId = authService.currentUser?.uid else {
             throw NSError(
@@ -99,11 +101,11 @@ final class SettingViewModel {
             )
         }
 
-        // 1. Firestore에서 사용자 관련 데이터 삭제
-        try await deleteUserData(userId: userId)
-
-        // 2. Firebase Auth에서 계정 삭제
+        // 1. Firebase Auth에서 계정 삭제
         try await authService.deleteAccountWithReauth(password: password)
+        
+        // 2. Firestore에서 사용자 관련 데이터 삭제
+        try await deleteUserData(userId: userId)
     }
 
     // 사용자 데이터 삭제

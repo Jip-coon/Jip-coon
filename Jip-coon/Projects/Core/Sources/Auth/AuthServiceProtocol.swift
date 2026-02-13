@@ -22,7 +22,7 @@ public protocol AuthServiceProtocol {
     func deleteAccount() async throws
     
     /// 회원탈퇴(재인증 성공 후 계정 삭제)
-    func deleteAccountWithReauth(password: String) async throws
+    func deleteAccountWithReauth(password: String?) async throws
     
     /// 비밀번호 변경
     func updatePassword(_ newPassword: String) async throws
@@ -38,4 +38,9 @@ public protocol AuthServiceProtocol {
     
     /// 현재 유저
     var currentUser: FirebaseAuth.User? { get }
+    
+    // MARK: - 소셜 로그인
+    
+    /// 애플 로그인
+    func signInWithApple() async throws
 }
