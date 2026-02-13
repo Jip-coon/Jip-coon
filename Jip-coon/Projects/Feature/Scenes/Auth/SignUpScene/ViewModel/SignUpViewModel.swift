@@ -63,8 +63,6 @@ final class SignUpViewModel {
             
             try await user.sendEmailVerification()
             try await userService.createTempUser(uid: user.uid, email: email)
-            print("✅ 인증 메일 발송 성공")
-            
             return true
         } catch {
             self.error = AuthError.map(from: error)
@@ -116,15 +114,12 @@ final class SignUpViewModel {
             // Firestore에 사용자 정보 저장
             try await userService.createUser(user)
             try await userService.deleteTempUser(uid: currentUser.uid)
-            
-            print("회원가입 및 Firestore 저장 성공")
         } catch {
             self.error = AuthError.map(from: error)
             
             // 회원가입 실패 시 Firebase Auth 계정 삭제
             do {
                 try await authService.deleteAccount()
-                print("실패한 계정 정리 완료")
             } catch {
                 print("실패한 계정 정리 실패: \(error.localizedDescription)")
             }

@@ -28,7 +28,7 @@ public extension UIColor {
         in: .module,
         compatibleWith: nil
     )!
-
+    
     /// Gray
     static let placeholderText = UIColor(
         named: "placeholderText",
@@ -55,7 +55,7 @@ public extension UIColor {
         in: .module,
         compatibleWith: nil
     )!
-
+    
     /// Categories
     static let green1 = UIColor(
         named: "green1",
@@ -88,7 +88,7 @@ public extension UIColor {
         in: .module,
         compatibleWith: nil
     )!
-
+    
     // 나머지
     static let backgroundWhite = UIColor(
         named: "backgroundWhite",
@@ -100,39 +100,23 @@ public extension UIColor {
         in: .module,
         compatibleWith: nil
     )!
-
-    static let headerBeige = UIColor(
-        named: "headerBeige",
-        in: .module,
-        compatibleWith: nil
-    )!
-    static let headerText = UIColor(
-        named: "headerText",
-        in: .module,
-        compatibleWith: nil
-    )!
-    static let headerNotiBack = UIColor(
-        named: "headerNotiBack",
-        in: .module,
-        compatibleWith: nil
-    )!
-
+    
     static func questCategoryColor(for colorName: String) -> UIColor {
         switch colorName {
-        case "blue1": return .blue1
-        case "blue2": return .blue2
-        case "red1": return .red1
-        case "yellow1": return .yellow1
-        case "brown1": return .brown1
-        case "orange3": return .orange3
-        case "purple1": return .purple1
-        case "green1": return .green1
-        case "textFieldStroke": return .textFieldStroke
-        case "mainOrange": return .mainOrange
-        case "secondaryOrange": return .secondaryOrange
-        case "textRed": return .textRed
-        case "textGray": return .textGray
-        default: return .systemGray
+            case "blue1": return .blue1
+            case "blue2": return .blue2
+            case "red1": return .red1
+            case "yellow1": return .yellow1
+            case "brown1": return .brown1
+            case "orange3": return .orange3
+            case "purple1": return .purple1
+            case "green1": return .green1
+            case "textFieldStroke": return .textFieldStroke
+            case "mainOrange": return .mainOrange
+            case "secondaryOrange": return .secondaryOrange
+            case "textRed": return .textRed
+            case "textGray": return .textGray
+            default: return .systemGray
         }
     }
 }

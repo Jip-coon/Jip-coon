@@ -494,7 +494,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
             case .notifications:
                 handleNotificationSetting()
             default:
-                print("\(item.title) 선택됨")
+                break
         }
     }
 }

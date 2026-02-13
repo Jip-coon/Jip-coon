@@ -130,7 +130,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Task {
             do {
                 try await self.userService.syncCurrentUserDocument()
-                print("로그인 후 사용자 정보 동기화 완료")
             } catch {
                 print("로그인 후 사용자 정보 동기화 실패: \(error.localizedDescription)")
             }

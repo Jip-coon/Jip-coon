@@ -179,8 +179,6 @@ public final class AuthService: NSObject, AuthServiceProtocol {
                 ]) { error in
                     if let error = error {
                         print("토큰 DB 저장 실패: \(error.localizedDescription)")
-                    } else {
-                        print("FCM 토큰 동기화 성공")
                     }
                 }
             }

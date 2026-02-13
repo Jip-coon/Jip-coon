@@ -95,8 +95,6 @@ extension AppDelegate: MessagingDelegate {
         ]) { error in
             if let error = error {
                 print("FCM 토큰 업데이트 실패: \(error.localizedDescription)")
-            } else {
-                print("FCM 토큰이 성공적으로 Firestore에 저장되었습니다.")
             }
         }
     }

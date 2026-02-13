@@ -133,13 +133,6 @@ final class NotificationViewController: UIViewController {
                 if let homeVC = navigationController?.topViewController as? HomeViewController {
                     homeVC.didSelectFilter(.myTask)
                     homeVC.forceSwitchToMyTask()
-                    print("home")
-                } else if let mainVC = navigationController?.topViewController as? MainViewController {
-                    if let homeVC = mainVC.children.first(where: { $0 is HomeViewController }) as? HomeViewController {
-                        homeVC.didSelectFilter(.myTask)
-                        homeVC.forceSwitchToMyTask()
-                        print("main")
-                    }
                 }
         }
     }
