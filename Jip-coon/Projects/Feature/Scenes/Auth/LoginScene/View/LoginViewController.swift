@@ -238,12 +238,11 @@ public final class LoginViewController: UIViewController {
             .store(in: &cancellables)
         
         // 에러 메시지 표시
-        viewModel.$errorMessage
+        viewModel.$error
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] errorMessage in
-                if let error = errorMessage {
-                    self?.showErrorAlert(message: error)
-                }
+            .sink { [weak self] error in
+                guard let error else { return }
+                self?.showErrorAlert(message: error.localizedDescription)
             }
             .store(in: &cancellables)
         

@@ -21,7 +21,7 @@ final class SignUpViewModel: ObservableObject {
     @Published var isPasswordValid: Bool = true
     @Published var isSignUpEnabled: Bool = false
     @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
+    @Published var error: Error?
     
     private let authService: AuthService
     private let userService: FirebaseUserService
@@ -66,7 +66,7 @@ final class SignUpViewModel: ObservableObject {
             
             return true
         } catch {
-            errorMessage = authService.handleError(error)
+            self.error = AuthError.map(from: error)
             return false
         }
     }
@@ -87,7 +87,7 @@ final class SignUpViewModel: ObservableObject {
     
     func performSignUp() async {
         isLoading = true
-        errorMessage = nil
+        error = nil
         
         defer { isLoading = false }
         
@@ -119,7 +119,7 @@ final class SignUpViewModel: ObservableObject {
             
             print("회원가입 및 Firestore 저장 성공")
         } catch {
-            errorMessage = authService.handleError(error)
+            self.error = AuthError.map(from: error)
             
             // 회원가입 실패 시 Firebase Auth 계정 삭제
             do {

@@ -159,97 +159,97 @@ public final class SignUpViewController: UIViewController {
         }
         
         NSLayoutConstraint.activate(
-[
-            signUpLabel.topAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.topAnchor,
-                    constant: 38
-                ),
-            signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            emailEnterLabel.topAnchor
-                .constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
-            emailEnterLabel.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            
-            emailTextField.topAnchor
-                .constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
-            emailTextField.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            emailTextField.heightAnchor.constraint(equalToConstant: 56),
-  
-            emailVerificationButton.centerYAnchor.constraint(equalTo: emailTextField.centerYAnchor),
-            emailVerificationButton.leadingAnchor.constraint(equalTo: emailTextField.trailingAnchor, constant: 15),
-            emailVerificationButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            emailVerificationButton.heightAnchor.constraint(equalToConstant: 56),
-            
-            passwordEnterLabel.topAnchor
-                .constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
-            passwordEnterLabel.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            
-            passwordTextField.topAnchor
-                .constraint(
-                    equalTo: passwordEnterLabel.bottomAnchor,
-                    constant: 4
-                ),
-            passwordTextField.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            passwordTextField.trailingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                    constant: -20
-                ),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 56),
-            
-            emailInvalidLabel.topAnchor
-                .constraint(equalTo: emailTextField.bottomAnchor, constant: 4),
-            emailInvalidLabel.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            
-            passwordInvalidLabel.topAnchor
-                .constraint(
-                    equalTo: passwordTextField.bottomAnchor,
-                    constant: 4
-                ),
-            passwordInvalidLabel.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            
-            signUpButton.topAnchor
-                .constraint(
-                    equalTo: passwordTextField.bottomAnchor,
-                    constant: 75
-                ),
-            signUpButton.leadingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                    constant: 20
-                ),
-            signUpButton.trailingAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                    constant: -20
-                ),
-            signUpButton.heightAnchor.constraint(equalToConstant: 56)
-]
+            [
+                signUpLabel.topAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.topAnchor,
+                        constant: 38
+                    ),
+                signUpLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                
+                emailEnterLabel.topAnchor
+                    .constraint(equalTo: signUpLabel.bottomAnchor, constant: 62),
+                emailEnterLabel.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                
+                emailTextField.topAnchor
+                    .constraint(equalTo: emailEnterLabel.bottomAnchor, constant: 4),
+                emailTextField.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                emailTextField.heightAnchor.constraint(equalToConstant: 56),
+                
+                emailVerificationButton.centerYAnchor.constraint(equalTo: emailTextField.centerYAnchor),
+                emailVerificationButton.leadingAnchor.constraint(equalTo: emailTextField.trailingAnchor, constant: 15),
+                emailVerificationButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+                emailVerificationButton.heightAnchor.constraint(equalToConstant: 56),
+                
+                passwordEnterLabel.topAnchor
+                    .constraint(equalTo: emailTextField.bottomAnchor, constant: 41),
+                passwordEnterLabel.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                
+                passwordTextField.topAnchor
+                    .constraint(
+                        equalTo: passwordEnterLabel.bottomAnchor,
+                        constant: 4
+                    ),
+                passwordTextField.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                passwordTextField.trailingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                        constant: -20
+                    ),
+                passwordTextField.heightAnchor.constraint(equalToConstant: 56),
+                
+                emailInvalidLabel.topAnchor
+                    .constraint(equalTo: emailTextField.bottomAnchor, constant: 4),
+                emailInvalidLabel.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                
+                passwordInvalidLabel.topAnchor
+                    .constraint(
+                        equalTo: passwordTextField.bottomAnchor,
+                        constant: 4
+                    ),
+                passwordInvalidLabel.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                
+                signUpButton.topAnchor
+                    .constraint(
+                        equalTo: passwordTextField.bottomAnchor,
+                        constant: 75
+                    ),
+                signUpButton.leadingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                        constant: 20
+                    ),
+                signUpButton.trailingAnchor
+                    .constraint(
+                        equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                        constant: -20
+                    ),
+                signUpButton.heightAnchor.constraint(equalToConstant: 56)
+            ]
         )
     }
     
@@ -302,13 +302,11 @@ public final class SignUpViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        viewModel.$errorMessage
+        viewModel.$error
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] errorMessage in
-                if let errorMessage = errorMessage {
-                    self?.showAlert(title: "회원가입 실패", message: errorMessage)
-                    print("회원가입 에러: \(errorMessage)")
-                }
+            .sink { [weak self] error in
+                guard let error else { return }
+                self?.showAlert(title: "회원가입 실패", message: error.localizedDescription)
             }
             .store(in: &cancellables)
     }
@@ -332,11 +330,11 @@ public final class SignUpViewController: UIViewController {
                 action: #selector(signUpTapped),
                 for: .touchUpInside
             )
-      emailVerificationButton
+        emailVerificationButton
             .addTarget(
-              self, 
-              action: #selector(emailVerificationButtonTapped)
-              , for: .touchUpInside
+                self,
+                action: #selector(emailVerificationButtonTapped)
+                , for: .touchUpInside
             )
     }
     

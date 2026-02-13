@@ -8,6 +8,7 @@
 import AuthenticationServices
 import CryptoKit
 import FirebaseAuth
+import FirebaseCore
 import FirebaseFirestore
 import FirebaseMessaging
 import Foundation
@@ -59,8 +60,7 @@ public final class AuthService: NSObject, AuthServiceProtocol {
     
     /// 회원탈퇴(재인증 성공 후 계정 삭제)
     public func deleteAccountWithReauth(password: String?) async throws {
-        guard let user = Auth.auth().currentUser,
-              let email = user.email else {
+        guard let user = Auth.auth().currentUser else {
             throw NSError(
                 domain: "AuthService",
                 code: -1,
@@ -81,6 +81,9 @@ public final class AuthService: NSObject, AuthServiceProtocol {
                 currentFlow = .reauthenticate
                 try await reauthenticateWithApple()
                 
+            case "google.com":
+                try await reauthenticateWithGoogle()
+                
             default:
                 throw AuthError.unsupportedProvider
                 
@@ -100,6 +103,44 @@ public final class AuthService: NSObject, AuthServiceProtocol {
         let credential = EmailAuthProvider.credential(
             withEmail: email,
             password: password
+        )
+        
+        try await user.reauthenticate(with: credential)
+    }
+    
+    /// 구글로 로그인시 재인증
+    @MainActor
+    func reauthenticateWithGoogle() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.notLoggedIn
+        }
+        
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            throw AuthError.invalidState
+        }
+        
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        guard let rootVC = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow })?.rootViewController
+        else {
+            throw AuthError.invalidState
+        }
+        
+        let signInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+        
+        guard let idToken = signInResult.user.idToken?.tokenString else {
+            throw AuthError.invalidCredential
+        }
+        
+        let accessToken = signInResult.user.accessToken.tokenString
+        
+        let credential = GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: accessToken
         )
         
         try await user.reauthenticate(with: credential)
@@ -143,36 +184,6 @@ public final class AuthService: NSObject, AuthServiceProtocol {
                     }
                 }
             }
-        }
-    }
-    
-    /// Firebase Auth 에러 처리
-    public func handleError(_ error: Error) -> String {
-        let nsError = error as NSError
-        
-        // Firebase Auth 에러인지 확인
-        guard nsError.domain == "FIRAuthErrorDomain" else {
-            return error.localizedDescription
-        }
-        
-        // AuthErrorCode로 변환
-        guard let errorCode = AuthErrorCode(rawValue: nsError.code) else {
-            return error.localizedDescription
-        }
-        
-        switch errorCode {
-            case .emailAlreadyInUse:
-                return "이미 가입된 이메일 계정입니다. \n로그인 또는 다른 이메일을 사용해주세요."
-            case .invalidEmail:
-                return "유효하지 않은 이메일 형식입니다."
-            case .wrongPassword:
-                return "비밀번호가 일치하지 않습니다."
-            case .weakPassword:
-                return "비밀번호가 너무 약합니다. 6자 이상 입력해주세요."
-            case .userNotFound:
-                return "사용자를 찾을 수 없습니다."
-            default:
-                return "알 수 없는 오류가 발생했습니다. 다시 시도해 주세요. (\(errorCode.rawValue))"
         }
     }
     
@@ -393,23 +404,67 @@ public enum AuthError: LocalizedError {
     case invalidState
     case requiresPassword
     case unsupportedProvider
+    // Firebase Error
+    case emailAlreadyInUse
+    case invalidEmail
+    case wrongPassword
+    case weakPassword
+    case userNotFound
+    case unknown(Int)
     
     public var errorDescription: String? {
         switch self {
             case .invalidCredential:
                 return "인증 정보가 올바르지 않습니다."
-                
             case .notLoggedIn:
                 return "로그인이 필요합니다."
-                
             case .invalidState:
                 return "현재 인증 상태가 올바르지 않습니다."
-                
             case .requiresPassword:
                 return "비밀번호 재입력이 필요합니다."
-                
             case .unsupportedProvider:
                 return "지원하지 않는 로그인 방식입니다."
+            case .emailAlreadyInUse:
+                return "이미 가입된 이메일입니다."
+            case .invalidEmail:
+                return "유효하지 않은 이메일 형식입니다."
+            case .wrongPassword:
+                return "비밀번호가 일치하지 않습니다."
+            case .weakPassword:
+                return "비밀번호가 너무 약합니다."
+            case .userNotFound:
+                return "사용자를 찾을 수 없습니다."
+            case .unknown:
+                return "알 수 없는 오류가 발생했습니다."
+        }
+    }
+}
+
+extension AuthError {
+    public static func map(from error: Error) -> AuthError {
+        let nsError = error as NSError
+        
+        guard nsError.domain == AuthErrorDomain else {
+            return .unknown(nsError.code)
+        }
+        
+        guard let code = AuthErrorCode(rawValue: nsError.code) else {
+            return .unknown(nsError.code)
+        }
+        
+        switch code {
+            case .emailAlreadyInUse:
+                return .emailAlreadyInUse
+            case .invalidEmail:
+                return .invalidEmail
+            case .wrongPassword:
+                return .wrongPassword
+            case .weakPassword:
+                return .weakPassword
+            case .userNotFound:
+                return .userNotFound
+            default:
+                return .unknown(code.rawValue)
         }
     }
 }

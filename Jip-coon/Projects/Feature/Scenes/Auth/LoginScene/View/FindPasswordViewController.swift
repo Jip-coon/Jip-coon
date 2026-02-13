@@ -77,12 +77,11 @@ final class FindPasswordViewController: UIViewController {
     
     private func bindViewModel() {
         // 에러 메시지 표시
-        viewModel.$errorMessage
+        viewModel.$error
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] errorMessage in
-                if let error = errorMessage {
-                    self?.showAlert(title: "오류", message: error)
-                }
+            .sink { [weak self] error in
+                guard let error else { return }
+                self?.showAlert(title: "오류", message: error.localizedDescription)
             }
             .store(in: &cancellables)
     }

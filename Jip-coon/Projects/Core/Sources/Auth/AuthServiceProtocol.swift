@@ -30,9 +30,6 @@ public protocol AuthServiceProtocol {
     /// 비밀번호 재설정 메일 전송
     func sendPasswordResetEmail(email: String) async throws
     
-    /// Firebase Auth 에러 처리
-    func handleError(_ error: Error) -> String
-    
     /// 로그인 여부 확인
     var isLoggedIn: Bool { get }
     

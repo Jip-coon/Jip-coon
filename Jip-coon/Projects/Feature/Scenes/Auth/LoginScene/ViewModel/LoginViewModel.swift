@@ -13,7 +13,7 @@ public final class LoginViewModel: ObservableObject {
     @Published public var email = ""
     @Published public var password = ""
     @Published public var isLoading = false
-    @Published public var errorMessage: String?
+    @Published public var error: Error?
     
     public let loginSuccess = PassthroughSubject<Void, Never>()
     
@@ -31,14 +31,14 @@ public final class LoginViewModel: ObservableObject {
     @MainActor
     public func signIn() async {
         isLoading = true
-        errorMessage = nil
+        error = nil
         
         do {
             try await authService.signIn(email: email, password: password)
             try await userService.syncCurrentUserDocument()
             loginSuccess.send()
         } catch {
-            errorMessage = error.localizedDescription
+            self.error = AuthError.map(from: error)
         }
         isLoading = false
     }
@@ -49,7 +49,7 @@ public final class LoginViewModel: ObservableObject {
             try await authService.sendPasswordResetEmail(email: email)
             return true
         } catch {
-            errorMessage = authService.handleError(error)
+            self.error = AuthError.map(from: error)
             return false
         }
     }

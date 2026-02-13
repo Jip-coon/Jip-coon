@@ -22,31 +22,31 @@ private enum SettingSection: Int, CaseIterable {
     
     var title: String {
         switch self {
-        case .profile:
-            return "프로필"
-        case .familyManage:
-            return "가족 관리"
-        case .appSettings:
-            return "앱 설정"
-        case .support:
-            return "고객지원"
-        case .account:
-            return "계정 관리"
+            case .profile:
+                return "프로필"
+            case .familyManage:
+                return "가족 관리"
+            case .appSettings:
+                return "앱 설정"
+            case .support:
+                return "고객지원"
+            case .account:
+                return "계정 관리"
         }
     }
     
     var items: [SettingItem] {
         switch self {
-        case .profile:
-            return [.editProfile]
-        case .familyManage:
-            return [.manageFamily]
-        case .appSettings:
-            return [.notifications]
-        case .support:
-            return [.termsOfService, .privacyPolicy, .appVersion]
-        case .account:
-            return [.leaveFamily, .logout, .deleteAccount]
+            case .profile:
+                return [.editProfile]
+            case .familyManage:
+                return [.manageFamily]
+            case .appSettings:
+                return [.notifications]
+            case .support:
+                return [.termsOfService, .privacyPolicy, .appVersion]
+            case .account:
+                return [.leaveFamily, .logout, .deleteAccount]
         }
     }
 }
@@ -64,15 +64,15 @@ private enum SettingItem {
     
     var title: String {
         switch self {
-        case .editProfile: return "프로필 수정"
-        case .manageFamily: return "가족 관리"
-        case .notifications: return "알림 설정"
-        case .termsOfService: return "서비스 이용약관"
-        case .privacyPolicy: return "개인정보 처리방침"
-        case .appVersion: return "앱 버전"
-        case .leaveFamily: return "가족 탈퇴"
-        case .logout: return "로그아웃"
-        case .deleteAccount: return "회원 탈퇴"
+            case .editProfile: return "프로필 수정"
+            case .manageFamily: return "가족 관리"
+            case .notifications: return "알림 설정"
+            case .termsOfService: return "서비스 이용약관"
+            case .privacyPolicy: return "개인정보 처리방침"
+            case .appVersion: return "앱 버전"
+            case .leaveFamily: return "가족 탈퇴"
+            case .logout: return "로그아웃"
+            case .deleteAccount: return "회원 탈퇴"
         }
     }
 }
@@ -217,26 +217,16 @@ public final class SettingViewController: UIViewController {
                     try await self.viewModel.performDeleteAccount(password: password)
                     
                     // 회원탈퇴 성공 Alert 표시
-                    let successAlert = UIAlertController(
-                        title: "회원탈퇴 완료",
-                        message: "회원탈퇴가 성공적으로 처리되었습니다.",
-                        preferredStyle: .alert
-                    )
-                    let confirmButton = UIAlertAction(
-                        title: "확인",
-                        style: .default
-                    ) { _ in
-                        // 확인 버튼을 누르면 로그인 화면으로 이동
-                        NotificationCenter.default.post(
-                            name: NSNotification.Name("LogoutSuccess"),
-                            object: nil
-                        )
+                    await MainActor.run {
+                        self.hideLoading()
+                        self.showSuccessAlert()
                     }
-                    successAlert.addAction(confirmButton)
-                    self.present(successAlert, animated: true, completion: nil)
                 } catch {
+                    await MainActor.run {
+                        self.hideLoading()
+                        self.showErrorAlert(message: "회원탈퇴에 실패했습니다.")
+                    }
                     print("회원 탈퇴 실패: \(error.localizedDescription)")
-                    self.showErrorAlert(message: "회원탈퇴에 실패했습니다. 다시 시도해주세요.")
                 }
             }
         }
@@ -259,42 +249,51 @@ public final class SettingViewController: UIViewController {
             message: "정말로 회원탈퇴 하시겠습니까?\n재인증이 진행됩니다.",
             preferredStyle: .alert
         )
-
+        
         let ok = UIAlertAction(title: "회원탈퇴", style: .destructive) { [weak self] _ in
             guard let self else { return }
-
+            
+            self.showLoading()
+            
             Task {
                 do {
                     try await self.viewModel.performDeleteAccount(password: nil)
                     
                     // 회원탈퇴 성공 Alert 표시
-                    let successAlert = UIAlertController(
-                        title: "회원탈퇴 완료",
-                        message: "회원탈퇴가 성공적으로 처리되었습니다.",
-                        preferredStyle: .alert
-                    )
-                    let confirmButton = UIAlertAction(
-                        title: "확인",
-                        style: .default
-                    ) { _ in
-                        // 확인 버튼을 누르면 로그인 화면으로 이동
-                        NotificationCenter.default.post(
-                            name: NSNotification.Name("LogoutSuccess"),
-                            object: nil
-                        )
+                    await MainActor.run {
+                        self.hideLoading()
+                        self.showSuccessAlert()
                     }
-                    successAlert.addAction(confirmButton)
-                    self.present(successAlert, animated: true, completion: nil)
                 } catch {
+                    await MainActor.run {
+                        self.hideLoading()
+                        self.showErrorAlert(message: "회원탈퇴에 실패했습니다.")
+                    }
                     print("회원 탈퇴 실패: \(error.localizedDescription)")
-                    self.showErrorAlert(message: "회원탈퇴에 실패했습니다. 다시 시도해주세요.")
                 }
             }
         }
-
+        
         alert.addAction(ok)
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
         present(alert, animated: true)
+    }
+    
+    /// 회원탈퇴 성공 알림
+    private func showSuccessAlert() {
+        let successAlert = UIAlertController(
+            title: "회원탈퇴 완료",
+            message: "성공적으로 처리되었습니다.",
+            preferredStyle: .alert
+        )
+        successAlert.addAction(
+            UIAlertAction(title: "확인", style: .default) { _ in
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("LogoutSuccess"),
+                    object: nil
+                )
+            })
+        self.present(successAlert, animated: true)
     }
     
     /// 회원탈퇴
@@ -303,7 +302,7 @@ public final class SettingViewController: UIViewController {
             showErrorAlert(message: "로그인 정보를 확인할 수 없습니다.")
             return
         }
-
+        
         if providerID == "password" {
             showPasswordDeleteAlert()
         } else {
@@ -406,6 +405,33 @@ public final class SettingViewController: UIViewController {
         alert.addAction(okButton)
         present(alert, animated: true, completion: nil)
     }
+    
+    /// 로딩 인디케이터 표시 (태그를 사용하여 중복 방지)
+    private func showLoading() {
+        // 이미 표시 중이라면 무시
+        if let _ = view.viewWithTag(999) { return }
+        
+        // 배경 뷰 생성 (반투명 어두운 배경)
+        let backgroundView = UIView(frame: view.bounds)
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        backgroundView.tag = 999
+        
+        // 인디케이터 생성
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.center = backgroundView.center
+        indicator.startAnimating()
+        
+        backgroundView.addSubview(indicator)
+        view.addSubview(backgroundView)
+    }
+    
+    /// 로딩 인디케이터 제거
+    private func hideLoading() {
+        if let backgroundView = view.viewWithTag(999) {
+            backgroundView.removeFromSuperview()
+        }
+    }
 }
 
 extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
@@ -435,15 +461,15 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         content.text = item.title
         
         switch item {
-        case .appVersion:
-            content.secondaryText = viewModel.fullVersionString
-            cell.accessoryType = .none
-            cell.selectionStyle = .none
-        case .leaveFamily, .logout, .deleteAccount:
-            content.textProperties.color = .systemRed
-            cell.accessoryType = .none
-        default:
-            cell.accessoryType = .disclosureIndicator
+            case .appVersion:
+                content.secondaryText = viewModel.fullVersionString
+                cell.accessoryType = .none
+                cell.selectionStyle = .none
+            case .leaveFamily, .logout, .deleteAccount:
+                content.textProperties.color = .systemRed
+                cell.accessoryType = .none
+            default:
+                cell.accessoryType = .disclosureIndicator
         }
         
         cell.contentConfiguration = content
@@ -472,7 +498,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
             case .notifications:
                 handleNotificationSetting()
             default:
-            print("\(item.title) 선택됨")
+                print("\(item.title) 선택됨")
         }
     }
 }
