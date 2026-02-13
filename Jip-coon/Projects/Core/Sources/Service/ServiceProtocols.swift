@@ -152,19 +152,16 @@ public protocol QuestServiceProtocol {
     /// 알림 배지 초기화
     func resetUserBadgeCount()
     
-    /// 퀘스트 완료 제출
-    func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws
     
-    /// 퀘스트 완료를 승인하거나 거절하는 메소드
+    /// 퀘스트의 완료 여부를 검토(승인/거절)합니다.
     /// - Parameters:
     ///   - questId: 검토할 퀘스트 ID
     ///   - isApproved: 승인 여부 (true: 승인, false: 거절)
-    ///   - reviewComment: 검토 의견 (거절 시 선택사항)
     ///   - reviewerId: 검토자(부모/관리자) ID
     ///   - userService: 포인트 지급을 위한 사용자 서비스
     /// - Note: 승인 시 해당 퀘스트의 포인트를 담당자에게 자동 지급
     ///         부모의 승인을 통한 포인트 시스템의 핵심 기능
-    func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws
+    func reviewQuest(questId: String, isApproved: Bool, reviewerId: String, userService: UserServiceProtocol) async throws
     
     /// 반복 퀘스트 생성
     func createQuestTemplate(_ template: QuestTemplate) async throws

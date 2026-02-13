@@ -30,9 +30,7 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         return db.collection(FirestoreCollections.quests)
     }
     
-    private var submissionsCollection: CollectionReference {
-        return db.collection(FirestoreCollections.questSubmissions)
-    }
+
     
     private var templatesCollection: CollectionReference {
         return db.collection(FirestoreCollections.questTemplates)
@@ -393,26 +391,12 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         ])
     }
     
-    // MARK: - Submission & Review Workflow
+
     
-    /// 퀘스트 완료 제출
-    public func submitQuestCompletion(quest: Quest, submission: QuestSubmission) async throws {
-        do {
-            // 1. 퀘스트 상태를 completed로 변경
-            try await updateQuestStatus(quest: quest, status: .completed)
-            
-            // 2. 제출 데이터 생성 (나중에 QuestSubmissionService로 분리 가능)
-            try submissionsCollection
-                .document(submission.id)
-                .setData(from: submission)
-        } catch {
-            throw FirebaseQuestServiceError
-                .submissionFailed(error.localizedDescription)
-        }
-    }
+    // MARK: - Review Workflow
     
     /// 퀘스트 승인/거절
-    public func reviewQuest(questId: String, isApproved: Bool, reviewComment: String?, reviewerId: String, userService: UserServiceProtocol) async throws {
+    public func reviewQuest(questId: String, isApproved: Bool, reviewerId: String, userService: UserServiceProtocol) async throws {
         do {
             // 1. 퀘스트 정보 조회
             guard let quest = try await getQuest(by: questId) else {
@@ -430,27 +414,6 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                         userId: quest.assignedTo ?? "",
                         points: quest.points
                     )
-            }
-            
-            // 2. 제출 데이터 업데이트 (해당 제출이 있다면)
-            let submissionQuery = submissionsCollection
-                .whereField("questId", isEqualTo: questId)
-                .whereField("isApproved", isEqualTo: NSNull()) // 검토되지 않은 제출만
-            
-            let snapshot = try await submissionQuery.getDocuments()
-            
-            if let submissionDoc = snapshot.documents.first {
-                var updateData: [String: Any] = [
-                    "isApproved": isApproved,
-                    "reviewedBy": reviewerId,
-                    "reviewedAt": Timestamp(date: Date())
-                ]
-                
-                if let reviewComment = reviewComment {
-                    updateData["reviewComment"] = reviewComment
-                }
-                
-                try await submissionDoc.reference.updateData(updateData)
             }
         } catch {
             throw FirebaseQuestServiceError
