@@ -5,11 +5,11 @@
 //  Created by 심관혁 on 2/1/26.
 //
 
-import UIKit
-import UI
 import Core
+import UI
+import UIKit
 
-public final class FamilyManageViewController: UIViewController {
+final class FamilyManageViewController: UIViewController {
     
     private let viewModel = FamilyManageViewModel()
     
@@ -21,7 +21,9 @@ public final class FamilyManageViewController: UIViewController {
         return tableView
     }()
     
-    public override func viewDidLoad() {
+    // MARK: - Lifecycle
+    
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
@@ -164,23 +166,25 @@ public final class FamilyManageViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDataSource, UITableViewDelegate
+
 extension FamilyManageViewController: UITableViewDataSource, UITableViewDelegate {
     
-    public func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 2 // 0: 가족 정보, 1: 구성원 목록
     }
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 { return 2 }
         return viewModel.familyMembers.count
     }
     
-    public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0 { return "가족 정보" }
         return "가족 구성원 (\(viewModel.familyMembers.count))"
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
             if indexPath.row == 0 {
                 // 가족 이름 셀
@@ -232,7 +236,7 @@ extension FamilyManageViewController: UITableViewDataSource, UITableViewDelegate
         }
     }
     
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if indexPath.section == 0 {

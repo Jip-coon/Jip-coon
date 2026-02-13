@@ -7,7 +7,6 @@
 
 import Core
 import FirebaseAuth
-import FirebaseFirestore
 import UI
 import UIKit
 
@@ -79,7 +78,7 @@ private enum SettingItem {
 
 // MARK: - SettingViewController
 
-public final class SettingViewController: UIViewController {
+final class SettingViewController: UIViewController {
     
     private let viewModel = SettingViewModel()
     
@@ -102,7 +101,7 @@ public final class SettingViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
@@ -434,22 +433,22 @@ public final class SettingViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDataSource, UITableViewDelegate
+
 extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
-    public func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return dataSource.count
     }
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource[section].items.count
     }
     
-    public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return dataSource[section].section.title
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
-    -> UITableViewCell
-    {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "settingCell",
             for: indexPath
@@ -476,10 +475,7 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     
-    public func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let sectionData = dataSource[indexPath.section]
         let item = sectionData.items[indexPath.row]
@@ -502,4 +498,3 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 }
-

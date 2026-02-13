@@ -5,11 +5,11 @@
 //  Created by 예슬 on 11/19/25.
 //
 
-import Core
 import Combine
+import Core
 import Foundation
 
-final class QuestDetailViewModel: ObservableObject {
+final class QuestDetailViewModel{
     // MARK: - Properties
     
     @Published var quest: Quest
@@ -227,7 +227,7 @@ final class QuestDetailViewModel: ObservableObject {
         updatedQuest.updatedAt = Date()
         self.quest = updatedQuest
     }
-
+    
     /// 퀘스트 완료 처리
     func completeQuest() async throws {
         // 현재 사용자 정보 가져오기
@@ -251,8 +251,6 @@ final class QuestDetailViewModel: ObservableObject {
             // Firestore에도 담당자 정보 업데이트
             try await questService.updateQuest(questToUpdate)
         }
-        
-
         
         // 로컬 quest 객체도 업데이트
         var updatedQuest = questToUpdate

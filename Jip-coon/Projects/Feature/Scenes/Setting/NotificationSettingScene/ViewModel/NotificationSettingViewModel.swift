@@ -5,12 +5,12 @@
 //  Created by 예슬 on 2/8/26.
 //
 
-import Core
 import Combine
+import Core
 import Foundation
 import UserNotifications
 
-final class NotificationSettingViewModel: ObservableObject {
+final class NotificationSettingViewModel {
     private let userService: UserServiceProtocol
     
     @Published var settings: [NotificationSettingType: Bool] = [:]

@@ -5,10 +5,10 @@
 //  Created by 심관혁 on 10/29/25.
 //
 
-import Foundation
+import Core
 import FirebaseAuth
 import FirebaseFirestore
-import Core
+import Foundation
 
 final class SettingViewModel {
     private let authService: AuthService
@@ -19,15 +19,15 @@ final class SettingViewModel {
     var currentProviderID: String? {
         authService.currentUser?.providerData.first?.providerID
     }
-
+    
     var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
-
+    
     var buildNumber: String {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
     }
-
+    
     var fullVersionString: String {
         "\(appVersion).\(buildNumber)"
     }
@@ -41,27 +41,18 @@ final class SettingViewModel {
         self.userService = userService
         self.familyService = familyService
     }
-
+    
     // MARK: - 사용자 관리
-
+    
     // 현재 사용자 정보 로드
     func loadCurrentUser() async {
         do {
             currentUser = try await userService.getCurrentUser()
-            if currentUser == nil {
-                print(
-                    "Firebase Auth UID: \(Auth.auth().currentUser?.uid ?? "없음")"
-                )
-                print("이메일: \(Auth.auth().currentUser?.email ?? "없음")")
-            }
         } catch {
             print("사용자 정보 로드 실패: \(error.localizedDescription)")
-            print(
-                "Firebase Auth 상태: \(Auth.auth().currentUser != nil ? "로그인됨" : "로그인되지 않음")"
-            )
         }
     }
-
+    
     // 로그아웃 수행
     func performLogout() async throws {
         try authService.signOut()
@@ -100,22 +91,22 @@ final class SettingViewModel {
                 userInfo: [NSLocalizedDescriptionKey: "사용자 정보를 찾을 수 없습니다."]
             )
         }
-
+        
         // 1. Firebase Auth에서 계정 삭제
         try await authService.deleteAccountWithReauth(password: password)
         
         // 2. Firestore에서 사용자 관련 데이터 삭제
         try await deleteUserData(userId: userId)
     }
-
+    
     // 사용자 데이터 삭제
     func deleteUserData(userId: String) async throws {
         let db = Firestore.firestore()
-
+        
         // Firestore 컬렉션 이름
         let questsCollection = FirestoreCollections.quests
         let familiesCollection = FirestoreCollections.families
-
+        
         // 사용자가 생성한 퀘스트 삭제
         let questsQuery = db.collection(questsCollection)
             .whereField("createdBy", isEqualTo: userId)
@@ -123,7 +114,7 @@ final class SettingViewModel {
         for document in questsSnapshot.documents {
             try await document.reference.delete()
         }
-
+        
         // 사용자가 담당자인 퀘스트에서 담당자 제거 (assignedTo 필드 업데이트)
         let assignedQuestsQuery = db.collection(questsCollection)
             .whereField("assignedTo", isEqualTo: userId)
@@ -133,7 +124,7 @@ final class SettingViewModel {
                 "assignedTo": FieldValue.delete()
             ])
         }
-
+        
         // 사용자가 속한 가족에서 제거
         if let currentUser = try await userService.getCurrentUser(),
            let familyId = currentUser.familyId {
@@ -142,10 +133,10 @@ final class SettingViewModel {
                 "memberIds": FieldValue.arrayRemove([userId])
             ])
         }
-
+        
         // 사용자 문서 삭제
         try await userService.deleteUser(id: userId)
-
+        
         print("사용자 관련 Firestore 데이터 삭제 완료")
     }
 }
