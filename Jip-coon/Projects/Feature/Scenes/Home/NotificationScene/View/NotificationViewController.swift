@@ -143,7 +143,6 @@ final class NotificationViewController: UIViewController {
                 }
         }
     }
-    
 }
 
 // MARK: - TableViewDelegate, TableViewDataSource
@@ -207,5 +206,4 @@ extension NotificationViewController: UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.didSelectNotification(at: indexPath)
     }
-    
 }

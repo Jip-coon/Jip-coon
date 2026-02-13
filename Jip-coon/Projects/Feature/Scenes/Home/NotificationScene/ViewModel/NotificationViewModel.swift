@@ -8,7 +8,7 @@
 import Core
 import Foundation
 
-final class NotificationViewModel: ObservableObject {
+final class NotificationViewModel {
     
     @Published private(set) var sections: [NotificationSectionModel] = []
     @Published var navigationDestination: NotificationDestination?

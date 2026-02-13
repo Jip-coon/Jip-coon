@@ -10,7 +10,7 @@ import Core
 import UI
 import UIKit
 
-public final class SignUpViewController: UIViewController {
+final class SignUpViewController: UIViewController {
     private let viewModel = SignUpViewModel()
     private var cancellables = Set<AnyCancellable>()
     private var activeField: UITextField?
@@ -117,7 +117,7 @@ public final class SignUpViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         bindViewModel()
@@ -411,7 +411,7 @@ public final class SignUpViewController: UIViewController {
 // MARK: - TextFieldDelegate
 
 extension SignUpViewController: UITextFieldDelegate {
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == emailTextField {
             passwordTextField.becomeFirstResponder()
         } else if textField == passwordTextField {
@@ -420,11 +420,11 @@ extension SignUpViewController: UITextFieldDelegate {
         return true
     }
     
-    public func textFieldDidBeginEditing(_ textField: UITextField) {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
         activeField = textField
     }
     
-    public func textFieldDidEndEditing(_ textField: UITextField) {
+    func textFieldDidEndEditing(_ textField: UITextField) {
         if activeField == textField {
             activeField = nil
         }

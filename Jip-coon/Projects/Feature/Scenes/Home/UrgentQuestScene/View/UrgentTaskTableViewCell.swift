@@ -5,13 +5,13 @@
 //  Created by 심관혁 on 1/27/26.
 //
 
-import UIKit
 import Core
 import UI
+import UIKit
 
 /// 긴급 할일 셀
-public class UrgentTaskTableViewCell: UITableViewCell {
-    public static let identifier = "UrgentTaskTableViewCell"
+final class UrgentTaskTableViewCell: UITableViewCell {
+    static let identifier = "UrgentTaskTableViewCell"
     
     // MARK: - UI Components
     
@@ -115,7 +115,7 @@ public class UrgentTaskTableViewCell: UITableViewCell {
         return label
     }()
     
-    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
@@ -147,7 +147,17 @@ public class UrgentTaskTableViewCell: UITableViewCell {
         containerView.addSubview(statusContainer)
         statusContainer.addSubview(statusLabel)
         
-        [containerView, emojiContainer, emojiLabel, titleLabel, infoStack, dateStack, urgencyContainer, urgencyLabel, statusContainer, statusLabel].forEach {
+        [containerView,
+         emojiContainer,
+         emojiLabel,
+         titleLabel,
+         infoStack,
+         dateStack,
+         urgencyContainer,
+         urgencyLabel,
+         statusContainer,
+         statusLabel
+        ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
@@ -189,7 +199,7 @@ public class UrgentTaskTableViewCell: UITableViewCell {
         ])
     }
     
-    public override func setSelected(_ selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         
         if selected {
@@ -203,7 +213,7 @@ public class UrgentTaskTableViewCell: UITableViewCell {
         }
     }
     
-    public override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         super.setHighlighted(highlighted, animated: animated)
         
         UIView.animate(withDuration: 0.1) {
@@ -215,10 +225,7 @@ public class UrgentTaskTableViewCell: UITableViewCell {
         }
     }
     
-    public func configure(
-        with quest: Quest,
-        urgencyLevel: UrgencyLevel
-    ) {
+    func configure(with quest: Quest, urgencyLevel: UrgencyLevel) {
         
         // 이모지
         emojiLabel.text = quest.category.emoji

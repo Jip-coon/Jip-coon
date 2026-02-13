@@ -11,7 +11,7 @@ import UI
 import UIKit
 
 /// 나의 할일 목록을 표시하는 뷰 컨트롤러
-public class MyTasksViewController: UIViewController {
+final class MyTasksViewController: UIViewController {
     
     private let userService: UserServiceProtocol
     private let questService: QuestServiceProtocol
@@ -56,7 +56,7 @@ public class MyTasksViewController: UIViewController {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         userService: UserServiceProtocol,
         questService: QuestServiceProtocol
     ) {
@@ -71,7 +71,7 @@ public class MyTasksViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
@@ -79,7 +79,7 @@ public class MyTasksViewController: UIViewController {
         setupNotifications()
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadData()
     }
@@ -238,7 +238,11 @@ public class MyTasksViewController: UIViewController {
         }
         
         // 반복 퀘스트인 경우
-        let actionSheet = UIAlertController(title: "반복 퀘스트 삭제", message: "삭제 방식을 선택해주세요.", preferredStyle: .actionSheet)
+        let actionSheet = UIAlertController(
+            title: "반복 퀘스트 삭제",
+            message: "삭제 방식을 선택해주세요.",
+            preferredStyle: .actionSheet
+        )
         
         actionSheet.addAction(UIAlertAction(title: "이 일정만 삭제", style: .default) { [weak self] _ in
             self?.performDelete(at: indexPath, for: quest, mode: .single)
@@ -257,17 +261,17 @@ public class MyTasksViewController: UIViewController {
 
 extension MyTasksViewController: UITableViewDelegate {
     
-    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 88
     }
     
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let quest = myTasks[indexPath.row]
         handleTaskTapped(quest)
     }
     
-    public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] _, _, completion in
             guard let self = self else { return }
             let quest = self.myTasks[indexPath.row]
@@ -288,11 +292,11 @@ extension MyTasksViewController: UITableViewDelegate {
 
 extension MyTasksViewController: UITableViewDataSource {
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return myTasks.count
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: MyTasksTableViewCell.identifier) as? MyTasksTableViewCell
         else {

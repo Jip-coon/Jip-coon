@@ -5,13 +5,13 @@
 //  Created by 심관혁 on 1/26/26.
 //
 
-import UIKit
-import Core
 import Combine
+import Core
 import UI
+import UIKit
 
 /// 긴급 할일 목록을 표시하는 뷰 컨트롤러
-public class UrgentQuestViewController: UIViewController {
+final class UrgentQuestViewController: UIViewController {
     
     private let userService: UserServiceProtocol
     private let questService: QuestServiceProtocol
@@ -56,7 +56,7 @@ public class UrgentQuestViewController: UIViewController {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         userService: UserServiceProtocol,
         questService: QuestServiceProtocol
     ) {
@@ -71,7 +71,7 @@ public class UrgentQuestViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTableView()
@@ -79,7 +79,7 @@ public class UrgentQuestViewController: UIViewController {
         setupNotifications()
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadData()
     }
@@ -106,10 +106,14 @@ public class UrgentQuestViewController: UIViewController {
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
-            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.topAnchor
+                .constraint(equalTo: view.topAnchor, constant: 20),
+            tableView.leadingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            tableView.trailingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            tableView.bottomAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
             emptyStateView.topAnchor.constraint(equalTo: view.topAnchor),
             emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -232,11 +236,11 @@ public class UrgentQuestViewController: UIViewController {
 
 extension UrgentQuestViewController: UITableViewDelegate {
     
-    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 88
     }
     
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let quest = urgentQuests[indexPath.row]
         handleTaskTapped(quest)
@@ -247,11 +251,11 @@ extension UrgentQuestViewController: UITableViewDelegate {
 
 extension UrgentQuestViewController: UITableViewDataSource {
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return urgentQuests.count
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: UrgentTaskTableViewCell.identifier) as? UrgentTaskTableViewCell
         else {

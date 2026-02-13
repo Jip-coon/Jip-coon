@@ -10,7 +10,7 @@ import Core
 import UIKit
 
 /// 홈 화면 (나의할일 목록)
-public class HomeViewController: UIViewController {
+final class HomeViewController: UIViewController {
     
     // MARK: - Properties
     
@@ -41,7 +41,7 @@ public class HomeViewController: UIViewController {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         userService: UserServiceProtocol,
         familyService: FamilyServiceProtocol,
         questService: QuestServiceProtocol
@@ -60,19 +60,19 @@ public class HomeViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupTraitChangeObserver()
         bindViewModel()
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
-    public override func viewWillDisappear(_ animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
@@ -87,7 +87,7 @@ public class HomeViewController: UIViewController {
                 self?.headerView.update(with: family)
             }
             .store(in: &cancellables)
-            
+        
         // 부모 여부 바인딩
         viewModel.$isParent
             .receive(on: DispatchQueue.main)
@@ -95,7 +95,7 @@ public class HomeViewController: UIViewController {
                 self?.filterBar.setupButtons(isParent: isParent)
             }
             .store(in: &cancellables)
-            
+        
         // 필터 선택 바인딩
         viewModel.$selectedFilter
             .receive(on: DispatchQueue.main)
@@ -148,12 +148,12 @@ public class HomeViewController: UIViewController {
         let viewController: UIViewController
         
         switch filter {
-        case .myTask:
-            viewController = createMyTasksViewController()
-        case .urgent:
-            viewController = createUrgentQuestViewController()
-        case .approval:
-            viewController = createApprovalViewController()
+            case .myTask:
+                viewController = createMyTasksViewController()
+            case .urgent:
+                viewController = createUrgentQuestViewController()
+            case .approval:
+                viewController = createApprovalViewController()
         }
         
         switchContentViewController(to: viewController)
@@ -249,7 +249,11 @@ public class HomeViewController: UIViewController {
     private func showFamilyInfoPopup() {
         guard let contents = viewModel.getFamilyInfoAlertContents() else { return }
         
-        let alert = UIAlertController(title: contents.title, message: contents.message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: contents.title,
+            message: contents.message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "초대코드 복사", style: .default) { _ in
             UIPasteboard.general.string = contents.inviteCode
         })
@@ -277,7 +281,11 @@ public class HomeViewController: UIViewController {
     }
     
     private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }

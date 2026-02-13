@@ -8,7 +8,7 @@
 import UIKit
 
 /// 커스텀 하단 네비게이션 탭바
-class MainTabBar: UIView {
+final class MainTabBar: UIView {
     
     // MARK: - Properties
     
@@ -223,18 +223,24 @@ class MainTabBar: UIView {
         
         let position: Int
         switch selectedTab {
-        case 0: position = 0  // 홈
-        case 1: position = 1  // 전체 퀘스트
-        case 3: position = 2  // 랭킹
-        case 4: position = 3  // 설정
-        default: position = 0
+            case 0: position = 0  // 홈
+            case 1: position = 1  // 전체 퀘스트
+            case 3: position = 2  // 랭킹
+            case 4: position = 3  // 설정
+            default: position = 0
         }
         
         let leadingConstant = calculateLeadingConstant(for: position, totalWidth: superview.bounds.width)
         
         constraint.constant = leadingConstant
         
-        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5, options: .curveEaseInOut) {
+        UIView.animate(
+            withDuration: 0.3,
+            delay: 0,
+            usingSpringWithDamping: 0.8,
+            initialSpringVelocity: 0.5,
+            options: .curveEaseInOut
+        ) {
             indicator.superview?.layoutIfNeeded()
         }
     }

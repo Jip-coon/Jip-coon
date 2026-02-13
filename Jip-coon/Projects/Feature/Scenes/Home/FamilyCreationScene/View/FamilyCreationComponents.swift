@@ -9,28 +9,28 @@ import Core
 import UI
 import UIKit
 
-public class FamilyCreationComponents: NSObject {
+final class FamilyCreationComponents: NSObject {
     
     // MARK: - Delegate
     
-    public weak var delegate: FamilyCreationComponentsDelegate?
+    weak var delegate: FamilyCreationComponentsDelegate?
     
     // MARK: - UI Components
     
-    public lazy var scrollView: UIScrollView = {
+    lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = UIColor.backgroundWhite
         scrollView.showsVerticalScrollIndicator = false
         return scrollView
     }()
     
-    public lazy var contentView: UIView = {
+    lazy var contentView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.backgroundWhite
         return view
     }()
     
-    public lazy var titleLabel: UILabel = {
+    lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 28, weight: .bold)
         label.textColor = UIColor.textGray
@@ -38,7 +38,7 @@ public class FamilyCreationComponents: NSObject {
         return label
     }()
     
-    public lazy var modeSegmentControl: UISegmentedControl = {
+    lazy var modeSegmentControl: UISegmentedControl = {
         let control = UISegmentedControl(items: ["가족 만들기", "가족 참여하기"])
         control.selectedSegmentIndex = 0
         control.backgroundColor = .white
@@ -49,7 +49,7 @@ public class FamilyCreationComponents: NSObject {
         return control
     }()
     
-    public lazy var subtitleLabel: UILabel = {
+    lazy var subtitleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .regular)
         label.textColor = UIColor.lightGray
@@ -58,7 +58,7 @@ public class FamilyCreationComponents: NSObject {
         return label
     }()
     
-    public lazy var familyNameTextField: UITextField = {
+    lazy var familyNameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "가족 이름을 입력하세요"
         textField.font = .systemFont(ofSize: 18, weight: .regular)
@@ -74,7 +74,7 @@ public class FamilyCreationComponents: NSObject {
         return textField
     }()
     
-    public lazy var inviteCodeTextField: UITextField = {
+    lazy var inviteCodeTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "초대코드를 입력하세요 (6자리 숫자)"
         textField.font = .systemFont(ofSize: 18, weight: .regular)
@@ -92,7 +92,7 @@ public class FamilyCreationComponents: NSObject {
         return textField
     }()
     
-    public lazy var createButton: UIButton = {
+    lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("가족 생성하기", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -107,7 +107,7 @@ public class FamilyCreationComponents: NSObject {
         return button
     }()
     
-    public lazy var joinButton: UIButton = {
+    lazy var joinButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("가족 참여하기", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -123,7 +123,7 @@ public class FamilyCreationComponents: NSObject {
         return button
     }()
     
-    public lazy var inviteCodeView: UIView = {
+    lazy var inviteCodeView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
         view.layer.cornerRadius = 12
@@ -133,7 +133,7 @@ public class FamilyCreationComponents: NSObject {
         return view
     }()
     
-    public lazy var inviteCodeTitleLabel: UILabel = {
+    lazy var inviteCodeTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "초대코드"
         label.font = .systemFont(ofSize: 16, weight: .semibold)
@@ -141,7 +141,7 @@ public class FamilyCreationComponents: NSObject {
         return label
     }()
     
-    public lazy var inviteCodeLabel: UILabel = {
+    lazy var inviteCodeLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 24, weight: .bold)
         label.textColor = UIColor.mainOrange
@@ -149,7 +149,7 @@ public class FamilyCreationComponents: NSObject {
         return label
     }()
     
-    public lazy var shareButton: UIButton = {
+    lazy var shareButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("📤 공유하기", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -160,7 +160,7 @@ public class FamilyCreationComponents: NSObject {
         return button
     }()
     
-    public lazy var doneButton: UIButton = {
+    lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("완료", for: .normal)
         button.setTitleColor(UIColor.mainOrange, for: .normal)
@@ -170,7 +170,7 @@ public class FamilyCreationComponents: NSObject {
         return button
     }()
     
-    public lazy var activityIndicator: UIActivityIndicatorView = {
+    lazy var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.color = UIColor.mainOrange
         indicator.hidesWhenStopped = true
@@ -202,7 +202,7 @@ public class FamilyCreationComponents: NSObject {
 
 // MARK: - Delegate Protocol
 
-public protocol FamilyCreationComponentsDelegate: AnyObject {
+protocol FamilyCreationComponentsDelegate: AnyObject {
     func didChangeMode(to index: Int)
     func didTapCreateButton()
     func didTapJoinButton()

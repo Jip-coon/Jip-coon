@@ -9,7 +9,7 @@ import Combine
 import Core
 import Foundation
 
-final class SignUpViewModel: ObservableObject {
+final class SignUpViewModel {
     @Published var email: String = "" {
         didSet { validateEmail() }
     }

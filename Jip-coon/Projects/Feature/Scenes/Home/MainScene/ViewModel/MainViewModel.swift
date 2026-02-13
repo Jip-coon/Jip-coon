@@ -10,7 +10,7 @@ import Core
 import Foundation
 
 /// 메인 화면의 ViewModel
-public class MainViewModel {
+final class MainViewModel {
     
     // MARK: - Services
     
@@ -25,7 +25,7 @@ public class MainViewModel {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         userService: UserServiceProtocol? = nil,
         familyService: FamilyServiceProtocol? = nil,
         questService: QuestServiceProtocol? = nil
