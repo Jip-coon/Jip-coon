@@ -76,7 +76,7 @@ final class AddQuestViewController: UIViewController {
         return InfoRowView(
             leading: label,
             title: "마감시간",
-            value: Date.now.aHHmm
+            value: Date.now.aHmm
         )
     }()
     
@@ -459,7 +459,7 @@ final class AddQuestViewController: UIViewController {
         )
         
         timePickerViewController.onDidTapDone = { [weak self] date in
-            self?.timeInfoRowView.setValueText(date.aHHmm)
+            self?.timeInfoRowView.setValueText(date.aHmm)
             self?.viewModel.selectedTime = date
             self?.viewModel.combineDateAndTime()
         }

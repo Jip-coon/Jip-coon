@@ -12,14 +12,14 @@ protocol HomeFilterBarDelegate: AnyObject {
 }
 
 enum HomeFilterType: Int {
-    case collection = 0
+    case myTask = 0
     case urgent = 1
     case approval = 2
 
     
     var title: String {
         switch self {
-        case .collection: return "나의할일"
+        case .myTask: return "나의할일"
         case .urgent: return "긴급할일"
         case .approval: return "승인대기"
         }
@@ -27,7 +27,7 @@ enum HomeFilterType: Int {
     
     var icon: String {
         switch self {
-        case .collection: return "archivebox.fill"
+        case .myTask: return "archivebox.fill"
         case .urgent: return "light.beacon.max.fill"
         case .approval: return "checkmark.seal.fill"
         }
@@ -40,7 +40,7 @@ final class HomeFilterBar: UIView {
     
     // MARK: - Properties
     
-    private var selectedFilter: HomeFilterType = .collection
+    private var selectedFilter: HomeFilterType = .myTask
     private let stackView = UIStackView()
     
     // MARK: - Initializer
@@ -78,13 +78,13 @@ final class HomeFilterBar: UIView {
         // 기존 뷰 제거
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        var filterTypes: [HomeFilterType] = [.collection, .urgent]
+        var filterTypes: [HomeFilterType] = [.myTask, .urgent]
         if isParent {
             filterTypes.append(.approval)
         }
         
         for (index, type) in filterTypes.enumerated() {
-            let buttonView = createFilterButton(for: type, showSeparator: type == .collection)
+            let buttonView = createFilterButton(for: type, showSeparator: type == .myTask)
             stackView.addArrangedSubview(buttonView)
             
             // 버튼 너비 제약 추가 (필요시)
@@ -182,6 +182,12 @@ final class HomeFilterBar: UIView {
     
     /// 다크모드 대응 등으로 인해 외부에서 갱신이 필요할 때 호출
     func refreshStyles() {
+        updateAllButtons()
+    }
+    
+    /// 외부에서 강제로 필터를 변경할 때 사용 (UI 업데이트용)
+    func setFilter(_ filterType: HomeFilterType) {
+        self.selectedFilter = filterType
         updateAllButtons()
     }
 }

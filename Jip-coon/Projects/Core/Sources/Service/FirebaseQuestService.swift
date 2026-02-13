@@ -382,6 +382,40 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         try templatesCollection.document(template.id).setData(from: template)
     }
     
+    /// 알림 타입에 따른 퀘스트 생성
+    public func createVirtualQuestFromTemplate(notification: NotificationItem) async throws -> Quest {
+        guard let templateId = notification.templateId else { throw FirebaseQuestServiceError.questNotFound }
+        
+        // 1. 템플릿 정보 가져오기
+        let doc = try await templatesCollection.document(templateId).getDocument()
+        guard let template = try? doc.data(as: QuestTemplate.self) else {
+            throw FirebaseQuestServiceError.questNotFound
+        }
+        
+        let calendar = Calendar.current
+        let referenceDate: Date
+        
+        // 2. 알림 타입에 따른 날짜 결정
+        if notification.type == .questAssigned {
+            // 할당 알림이면 템플릿의 시작일이 첫 마감일
+            referenceDate = template.startDate
+        } else {
+            // 마감 임박 알림(.deadline)알림이 온 그날(오늘)이 기준!
+            referenceDate = notification.createdAt
+        }
+        
+        // 3. 시간 합성 (템플릿의 recurringDueTime에서 시/분 추출)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: template.recurringDueTime ?? referenceDate)
+        var dateComponents = calendar.dateComponents([.year, .month, .day], from: referenceDate)
+        dateComponents.hour = timeComponents.hour
+        dateComponents.minute = timeComponents.minute
+        
+        let finalDueDate = calendar.date(from: dateComponents) ?? referenceDate
+        
+        // 4. 기존 가상 퀘스트 생성 메서드 호출
+        return createVirtualQuest(from: template, on: finalDueDate)
+    }
+    
     /// 실제 퀘스트 + 가상 퀘스트 조회
     /// - Parameters:
     ///   - familyId: 가족 ID

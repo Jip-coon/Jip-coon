@@ -128,6 +128,9 @@ public protocol QuestServiceProtocol {
     /// 반복 퀘스트 생성
     func createQuestTemplate(_ template: QuestTemplate) async throws
     
+    /// 알림을 위한 퀘스트 생성
+    func createVirtualQuestFromTemplate(notification: NotificationItem) async throws -> Quest
+    
     /// 퀘스트 조회 (병합 로직)
     func fetchQuestsWithRepeat(familyId: String, startDate: Date, endDate: Date) async throws -> [Quest]
     
@@ -136,4 +139,14 @@ public protocol QuestServiceProtocol {
     
     /// 알림 배지 초기화
     func resetUserBadgeCount()
+}
+
+// MARK: - 알림 서비스 프로토콜
+
+public protocol NotificationServiceProtocol {
+    /// 알림 가져오기
+    func fetchNotifications(userId: String) async throws -> [NotificationItem]
+    
+    /// 알림 읽음 상태 수정
+    func updateReadStatus(userId: String, notificationId: String) async throws
 }

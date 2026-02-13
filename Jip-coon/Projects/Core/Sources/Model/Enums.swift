@@ -161,7 +161,7 @@ public enum DeleteMode {
 
 // MARK: - 알림 설정
 
-public enum NotificationSettingType: String, CaseIterable {
+public enum NotificationSettingType: String, CaseIterable, Codable {
     case deadline
     case questAssigned
     case dailySummary

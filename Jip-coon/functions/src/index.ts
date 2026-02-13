@@ -51,7 +51,10 @@ async function sendNotification(
     userId: string,
     type: NotificationType,
     title: string,
-    body: string
+    body: string,
+    questId?: string | null,
+    category?: string | null,
+    templateId?: string | null
 ) {
     const userRef = db.collection("users").doc(userId);
     const userSnap = await userRef.get();
@@ -63,39 +66,54 @@ async function sendNotification(
     const setting = user.notificationSetting || {};
     if (setting[type] === false) return;
 
-    // 2. 토큰 체크
-    const tokens: string[] = user.fcmTokens || (user.fcmToken ? [user.fcmToken] : []);
-    if (tokens.length === 0) return;
-
-    // 3. badge 누적 및 DB 업데이트
+    // 2. badge 누적 및 DB 업데이트
     const newBadge = (user.badgeCount || 0) + 1;
 
-    const message = {
-        tokens,
-        notification: { title, body },
-        apns: {
-            payload: {
-                aps: {
-                    sound: "default",
-                    badge: newBadge
-                }
-            }
-        }
+    // Notifications 서브 컬렉션에 알림 내역 저장
+    const notificationRef = userRef.collection("notifications").doc(); // 자동 ID 생성
+    const expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    const notificationData = {
+        id: notificationRef.id,
+        questId: questId || null,
+        templateId: templateId || null,
+        title: title,
+        body: body,
+        type: type,
+        category: category || null,
+        isRead: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(), // 서버 시간 기준
+        expireAt: admin.firestore.Timestamp.fromDate(expireDate)
     };
 
     try {
-        // 여러 기기에 동시 발송 (Multicast)
-        await admin.messaging().sendEachForMulticast(message);
-        // 발송 성공 시 DB의 배지 카운트 업데이트
-        await userRef.update({ badgeCount: newBadge });
+        // 3. FCM 메시지 구성 및 발송
+        const tokens: string[] = user.fcmTokens || (user.fcmToken ? [user.fcmToken] : []);
+        if (tokens.length > 0) {
+            const message = {
+                tokens,
+                notification: { title, body },
+                apns: { payload: { aps: { sound: "default", badge: newBadge } } }
+            };
+            await admin.messaging().sendEachForMulticast(message);
+        }
+
+        // 4. DB 업데이트 (배지 카운트 + 알림 내역 저장)
+        const batch = db.batch();
+        batch.update(userRef, { badgeCount: newBadge });
+        batch.set(notificationRef, notificationData);
+        await batch.commit();
+
     } catch (error) {
-        console.error("FCM 전송 실패:", error);
+        console.error("알림 처리 실패:", error);
     }
 }
 
 // 1. 새로운 퀘스트 할당 알림
 export const onquestcreated = onDocumentCreated("quests/{id}", async (event) => {
     const quest = event.data?.data();
+    const questId = event.params.id;
+
     if (quest?.assignedTo && quest.assignedTo !== quest.createdBy) {
         const emoji = categoryEmojis[quest.category] || "✨";
         const now = Date.now();
@@ -117,7 +135,10 @@ export const onquestcreated = onDocumentCreated("quests/{id}", async (event) => 
             quest.assignedTo,
             "questAssigned",
             title,
-            body
+            body,
+            questId,
+            quest.category,
+            quest.templateId || null
         );
     }
 });
@@ -125,13 +146,18 @@ export const onquestcreated = onDocumentCreated("quests/{id}", async (event) => 
 // 새로운 반복 퀘스트 할당
 export const ontemplatecreated = onDocumentCreated("quest_templates/{id}", async (event) => {
     const template = event.data?.data();
+    const templateId = event.params.id;
+
     if (template?.assignedTo && template.assignedTo !== template.createdBy) {
         const emoji = categoryEmojis[template.category] || "✨";
         await sendNotification(
             template.assignedTo,
             "questAssigned",
             "퀘스트가 도착했어요!",
-            `${emoji} ${template.title}`
+            `${emoji} ${template.title}`,
+            null,
+            template.category,
+            templateId
         );
     }
 });
@@ -167,7 +193,10 @@ export const checkdeadline = onSchedule({
                 q.assignedTo,
                 "deadline",
                 "마감 1시간 전! ⏰",
-                `${q.title} 잊지 말아주세요 🥺`
+                `${q.title} 잊지 말아주세요 🥺`,
+                doc.id,
+                q.category,
+                q.templateId || null
             ));
 
             // 알림 발송 기록 저장 (중복 발송 방지)
@@ -181,7 +210,7 @@ export const checkdeadline = onSchedule({
     const templates = await db.collection("quest_templates").get();
     const nowDate = now.toDate();
 
-    // B. 가상 퀘스트(템플릿) 체크 부분 (수정본)
+    // B. 가상 퀘스트(템플릿) 체크 부분
     for (const doc of templates.docs) {
         const t = doc.data();
 
@@ -225,7 +254,10 @@ export const checkdeadline = onSchedule({
                         t.assignedTo,
                         "deadline",
                         "마감 1시간 전! ⏰",
-                        `${t.title} 잊지 말아주세요 🥺`
+                        `${t.title} 잊지 말아주세요 🥺`,
+                        null,
+                        t.category,
+                        doc.id
                     ));
 
                     // 알림 발송 후 '오늘 날짜' 기록
@@ -388,7 +420,10 @@ async function sendSummaryToUser(userId: string, timeZone: string) {
                 userId,
                 "dailySummary",
                 "오늘의 퀘스트 요약 ☀️",
-                `오늘 마감인 퀘스트가 ${count}개 있어요! 기분 좋게 시작해 볼까요?`
+                `오늘 마감인 퀘스트가 ${count}개 있어요! 기분 좋게 시작해 볼까요?`,
+                null,
+                null,
+                null
             );
             console.log(`✅ 알림 발송 완료`);
         } else {
@@ -517,7 +552,7 @@ function shouldShowTemplateToday(
         return true;
     }
 
-    // 월간 반복 (추가 구현 필요)
+    // 월간 반복
     if (recurringType === "monthly") {
         // 예: 매월 같은 날짜에 반복
         const startDay = start.getUTCDate();
