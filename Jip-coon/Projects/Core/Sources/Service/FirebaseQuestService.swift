@@ -30,8 +30,6 @@ public final class FirebaseQuestService: QuestServiceProtocol {
         return db.collection(FirestoreCollections.quests)
     }
     
-
-    
     private var templatesCollection: CollectionReference {
         return db.collection(FirestoreCollections.questTemplates)
     }
@@ -344,8 +342,6 @@ public final class FirebaseQuestService: QuestServiceProtocol {
                 .updateFailed(error.localizedDescription)
         }
     }
-    
-    // MARK: - Submission & Review Workflow
     
     // MARK: - Review Workflow
     

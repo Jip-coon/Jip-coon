@@ -13,7 +13,6 @@ public struct FirestoreCollections {
     public static let usersTemp = "users_temp"
     public static let families = "families"
     public static let quests = "quests"
-    public static let questSubmissions = "quest_submissions"
     public static let notifications = "notifications"
     public static let questTemplates = "quest_templates"
 }
@@ -76,17 +75,6 @@ public struct FirestoreFields {
         static let completedAt = "completedAt"
         static let approvedAt = "approvedAt"
         static let lastNotifiedAt = "lastNotifiedAt"
-    }
-    
-    struct QuestSubmission {
-        static let id = "id"
-        static let questId = "questId"
-        static let userId = "userId"
-        static let submittedAt = "submittedAt"
-        static let reviewedBy = "reviewedBy"
-        static let reviewedAt = "reviewedAt"
-        static let reviewComment = "reviewComment"
-        static let isApproved = "isApproved"
     }
     
     struct QuestTemplate {
