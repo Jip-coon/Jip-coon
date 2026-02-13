@@ -20,6 +20,8 @@ public final class LoginViewModel: ObservableObject {
     private let authService: AuthServiceProtocol
     private let userService: UserServiceProtocol
     
+    // MARK: - init
+    
     public init(
         authService: AuthServiceProtocol,
         userService: UserServiceProtocol
@@ -27,6 +29,8 @@ public final class LoginViewModel: ObservableObject {
         self.authService = authService
         self.userService = userService
     }
+    
+    // MARK: - Methods
     
     @MainActor
     public func signIn() async {
@@ -53,5 +57,4 @@ public final class LoginViewModel: ObservableObject {
             return false
         }
     }
-    
 }

@@ -5,9 +5,9 @@
 //  Created by 예슬 on 9/5/25.
 //
 
-import UIKit
 import Lottie
 import UI
+import UIKit
 
 public final class SplashViewController: UIViewController {
     private let animationView: LottieAnimationView = {
@@ -62,26 +62,26 @@ public final class SplashViewController: UIViewController {
         let ratio: CGFloat = 239 / 874  // label topInset / iPhone 16Pro Height
         let topConstant: CGFloat = screenHeight * ratio
         
-        NSLayoutConstraint.activate(
-[
-            jipCoonLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        NSLayoutConstraint.activate([
+            jipCoonLabel.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
             jipCoonLabel.topAnchor
-                .constraint(
-                    equalTo: view.safeAreaLayoutGuide.topAnchor,
-                    constant: topConstant
-                ),
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topConstant),
             
-            animationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            animationView.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
             animationView.bottomAnchor
                 .constraint(equalTo: jipCoonLabel.topAnchor, constant: 20),
             
-            jipCoonIcon.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            jipCoonIcon.centerXAnchor
+                .constraint(equalTo: view.centerXAnchor),
             jipCoonIcon.topAnchor
                 .constraint(equalTo: jipCoonLabel.bottomAnchor, constant: 10),
-            jipCoonIcon.widthAnchor.constraint(equalToConstant: 287),
-            jipCoonIcon.heightAnchor.constraint(equalToConstant: 287)
-]
-        )
+            jipCoonIcon.widthAnchor
+                .constraint(equalToConstant: 287),
+            jipCoonIcon.heightAnchor
+                .constraint(equalToConstant: 287)
+        ])
     }
     
     private func jipCoonLabelAnimation() {
@@ -93,5 +93,4 @@ public final class SplashViewController: UIViewController {
                 self.jipCoonLabel.transform = .identity
             })
     }
-    
 }

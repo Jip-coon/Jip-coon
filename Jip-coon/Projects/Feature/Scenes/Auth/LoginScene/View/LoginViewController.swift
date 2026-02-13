@@ -71,36 +71,11 @@ public final class LoginViewController: UIViewController {
     }
     
     private func setUpButtonAction() {
-        loginView.findPasswordButton
-            .addTarget(
-                self,
-                action: #selector(findPasswordButtonTapped),
-                for: .touchUpInside
-            )
-        loginView.loginButton
-            .addTarget(
-                self,
-                action: #selector(loginButtonTapped),
-                for: .touchUpInside
-            )
-        loginView.signUpButton
-            .addTarget(
-                self,
-                action: #selector(signUpButtonTapped),
-                for: .touchUpInside
-            )
-        loginView.googleLoginButton
-            .addTarget(
-                self,
-                action: #selector(googleLoginTapped),
-                for: .touchUpInside
-            )
-        loginView.appleLoginButton
-            .addTarget(
-                self,
-                action: #selector(appleLoginTapped),
-                for: .touchUpInside
-            )
+        loginView.findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
+        loginView.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        loginView.signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        loginView.googleLoginButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
+        loginView.appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
     }
     // MARK: - Button Action
     
@@ -289,8 +264,7 @@ public final class LoginViewController: UIViewController {
     
     private func updateLoadingState(_ isLoading: Bool) {
         loginView.loginButton.isEnabled = !isLoading
-        loginView.loginButton
-            .setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
+        loginView.loginButton.setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
     }
 }
 

@@ -41,7 +41,8 @@ final class SignUpViewModel: ObservableObject {
     }
     
     private func validateEmail() {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"    // (영문,숫자) + 골뱅이 + (영문,숫자) + . + 영문
+        // (영문,숫자) + 골뱅이 + (영문,숫자) + . + 영문
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         isEmailFormatValid = emailTest.evaluate(with: email)
     }
@@ -104,7 +105,6 @@ final class SignUpViewModel: ObservableObject {
             try await authService.updatePassword(password)
             
             // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
-            // TODO: - 가족 역할 설정하기
             let emailPrefix = email.components(separatedBy: "@").first ?? "사용자"
             let user = User(
                 id: currentUser.uid,
