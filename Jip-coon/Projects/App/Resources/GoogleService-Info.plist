@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CLIENT_ID</key>
+    <string>930536285317-qhv64s0qc5u0peoi1j32vipm75msseau.apps.googleusercontent.com</string>
+    <key>REVERSED_CLIENT_ID</key>
+    <string>com.googleusercontent.apps.930536285317-qhv64s0qc5u0peoi1j32vipm75msseau</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAN0lslQh4K0BH49f6_cl88UJfF9V5bsjk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>930536285317</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>dev.tuist.Jip-coon</string>
+	<key>PROJECT_ID</key>
+	<string>jip-coon</string>
+	<key>STORAGE_BUCKET</key>
+	<string>jip-coon.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:930536285317:ios:c512fcf096f8ad043235ec</string>
+</dict>
+</plist>

@@ -1,0 +1,85 @@
+//
+//  UIFontExtension.swift
+//  UI
+//
+//  Created by 예슬 on 9/5/25.
+//
+
+import CoreText
+import UIKit
+
+public extension UIFont {
+    static func npsExtraBold(ofSize size: CGFloat) -> UIFont {
+        FontRegistrar.registerIfNeeded()
+        return UIFont(name: "NPS font ExtraBold", size: size)!
+    }
+    
+    static func pretendard(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        FontRegistrar.registerIfNeeded()
+        
+        let fontName: String
+        switch weight {
+            case .regular:
+                fontName = "Pretendard-Regular"
+            case .semibold:
+                fontName = "Pretendard-SemiBold"
+            case .bold:
+                fontName = "Pretendard-Bold"
+            default:
+                fontName = "Pretendard-Regular"
+        }
+        
+        guard let font = UIFont(name: fontName, size: size) else {
+            assertionFailure("❌ Pretendard font not found: \(fontName)")
+            return UIFont.systemFont(ofSize: size, weight: weight)
+        }
+        return font
+    }
+}
+
+// MARK: - 폰트 등록 유틸
+
+private enum FontRegistrar {
+    private static var didRegister = false
+    
+    static func registerIfNeeded() {
+        guard !didRegister else { return }  // 한 번만 등록
+        
+        let fontNames = [
+            "Pretendard-Regular",
+            "Pretendard-SemiBold",
+            "Pretendard-Bold"
+        ]
+        
+        for fontName in fontNames {
+            registerFont(named: fontName, ext: "otf")
+        }
+        
+        registerFont(named: "NPSfont_extrabold", ext: "ttf")
+        didRegister = true
+    }
+    
+    // 실제 번들에서 폰트 가져와 CoreText로 등록
+    private static func registerFont(named: String, ext: String) {
+        guard let url = Bundle.module.url(
+            forResource: named,
+            withExtension: ext
+        ) else {
+            print("❌ Failed to find font file: \(named).\(ext)")
+            return
+        }
+
+        var error: Unmanaged<CFError>?
+        let success = CTFontManagerRegisterFontsForURL(
+            url as CFURL,
+            .process,
+            &error
+        )
+
+        if !success {
+            if let error = error?.takeUnretainedValue() {
+                print("❌ Font registration error: \(error)")
+            }
+        }
+    }
+}

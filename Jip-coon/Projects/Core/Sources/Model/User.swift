@@ -1,0 +1,100 @@
+//
+//  User.swift
+//  Core
+//
+//  Created by 심관혁 on 1/28/25.
+//
+
+import Foundation
+
+// MARK: - 유저 모델
+
+public struct User: Codable, Identifiable {
+    public let id: String                           // Firebase Auth UID
+    public var name: String                         // 사용자 이름
+    public var email: String                        // 이메일
+    public var role: UserRole                       // 역할 (부모/자녀)
+    public var familyId: String?                    // 소속 가족 ID
+    public var points: Int                          // 획득 포인트
+    public let createdAt: Date                      // 생성일
+    public var updatedAt: Date                      // 수정일
+    public var admin: Bool                          // 관리자 여부
+    public var fcmTokens: [String]?                 // 여러 기기 대응을 위해 배열로 관리
+    public var badgeCount: Int?                     // 현재 읽지 않은 알림 개수
+    public var notificationSetting: [String: Bool]? // 알림 종류별 ON/OFF
+    
+    /// 사용자 초기화
+    /// - Parameters:
+    ///   - id: Firebase Auth UID
+    ///   - name: 사용자 이름
+    ///   - email: 이메일
+    ///   - role: 사용자 역할
+    public init(
+        id: String,
+        name: String,
+        email: String,
+        role: UserRole
+    ) {
+        self.id = id
+        self.name = name
+        self.email = email
+        self.role = role
+        self.familyId = nil
+        self.points = 0
+        self.createdAt = Date()
+        self.updatedAt = Date()
+        self.admin = false
+        self.fcmTokens = []
+        self.badgeCount = 0
+        self.notificationSetting = User.defaultSettings() // 기본 알림 ON 설정
+    }
+}
+
+// MARK: - 유저 Extensions
+
+public extension User {
+    /// 사용자가 관리자인지 확인
+    var isAdmin: Bool {
+        return admin
+    }
+    
+    /// 사용자가 부모인지 확인
+    var isParent: Bool {
+        return role == .parent
+    }
+    
+    /// 사용자 표시명 (이름 + 역할) - 수정해도 됨
+    var displayNameWithRole: String {
+        return "\(name) (\(role.displayName))"
+    }
+    
+    // 기본값 설정 (회원가입 시 사용)
+    static func defaultSettings() -> [String: Bool] {
+        return [
+            "questAssigned": true,
+            "deadline": true,
+            "dailySummary": true
+        ]
+    }
+}
+
+// MARK: - 임시 사용자
+
+public struct TempUser: Codable {
+    public let id: String
+    public let email: String
+    public let state: String
+    public let createdAt: Date
+    
+    public init(
+        id: String,
+        email: String,
+        state: String,
+        createdAt: Date
+    ) {
+        self.id = id
+        self.email = email
+        self.state = state
+        self.createdAt = createdAt
+    }
+}
