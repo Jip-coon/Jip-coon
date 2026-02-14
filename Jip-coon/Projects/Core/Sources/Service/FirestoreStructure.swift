@@ -10,11 +10,9 @@ import Foundation
 // MARK: - Firestore 컬렉션 이름
 public struct FirestoreCollections {
     public static let users = "users"
-    public static let usersTemp = "users_temp" 
+    public static let usersTemp = "users_temp"
     public static let families = "families"
     public static let quests = "quests"
-    public static let questSubmissions = "quest_submissions"
-    public static let statistics = "statistics"
     public static let notifications = "notifications"
     public static let questTemplates = "quest_templates"
 }
@@ -30,10 +28,10 @@ public struct FirestoreFields {
         static let email = "email"
         static let role = "role"
         static let familyId = "familyId"
-        static let profileImageURL = "profileImageURL"
         static let points = "points"
         static let createdAt = "createdAt"
         static let updatedAt = "updatedAt"
+        static let admin = "admin"
         static let fcmTokens = "fcmTokens"
         static let badgeCount = "badgeCount"
         static let notificationSetting = "notificationSetting"
@@ -41,6 +39,8 @@ public struct FirestoreFields {
     
     struct TempUser {
         static let id = "id"
+        static let email = "email"
+        static let state = "state"
         static let createdAt = "createdAt"
     }
     
@@ -61,13 +61,13 @@ public struct FirestoreFields {
         static let description = "description"
         static let category = "category"
         static let status = "status"
+        static let recurringType = "recurringType"
         static let assignedTo = "assignedTo"
         static let createdBy = "createdBy"
         static let familyId = "familyId"
         static let points = "points"
         static let dueDate = "dueDate"
         static let selectedRepeatDays = "selectedRepeatDays"
-        static let recurringType = "recurringType"
         static let recurringEndDate = "recurringEndDate"
         static let createdAt = "createdAt"
         static let updatedAt = "updatedAt"
@@ -75,19 +75,6 @@ public struct FirestoreFields {
         static let completedAt = "completedAt"
         static let approvedAt = "approvedAt"
         static let lastNotifiedAt = "lastNotifiedAt"
-    }
-    
-    struct QuestSubmission {
-        static let id = "id"
-        static let questId = "questId"
-        static let userId = "userId"
-        static let comment = "comment"
-        static let imageURLs = "imageURLs"
-        static let submittedAt = "submittedAt"
-        static let reviewedBy = "reviewedBy"
-        static let reviewedAt = "reviewedAt"
-        static let reviewComment = "reviewComment"
-        static let isApproved = "isApproved"
     }
     
     struct QuestTemplate {
@@ -106,6 +93,7 @@ public struct FirestoreFields {
         static let updatedAt = "updatedAt"
         static let excludedDates = "excludedDates"
         static let recurringDueTime = "recurringDueTime"
+        static let lastNotifiedAt = "lastNotifiedAt"
     }
     
     struct Notification {

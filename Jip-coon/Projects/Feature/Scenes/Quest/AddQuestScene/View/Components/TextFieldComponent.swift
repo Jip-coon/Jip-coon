@@ -5,8 +5,8 @@
 //  Created by 예슬 on 9/11/25.
 //
 
-import UIKit
 import UI
+import UIKit
 
 final class TextFieldComponent: UIView {
     private let titleLabel: UILabel = {
@@ -53,8 +53,7 @@ final class TextFieldComponent: UIView {
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             
-            textField.leadingAnchor
-                .constraint(equalTo: titleLabel.trailingAnchor, constant: 13),
+            textField.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 13),
             textField.trailingAnchor.constraint(equalTo: trailingAnchor),
             textField.centerYAnchor.constraint(equalTo: centerYAnchor),
             textField.heightAnchor.constraint(equalToConstant: 35)
@@ -65,5 +64,4 @@ final class TextFieldComponent: UIView {
         titleLabel.text = title
         textField.placeholder = placeholder
     }
-    
 }

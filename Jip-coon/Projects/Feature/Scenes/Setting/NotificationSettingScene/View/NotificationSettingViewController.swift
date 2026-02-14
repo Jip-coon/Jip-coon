@@ -5,8 +5,8 @@
 //  Created by 예슬 on 2/6/26.
 //
 
-import Core
 import Combine
+import Core
 import UI
 import UIKit
 
@@ -56,14 +56,10 @@ final class NotificationSettingViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor
-                .constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor
-                .constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
         tableView.dataSource = self
@@ -122,7 +118,6 @@ final class NotificationSettingViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
         present(alert, animated: true)
     }
-    
 }
 
 // MARK: - TableViewDataSource, TableViewDelegate
@@ -152,5 +147,4 @@ extension NotificationSettingViewController: UITableViewDataSource, UITableViewD
         
         return cell
     }
-    
 }

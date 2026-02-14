@@ -37,11 +37,6 @@ final class NotificationSettingTableViewCell: UITableViewCell {
     private let toggleSwitch: UISwitch = {
         let toggleSwitch = UISwitch()
         toggleSwitch.onTintColor = .blue1
-        toggleSwitch.addTarget(
-            self,
-            action: #selector(toggleChanged),
-            for: .valueChanged
-        )
         return toggleSwitch
     }()
     
@@ -55,6 +50,7 @@ final class NotificationSettingTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        toggleSwitch.addTarget(self, action: #selector(toggleChanged), for: .valueChanged)
         setupUI()
     }
     
@@ -120,5 +116,4 @@ final class NotificationSettingTableViewCell: UITableViewCell {
         guard let type else { return }
         onToggle?(type, sender.isOn)
     }
-    
 }

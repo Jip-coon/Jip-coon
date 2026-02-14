@@ -5,15 +5,17 @@
 //  Created by 예슬 on 9/18/25.
 //
 
-import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import Foundation
 
 public final class FirebaseUserService: UserServiceProtocol {
     private let db = Firestore.firestore()
+    
     private var usersCollection: CollectionReference {
         return db.collection(FirestoreCollections.users)
     }
+    
     private var usersTempCollection: CollectionReference {
         db.collection(FirestoreCollections.usersTemp)
     }
@@ -47,7 +49,10 @@ public final class FirebaseUserService: UserServiceProtocol {
         try await usersCollection.document(id).delete()
     }
     
-    /// 사용자 정보가 없으면 사용자 생성
+    /// 현재 로그인한 사용자의 Firestore 문서 존재 여부 확인 및 자동 생성
+    /// - Firebase Auth 사용자이지만 Firestore 문서가 없는 경우 새 문서 생성
+    /// - 앱 시작 시 또는 로그인 후 사용자 데이터 일관성 확보를 위해 사용
+    /// - Note: 사용자 등록 프로세스의 일부로 자동 실행됨
     public func syncCurrentUserDocument() async throws {
         guard let authUser = Auth.auth().currentUser else { return }
         
@@ -65,7 +70,7 @@ public final class FirebaseUserService: UserServiceProtocol {
                     .map(String.init) ?? "사용자"
             )
             
-            var newUser = User(
+            let newUser = User(
                 id: authUser.uid,
                 name: displayName,
                 email: authUser.email ?? "",
@@ -78,7 +83,10 @@ public final class FirebaseUserService: UserServiceProtocol {
     
     // MARK: - Query
     
-    /// 현재 로그인한 사용자 정보 조회
+    /// 현재 Firebase Auth로 로그인한 사용자의 Firestore 문서 조회
+    /// - Returns: 현재 사용자 정보 또는 nil (로그인하지 않은 경우)
+    /// - Note: Firebase Auth UID를 키로 사용하여 Firestore에서 사용자 문서 검색
+    ///         앱 전반에서 현재 사용자 정보를 얻기 위한 핵심 메소드
     public func getCurrentUser() async throws -> User? {
         // Firebase Auth에서 현재 로그인한 사용자 정보 가져오기
         if let currentUser = Auth.auth().currentUser {
@@ -92,7 +100,9 @@ public final class FirebaseUserService: UserServiceProtocol {
     /// 가족 구성원 목록 조회
     public func getFamilyMembers(familyId: String) async throws -> [User] {
         // familyId와 일치하는 문서 가져오기
-        let snapshot = try await usersCollection.whereField("familyId", isEqualTo: familyId).getDocuments()
+        let snapshot = try await usersCollection
+            .whereField(FirestoreFields.User.familyId, isEqualTo: familyId)
+            .getDocuments()
         
         let users = snapshot.documents.compactMap { document in
             return try? document.data(as: User.self)
@@ -107,7 +117,7 @@ public final class FirebaseUserService: UserServiceProtocol {
     public func updateUserPoints(userId: String, points: Int) async throws {
         try await usersCollection
             .document(userId)
-            .updateData(["points": FieldValue.increment(Int64(points))])
+            .updateData([FirestoreFields.User.points: FieldValue.increment(Int64(points))])
     }
     
     /// 사용자 이름 업데이트
@@ -115,8 +125,8 @@ public final class FirebaseUserService: UserServiceProtocol {
         let userDocRef = usersCollection.document(userId)
         
         try await userDocRef.updateData([
-            "name": newName,
-            "updatedAt": Timestamp(date: Date())
+            FirestoreFields.User.name: newName,
+            FirestoreFields.User.updatedAt: Timestamp(date: Date())
         ])
     }
     
@@ -125,8 +135,8 @@ public final class FirebaseUserService: UserServiceProtocol {
         let userDocRef = usersCollection.document(userId)
         
         try await userDocRef.updateData([
-            "role": role.rawValue,
-            "updatedAt": Timestamp(date: Date())
+            FirestoreFields.User.role: role.rawValue,
+            FirestoreFields.User.updatedAt: Timestamp(date: Date())
         ])
     }
     
@@ -169,12 +179,6 @@ public final class FirebaseUserService: UserServiceProtocol {
         )
         
         try usersTempCollection.document(uid).setData(from: tempUser)
-    }
-    
-    /// 임시 사용자 조회
-    public func getTempUser(by uid: String) async throws -> TempUser? {
-        let document = try await usersTempCollection.document(uid).getDocument()
-        return try document.data(as: TempUser.self)
     }
     
     /// 임시 사용자 삭제

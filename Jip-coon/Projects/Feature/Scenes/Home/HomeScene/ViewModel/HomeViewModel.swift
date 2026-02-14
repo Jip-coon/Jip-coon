@@ -5,11 +5,11 @@
 //  Created by 심관혁 on 1/27/26.
 //
 
-import Foundation
 import Combine
 import Core
+import Foundation
 
-public final class HomeViewModel: ObservableObject {
+final class HomeViewModel {
     
     // MARK: - Properties
     
@@ -20,16 +20,16 @@ public final class HomeViewModel: ObservableObject {
     @Published var selectedFilter: HomeFilterType = .myTask
     
     // MARK: - Services
-    public let userService: UserServiceProtocol
-    public let familyService: FamilyServiceProtocol
-    public let questService: QuestServiceProtocol
+    let userService: UserServiceProtocol
+    let familyService: FamilyServiceProtocol
+    let questService: QuestServiceProtocol
     
     private var cancellables = Set<AnyCancellable>()
     private var questSubscription: AnyCancellable?
     
     // MARK: - Initializer
     
-    public init(
+    init(
         userService: UserServiceProtocol,
         familyService: FamilyServiceProtocol,
         questService: QuestServiceProtocol

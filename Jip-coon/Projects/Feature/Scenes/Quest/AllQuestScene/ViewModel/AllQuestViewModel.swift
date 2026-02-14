@@ -8,7 +8,7 @@
 import Core
 import Foundation
 
-public final class AllQuestViewModel: ObservableObject {
+final class AllQuestViewModel {
     
     let userService: UserServiceProtocol
     let questService: QuestServiceProtocol
@@ -41,7 +41,7 @@ public final class AllQuestViewModel: ObservableObject {
     
     // MARK: - init
     
-    public init(
+    init(
         userService: UserServiceProtocol,
         questService: QuestServiceProtocol
     ) {
@@ -278,7 +278,6 @@ public final class AllQuestViewModel: ObservableObject {
             QuestSection(date: $0, quests: dictionary[$0] ?? [])
         }
     }
-    
 }
 
 // MARK: - Quest Section

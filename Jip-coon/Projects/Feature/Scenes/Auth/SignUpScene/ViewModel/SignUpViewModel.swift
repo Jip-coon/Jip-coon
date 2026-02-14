@@ -9,7 +9,7 @@ import Combine
 import Core
 import Foundation
 
-final class SignUpViewModel: ObservableObject {
+final class SignUpViewModel {
     @Published var email: String = "" {
         didSet { validateEmail() }
     }
@@ -21,7 +21,7 @@ final class SignUpViewModel: ObservableObject {
     @Published var isPasswordValid: Bool = true
     @Published var isSignUpEnabled: Bool = false
     @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
+    @Published var error: Error?
     
     private let authService: AuthService
     private let userService: FirebaseUserService
@@ -41,7 +41,8 @@ final class SignUpViewModel: ObservableObject {
     }
     
     private func validateEmail() {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"    // (영문,숫자) + 골뱅이 + (영문,숫자) + . + 영문
+        // (영문,숫자) + 골뱅이 + (영문,숫자) + . + 영문
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         isEmailFormatValid = emailTest.evaluate(with: email)
     }
@@ -62,11 +63,9 @@ final class SignUpViewModel: ObservableObject {
             
             try await user.sendEmailVerification()
             try await userService.createTempUser(uid: user.uid, email: email)
-            print("✅ 인증 메일 발송 성공")
-            
             return true
         } catch {
-            errorMessage = authService.handleError(error)
+            self.error = AuthError.map(from: error)
             return false
         }
     }
@@ -87,7 +86,7 @@ final class SignUpViewModel: ObservableObject {
     
     func performSignUp() async {
         isLoading = true
-        errorMessage = nil
+        error = nil
         
         defer { isLoading = false }
         
@@ -104,7 +103,6 @@ final class SignUpViewModel: ObservableObject {
             try await authService.updatePassword(password)
             
             // 기본 사용자 정보 생성 (이름은 이메일의 앞부분으로 설정)
-            // TODO: - 가족 역할 설정하기
             let emailPrefix = email.components(separatedBy: "@").first ?? "사용자"
             let user = User(
                 id: currentUser.uid,
@@ -116,15 +114,12 @@ final class SignUpViewModel: ObservableObject {
             // Firestore에 사용자 정보 저장
             try await userService.createUser(user)
             try await userService.deleteTempUser(uid: currentUser.uid)
-            
-            print("회원가입 및 Firestore 저장 성공")
         } catch {
-            errorMessage = authService.handleError(error)
+            self.error = AuthError.map(from: error)
             
             // 회원가입 실패 시 Firebase Auth 계정 삭제
             do {
                 try await authService.deleteAccount()
-                print("실패한 계정 정리 완료")
             } catch {
                 print("실패한 계정 정리 실패: \(error.localizedDescription)")
             }

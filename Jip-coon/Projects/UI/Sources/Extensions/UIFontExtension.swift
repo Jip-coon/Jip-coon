@@ -5,8 +5,8 @@
 //  Created by 예슬 on 9/5/25.
 //
 
-import UIKit
 import CoreText
+import UIKit
 
 public extension UIFont {
     static func npsExtraBold(ofSize size: CGFloat) -> UIFont {
@@ -19,14 +19,14 @@ public extension UIFont {
         
         let fontName: String
         switch weight {
-        case .regular:
-            fontName = "Pretendard-Regular"
-        case .semibold:
-            fontName = "Pretendard-SemiBold"
-        case .bold:
-            fontName = "Pretendard-Bold"
-        default:
-            fontName = "Pretendard-Regular"
+            case .regular:
+                fontName = "Pretendard-Regular"
+            case .semibold:
+                fontName = "Pretendard-SemiBold"
+            case .bold:
+                fontName = "Pretendard-Bold"
+            default:
+                fontName = "Pretendard-Regular"
         }
         
         guard let font = UIFont(name: fontName, size: size) else {
@@ -38,6 +38,7 @@ public extension UIFont {
 }
 
 // MARK: - 폰트 등록 유틸
+
 private enum FontRegistrar {
     private static var didRegister = false
     
@@ -63,21 +64,22 @@ private enum FontRegistrar {
         guard let url = Bundle.module.url(
             forResource: named,
             withExtension: ext
-        ),  // Tuist UI 모듈 번들에서 폰트 파일 경로 가져오기
-              let provider = CGDataProvider(url: url as CFURL),
-              let font = CGFont(provider) else {    // CoreText에서 폰트 객체 생성
-            print("❌ Failed to load font: \(named).\(ext)")
+        ) else {
+            print("❌ Failed to find font file: \(named).\(ext)")
             return
         }
-        
+
         var error: Unmanaged<CFError>?
-        CTFontManagerRegisterGraphicsFont(font, &error) // 폰트를 시스템에 등록
-        if let error = error {
-            print("❌ Font registration error: \(error.takeUnretainedValue())")
-        } else {
-            print(
-                "✅ Font registered: \(font.fullName ?? "Unknown" as CFString)"
-            )
+        let success = CTFontManagerRegisterFontsForURL(
+            url as CFURL,
+            .process,
+            &error
+        )
+
+        if !success {
+            if let error = error?.takeUnretainedValue() {
+                print("❌ Font registration error: \(error)")
+            }
         }
     }
 }

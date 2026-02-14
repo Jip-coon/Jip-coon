@@ -114,32 +114,14 @@ public enum RecurringType: String, CaseIterable, Codable {
     case daily = "daily"        // 매일
     case weekly = "weekly"      // 매주
     case monthly = "monthly"    // 매월
-    
-    public var displayName: String {
-        switch self {
-            case .none: return "반복 없음"
-            case .daily: return "매일"
-            case .weekly: return "매주"
-            case .monthly: return "매월"
-        }
-    }
-    
-    public var shortDisplayName: String {
-        switch self {
-            case .none: return "없음"
-            case .daily: return "매일"
-            case .weekly: return "매주"
-            case .monthly: return "매월"
-        }
-    }
 }
 
 // MARK: - 긴급도 레벨
 
 public enum UrgencyLevel: String, CaseIterable, Codable {
-    case low = "low"  // 낮음
-    case medium = "medium"  // 보통
-    case high = "high"  // 높음
+    case low = "low"            // 낮음
+    case medium = "medium"      // 보통
+    case high = "high"          // 높음
     case critical = "critical"  // 매우 긴급
     
     public var displayName: String {
@@ -168,7 +150,6 @@ public enum UrgencyLevel: String, CaseIterable, Codable {
             case .critical: return "🚨"
         }
     }
-    
 }
 
 // MARK: - 반복 퀘스트 삭제

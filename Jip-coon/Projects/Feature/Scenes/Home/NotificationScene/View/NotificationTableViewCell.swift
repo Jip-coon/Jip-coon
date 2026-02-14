@@ -171,5 +171,4 @@ final class NotificationTableViewCell: UITableViewCell {
             contentView.backgroundColor = .backgroundWhite
         }
     }
-    
 }

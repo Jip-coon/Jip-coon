@@ -20,6 +20,8 @@ final class UnderlineSegmentControl: UIView {
     private var underlineLeadingConstraint: NSLayoutConstraint!
     private var underlineWidthConstraint: NSLayoutConstraint!
     
+    // MARK: - init
+    
     init(titles: [String]) {
         super.init(frame: .zero)
         setup(titles: titles)
@@ -27,6 +29,15 @@ final class UnderlineSegmentControl: UIView {
     
     required init?(coder: NSCoder) {
         fatalError()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // layoutSubviews가 여러 번 호출될 수 있으므로,
+        // 유효한 bounds를 가질 때만 underline 업데이트
+        if bounds.width > 0 {
+            moveUnderline(animated: false)
+        }
     }
     
     private func setup(titles: [String]) {
@@ -50,17 +61,13 @@ final class UnderlineSegmentControl: UIView {
         underlineWidthConstraint = underlineView.widthAnchor.constraint(equalToConstant: 0)
         
         NSLayoutConstraint.activate([
-            stackView.topAnchor
-                .constraint(equalTo: topAnchor),
-            stackView.bottomAnchor
-                .constraint(equalTo: bottomAnchor),
+            stackView.topAnchor.constraint(equalTo: topAnchor),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
             leadingConstraint,
             trailingConstraint,
             
-            underlineView.bottomAnchor
-                .constraint(equalTo: bottomAnchor),
-            underlineView.heightAnchor
-                .constraint(equalToConstant: 1),
+            underlineView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            underlineView.heightAnchor.constraint(equalToConstant: 1),
             underlineLeadingConstraint,
             underlineWidthConstraint
         ])
@@ -137,14 +144,4 @@ final class UnderlineSegmentControl: UIView {
             self.layoutIfNeeded()
         }
     }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        // layoutSubviews가 여러 번 호출될 수 있으므로, 
-        // 유효한 bounds를 가질 때만 underline 업데이트
-        if bounds.width > 0 {
-            moveUnderline(animated: false)
-        }
-    }
-    
 }

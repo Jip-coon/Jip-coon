@@ -10,18 +10,17 @@ import Foundation
 // MARK: - 유저 모델
 
 public struct User: Codable, Identifiable {
-    public let id: String              // Firebase Auth UID
-    public var name: String            // 사용자 이름
-    public var email: String           // 이메일
-    public var role: UserRole          // 역할 (부모/자녀)
-    public var familyId: String?       // 소속 가족 ID
-    public var profileImageURL: String? // 프로필 이미지 URL
-    public var points: Int             // 획득 포인트
-    public let createdAt: Date         // 생성일
-    public var updatedAt: Date         // 수정일
-    public var admin: Bool           // 관리자 여부
-    public var fcmTokens: [String]?          // 여러 기기 대응을 위해 배열로 관리
-    public var badgeCount: Int?             // 현재 읽지 않은 알림 개수
+    public let id: String                           // Firebase Auth UID
+    public var name: String                         // 사용자 이름
+    public var email: String                        // 이메일
+    public var role: UserRole                       // 역할 (부모/자녀)
+    public var familyId: String?                    // 소속 가족 ID
+    public var points: Int                          // 획득 포인트
+    public let createdAt: Date                      // 생성일
+    public var updatedAt: Date                      // 수정일
+    public var admin: Bool                          // 관리자 여부
+    public var fcmTokens: [String]?                 // 여러 기기 대응을 위해 배열로 관리
+    public var badgeCount: Int?                     // 현재 읽지 않은 알림 개수
     public var notificationSetting: [String: Bool]? // 알림 종류별 ON/OFF
     
     /// 사용자 초기화
@@ -41,7 +40,6 @@ public struct User: Codable, Identifiable {
         self.email = email
         self.role = role
         self.familyId = nil
-        self.profileImageURL = nil
         self.points = 0
         self.createdAt = Date()
         self.updatedAt = Date()
@@ -63,21 +61,6 @@ public extension User {
     /// 사용자가 부모인지 확인
     var isParent: Bool {
         return role == .parent
-    }
-    
-    /// 사용자가 자녀인지 확인
-    var isChild: Bool {
-        return role == .child
-    }
-    
-    /// 가족에 속해있는지 확인
-    var hasFamily: Bool {
-        return familyId != nil
-    }
-    
-    /// 프로필 이미지가 있는지 확인
-    var hasProfileImage: Bool {
-        return profileImageURL != nil && !profileImageURL!.isEmpty
     }
     
     /// 사용자 표시명 (이름 + 역할) - 수정해도 됨
@@ -103,7 +86,12 @@ public struct TempUser: Codable {
     public let state: String
     public let createdAt: Date
     
-    public init(id: String, email: String, state: String, createdAt: Date) {
+    public init(
+        id: String,
+        email: String,
+        state: String,
+        createdAt: Date
+    ) {
         self.id = id
         self.email = email
         self.state = state

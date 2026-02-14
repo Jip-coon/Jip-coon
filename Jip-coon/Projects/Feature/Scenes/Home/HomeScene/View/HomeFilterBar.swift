@@ -15,21 +15,21 @@ enum HomeFilterType: Int {
     case myTask = 0
     case urgent = 1
     case approval = 2
-
+    
     
     var title: String {
         switch self {
-        case .myTask: return "나의할일"
-        case .urgent: return "긴급할일"
-        case .approval: return "승인대기"
+            case .myTask: return "나의할일"
+            case .urgent: return "긴급할일"
+            case .approval: return "승인대기"
         }
     }
     
     var icon: String {
         switch self {
-        case .myTask: return "archivebox.fill"
-        case .urgent: return "light.beacon.max.fill"
-        case .approval: return "checkmark.seal.fill"
+            case .myTask: return "archivebox.fill"
+            case .urgent: return "light.beacon.max.fill"
+            case .approval: return "checkmark.seal.fill"
         }
     }
 }
@@ -83,7 +83,7 @@ final class HomeFilterBar: UIView {
             filterTypes.append(.approval)
         }
         
-        for (index, type) in filterTypes.enumerated() {
+        for (_, type) in filterTypes.enumerated() {
             let buttonView = createFilterButton(for: type, showSeparator: type == .myTask)
             stackView.addArrangedSubview(buttonView)
             

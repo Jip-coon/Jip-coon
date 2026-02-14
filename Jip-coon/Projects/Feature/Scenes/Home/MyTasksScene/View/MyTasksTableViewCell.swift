@@ -5,12 +5,12 @@
 //  Created by 심관혁 on 1/27/26.
 //
 
-import UIKit
 import Core
 import UI
+import UIKit
 
-public class MyTasksTableViewCell: UITableViewCell {
-    public static let identifier = "MyTasksTableViewCell"
+final class MyTasksTableViewCell: UITableViewCell {
+    static let identifier = "MyTasksTableViewCell"
     
     // MARK: - UI Components
     
@@ -88,7 +88,7 @@ public class MyTasksTableViewCell: UITableViewCell {
         return label
     }()
     
-    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
@@ -103,7 +103,11 @@ public class MyTasksTableViewCell: UITableViewCell {
         
         contentView.addSubview(containerView)
         
-        [emojiContainer, titleLabel, dateStack, statusContainer].forEach {
+        [emojiContainer,
+         titleLabel,
+         dateStack,
+         statusContainer
+        ].forEach {
             containerView.addSubview($0)
         }
         
@@ -150,11 +154,12 @@ public class MyTasksTableViewCell: UITableViewCell {
             
             dateStack.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
             dateStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            dateStack.trailingAnchor.constraint(lessThanOrEqualTo: statusContainer.leadingAnchor, constant: -12)
+            dateStack.trailingAnchor
+                .constraint(lessThanOrEqualTo: statusContainer.leadingAnchor, constant: -12)
         ])
     }
     
-    public override func setSelected(_ selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         
         if selected {
@@ -168,7 +173,7 @@ public class MyTasksTableViewCell: UITableViewCell {
         }
     }
     
-    public override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         super.setHighlighted(highlighted, animated: animated)
         
         UIView.animate(withDuration: 0.1) {
@@ -180,7 +185,7 @@ public class MyTasksTableViewCell: UITableViewCell {
         }
     }
     
-    public func configure(with quest: Quest, familyMembers: [User]) {
+    func configure(with quest: Quest, familyMembers: [User]) {
         emojiLabel.text = quest.category.emoji
         titleLabel.text = quest.title
         
@@ -190,7 +195,7 @@ public class MyTasksTableViewCell: UITableViewCell {
         // 날짜 포맷팅
         if let dueDate = quest.dueDate {
             let formatter = DateFormatter()
-            formatter.dateFormat = "M월 d일 a h:mm" 
+            formatter.dateFormat = "M월 d일 a h:mm"
             formatter.locale = Locale(identifier: "ko_KR")
             dueDateLabel.text = formatter.string(from: dueDate)
             dateIcon.isHidden = false

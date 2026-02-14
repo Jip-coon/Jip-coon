@@ -13,7 +13,7 @@ import UIKit
 /// - 가족 생성: 이름 입력과 초대코드 생성
 /// - 가족 참여: 초대코드 입력으로 기존 가족 참여
 /// - FirebaseFamilyService를 활용한 실제 기능 구현
-public class FamilyCreationViewController: UIViewController {
+final class FamilyCreationViewController: UIViewController {
     
     // MARK: - Mode
     
@@ -23,15 +23,15 @@ public class FamilyCreationViewController: UIViewController {
         
         var title: String {
             switch self {
-            case .create: return "가족 만들기"
-            case .join: return "가족 참여하기"
+                case .create: return "가족 만들기"
+                case .join: return "가족 참여하기"
             }
         }
         
         var subtitle: String {
             switch self {
-            case .create: return "가족 이름을 입력하고 초대코드를 공유하세요"
-            case .join: return "초대코드를 입력하여 가족에 참여하세요"
+                case .create: return "가족 이름을 입력하고 초대코드를 공유하세요"
+                case .join: return "초대코드를 입력하여 가족에 참여하세요"
             }
         }
     }
@@ -47,14 +47,14 @@ public class FamilyCreationViewController: UIViewController {
     private let familyService: FamilyServiceProtocol
     private let userService: UserServiceProtocol
     private var currentUser: User?
-    internal let components = FamilyCreationComponents()
+    let components = FamilyCreationComponents()
     
-    public var onFamilyCreated: (() -> Void)?
+    var onFamilyCreated: (() -> Void)?
     
     
     // MARK: - Initialization
     
-    public init(
+    init(
         familyService: FamilyServiceProtocol,
         userService: UserServiceProtocol
     ) {
@@ -69,7 +69,7 @@ public class FamilyCreationViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         components.delegate = self
         components.familyNameTextField.delegate = self
@@ -107,34 +107,34 @@ public class FamilyCreationViewController: UIViewController {
         
         // 타이틀 텍스트 설정
         switch currentMode {
-        case .create:
-            components.titleLabel.text = "🏠 우리 가족 만들기"
-        case .join:
-            components.titleLabel.text = "🏠 우리 가족 참여하기"
+            case .create:
+                components.titleLabel.text = "🏠 우리 가족 만들기"
+            case .join:
+                components.titleLabel.text = "🏠 우리 가족 참여하기"
         }
         
         components.subtitleLabel.text = currentMode.subtitle
         
         switch currentMode {
-        case .create:
-            components.familyNameTextField.isHidden = false
-            components.inviteCodeTextField.isHidden = true
-            components.createButton.isHidden = false
-            components.joinButton.isHidden = true
-            
-            // 초대코드 뷰 숨김
-            components.inviteCodeView.isHidden = true
-            components.doneButton.isHidden = true
-            
-        case .join:
-            components.familyNameTextField.isHidden = true
-            components.inviteCodeTextField.isHidden = false
-            components.createButton.isHidden = true
-            components.joinButton.isHidden = false
-            
-            // 초대코드 뷰 숨김
-            components.inviteCodeView.isHidden = true
-            components.doneButton.isHidden = true
+            case .create:
+                components.familyNameTextField.isHidden = false
+                components.inviteCodeTextField.isHidden = true
+                components.createButton.isHidden = false
+                components.joinButton.isHidden = true
+                
+                // 초대코드 뷰 숨김
+                components.inviteCodeView.isHidden = true
+                components.doneButton.isHidden = true
+                
+            case .join:
+                components.familyNameTextField.isHidden = true
+                components.inviteCodeTextField.isHidden = false
+                components.createButton.isHidden = true
+                components.joinButton.isHidden = false
+                
+                // 초대코드 뷰 숨김
+                components.inviteCodeView.isHidden = true
+                components.doneButton.isHidden = true
         }
         
         // 키보드 내리기
@@ -149,9 +149,17 @@ public class FamilyCreationViewController: UIViewController {
         view.addSubview(components.scrollView)
         components.scrollView.addSubview(components.contentView)
         
-        [components.modeSegmentControl, components.titleLabel, components.subtitleLabel, components.familyNameTextField,
-         components.inviteCodeTextField, components.createButton, components.joinButton, components.inviteCodeView,
-         components.doneButton, components.activityIndicator].forEach {
+        [components.modeSegmentControl,
+         components.titleLabel,
+         components.subtitleLabel,
+         components.familyNameTextField,
+         components.inviteCodeTextField,
+         components.createButton,
+         components.joinButton,
+         components.inviteCodeView,
+         components.doneButton,
+         components.activityIndicator
+        ].forEach {
             components.contentView.addSubview($0)
         }
         
@@ -264,7 +272,11 @@ public class FamilyCreationViewController: UIViewController {
             
             await MainActor.run {
                 setLoadingState(false)
-                let alert = UIAlertController(title: "참여 완료", message: "'\(joinedFamily.name)' 가족에 참여했습니다!", preferredStyle: .alert)
+                let alert = UIAlertController(
+                    title: "참여 완료",
+                    message: "'\(joinedFamily.name)' 가족에 참여했습니다!",
+                    preferredStyle: .alert
+                )
                 alert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
                     self?.onFamilyCreated?()
                     self?.dismiss(animated: true)
@@ -349,23 +361,23 @@ public class FamilyCreationViewController: UIViewController {
 // MARK: - FamilyCreationComponentsDelegate
 
 extension FamilyCreationViewController: FamilyCreationComponentsDelegate {
-    public func didChangeMode(to index: Int) {
+    func didChangeMode(to index: Int) {
         currentMode = Mode(rawValue: index) ?? .create
     }
     
-    public func didTapCreateButton() {
+    func didTapCreateButton() {
         createButtonTapped()
     }
     
-    public func didTapJoinButton() {
+    func didTapJoinButton() {
         joinButtonTapped()
     }
     
-    public func didTapShareButton() {
+    func didTapShareButton() {
         shareButtonTapped()
     }
     
-    public func didTapDoneButton() {
+    func didTapDoneButton() {
         doneButtonTapped()
     }
 }
@@ -373,7 +385,7 @@ extension FamilyCreationViewController: FamilyCreationComponentsDelegate {
 // MARK: - UITextFieldDelegate
 
 extension FamilyCreationViewController: UITextFieldDelegate {
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }

@@ -16,59 +16,36 @@ import Foundation
 /// - 다양한 계산 속성을 통한 상태 및 날짜 정보 제공
 public struct Quest: Codable, Identifiable {
     // MARK: - 기본 식별 정보
-    public let id: String              // Firestore 문서 ID (고유 식별자)
-    public var templateId: String?     // Quest Template ID (반복 퀘스트 연결용 ID)
-    public var title: String           // 퀘스트 제목
-    public var description: String?    // 퀘스트 상세 설명 (선택사항)
-
+    public let id: String                   // Firestore 문서 ID (고유 식별자)
+    public var templateId: String?          // Quest Template ID (반복 퀘스트 연결용 ID)
+    public var title: String                // 퀘스트 제목
+    public var description: String?         // 퀘스트 상세 설명 (선택사항)
+    
     // MARK: - 분류 및 상태 정보
-    public var category: QuestCategory // 퀘스트 카테고리 (청소, 요리, 반려동물 등)
-    public var status: QuestStatus     // 현재 진행 상태 (대기, 진행중, 완료, 승인, 거절)
+    public var category: QuestCategory      // 퀘스트 카테고리 (청소, 요리, 반려동물 등)
+    public var status: QuestStatus          // 현재 진행 상태 (대기, 진행중, 완료, 승인, 거절)
     public var recurringType: RecurringType // 반복 유형 (없음, 일간, 주간, 월간)
-
+    
     // MARK: - 사용자 및 가족 관련
-    public var assignedTo: String?     // 담당자 사용자 ID (nil이면 미할당)
-    public let createdBy: String       // 퀘스트 생성자 ID
-    public let familyId: String        // 소속 가족 ID
-
+    public var assignedTo: String?          // 담당자 사용자 ID (nil이면 미할당)
+    public let createdBy: String            // 퀘스트 생성자 ID
+    public let familyId: String             // 소속 가족 ID
+    
     // MARK: - 보상 및 일정 정보
-    public var points: Int             // 완료 시 획득 포인트
-    public var dueDate: Date?          // 마감 기한 (nil이면 기한 없음)
+    public var points: Int                  // 완료 시 획득 포인트
+    public var dueDate: Date?               // 마감 기한 (nil이면 기한 없음)
     public var selectedRepeatDays: [Int]?   // 선택된 반복 요일
-    public var recurringEndDate: Date?  // 반복 종료일
-
+    public var recurringEndDate: Date?      // 반복 종료일
+    
     // MARK: - 타임스탬프 정보
-    public let createdAt: Date         // 퀘스트 생성 시각
-    public var updatedAt: Date         // 마지막 수정 시각
-    public var startedAt: Date?        // 퀘스트 시작 시각
-    public var completedAt: Date?      // 퀘스트 완료 시각
-    public var approvedAt: Date?       // 퀘스트 승인 시각
-    public var lastNotifiedAt: Date?   // 마지막으로 알림 보낸 시각
-
-    /// 기본 퀘스트 생성자
-    /// - Parameters:
-    ///   - id: Firestore에서 자동 생성된 문서 ID
-    ///   - title: 퀘스트 제목
-    ///   - description: 퀘스트 상세 설명 (선택사항)
-    ///   - category: 퀘스트 카테고리
-    ///   - createdBy: 생성자 사용자 ID
-    ///   - familyId: 소속 가족 ID
-    ///   - points: 완료 시 획득 포인트 (기본값: 10)
-    ///   - templateId: Quest Template ID (반복 퀘스트일 경우)
-    ///   - status: 퀘스트 진행 상태
-    ///   - recurringType: 퀘스트 반복 유형
-    ///   - assignedTo: 담당자 사용자 ID
-    ///   - dueDate: 마감일
-    ///   - createdAt: 퀘스트 생성 시각
-    ///   - startedAt: 퀘스트 시작 시각
-    ///   - completedAt: 퀘스트 완료 시각
-    ///   - approvedAt: 퀘스트 승인 시각
-    ///   - updatedAt: 마지막 수정 시각
-    ///   - selectedRepeatDays: 반복되는 요일
-    ///   - recurringEndDate: 반복 종료일
-    ///   - lastNotifiedAt: 해당 퀘스트가 마지막으로 알림 보내진 시각
-    /// - Note: FirebaseQuestService에서 퀘스트 생성 시 사용
-    ///         실제 Firestore 문서 ID를 사용하여 데이터 일관성 보장
+    public let createdAt: Date              // 퀘스트 생성 시각
+    public var updatedAt: Date              // 마지막 수정 시각
+    public var startedAt: Date?             // 퀘스트 시작 시각
+    public var completedAt: Date?           // 퀘스트 완료 시각
+    public var approvedAt: Date?            // 퀘스트 승인 시각
+    public var lastNotifiedAt: Date?        // 마지막으로 알림 보낸 시각
+    
+    /// 퀘스트 생성자
     public init(
         id: String = UUID().uuidString,
         templateId: String? = nil,
@@ -111,168 +88,5 @@ public struct Quest: Codable, Identifiable {
         self.approvedAt = approvedAt
         self.updatedAt = updatedAt
         self.lastNotifiedAt = lastNotifiedAt
-    }
-}
-
-// MARK: - 퀘스트 상태 관련 계산 속성
-
-public extension Quest {
-    /// 퀘스트가 특정 담당자에게 할당되었는지 확인
-    var isAssigned: Bool {
-        return assignedTo != nil
-    }
-
-    /// 퀘스트가 현재 진행 중인지 확인 (담당자가 작업을 시작한 상태)
-    var isInProgress: Bool {
-        return status == .inProgress
-    }
-
-    /// 퀘스트가 완료되었는지 확인 (완료 또는 승인 상태 모두 포함)
-    var isCompleted: Bool {
-        return status == .completed || status == .approved
-    }
-
-    /// 퀘스트가 부모/관리자에 의해 승인되었는지 확인
-    var isApproved: Bool {
-        return status == .approved
-    }
-
-    /// 퀘스트 완료가 거절되었는지 확인
-    var isRejected: Bool {
-        return status == .rejected
-    }
-    
-    /// 퀘스트가 반복 실행되는지 확인
-    var isRecurring: Bool {
-        return recurringType != .none
-    }
-
-    /// 마감 기한이 설정되어 있는지 확인
-    var hasDueDate: Bool {
-        return dueDate != nil
-    }
-
-    /// 마감 기한이 지났는지 확인 (완료되지 않은 경우에만)
-    var isOverdue: Bool {
-        guard let dueDate = dueDate else { return false }
-        return Date() > dueDate && !isCompleted
-    }
-
-    /// 마감 기한이 오늘인지 확인
-    var isDueToday: Bool {
-        guard let dueDate = dueDate else { return false }
-        return Calendar.current.isDateInToday(dueDate)
-    }
-
-    /// 마감 기한이 내일인지 확인
-    var isDueTomorrow: Bool {
-        guard let dueDate = dueDate else { return false }
-        return Calendar.current.isDateInTomorrow(dueDate)
-    }
-    
-    /// 특정 사용자가 담당자인지 확인
-    func isAssignedTo(_ userId: String) -> Bool {
-        return assignedTo == userId
-    }
-    
-    /// 특정 사용자가 생성자인지 확인
-    func isCreatedBy(_ userId: String) -> Bool {
-        return createdBy == userId
-    }
-    
-    /// 퀘스트를 진행 상태로 변경
-    /// - Parameter userId: 퀘스트를 시작하는 사용자 ID
-    /// - Note: 담당자가 맞고 대기 상태인 경우에만 시작 가능
-    ///         시작 시각과 수정 시각을 현재 시간으로 기록
-    mutating func start(by userId: String) {
-        guard assignedTo == userId, status == .pending else { return }
-        status = .inProgress
-        startedAt = Date()
-        updatedAt = Date()
-    }
-
-    /// 퀘스트를 완료 상태로 변경
-    /// - Note: 진행 중인 퀘스트만 완료 가능
-    ///         완료 시각과 수정 시각을 현재 시간으로 기록
-    mutating func complete() {
-        guard status == .inProgress else { return }
-        status = .completed
-        completedAt = Date()
-        updatedAt = Date()
-    }
-
-    /// 퀘스트를 승인 상태로 변경 (관리자 권한)
-    /// - Note: 완료된 퀘스트만 승인 가능
-    ///         승인 시각과 수정 시각을 현재 시간으로 기록
-    mutating func approve() {
-        guard status == .completed else { return }
-        status = .approved
-        approvedAt = Date()
-        updatedAt = Date()
-    }
-
-    /// 퀘스트 완료를 거절 상태로 변경 (관리자 권한)
-    /// - Note: 완료된 퀘스트만 거절 가능
-    ///         수정 시각을 현재 시간으로 기록
-    mutating func reject() {
-        guard status == .completed else { return }
-        status = .rejected
-        updatedAt = Date()
-    }
-    
-    /// 담당자 지정
-    mutating func assign(to userId: String) {
-        assignedTo = userId
-        updatedAt = Date()
-    }
-    
-    /// 마감 기한까지 남은 시간을 읽기 쉽게 포맷한 문자열
-    /// - Returns: "3일 남음", "5시간 남음", "곧 마감", "마감됨" 등의 문자열
-    /// - Note: 마감 기한이 없는 경우 nil 반환
-    ///         경과 시간에 따라 일/시간/분 단위로 표시
-    var timeUntilDueString: String? {
-        guard let dueDate = dueDate else { return nil }
-
-        let now = Date()
-        let timeInterval = dueDate.timeIntervalSince(now)
-
-        if timeInterval < 0 {
-            return "마감됨"
-        }
-
-        let days = Int(timeInterval / 86400)
-        let hours = Int(
-            (timeInterval.truncatingRemainder(dividingBy: 86400)) / 3600
-        )
-
-        if days > 0 {
-            return "\(days)일 남음"
-        } else if hours > 0 {
-            return "\(hours)시간 남음"
-        } else {
-            return "곧 마감"
-        }
-    }
-
-    /// 퀘스트 진행 시간을 읽기 쉽게 포맷한 문자열
-    /// - Returns: "2시간 30분", "45분" 등의 문자열
-    /// - Note: 시작되지 않은 퀘스트는 nil 반환
-    ///         완료된 경우 완료 시각까지, 진행 중인 경우 현재까지의 시간 계산
-    var progressTimeString: String? {
-        guard let startedAt = startedAt else { return nil }
-
-        let now = completedAt ?? Date()
-        let timeInterval = now.timeIntervalSince(startedAt)
-
-        let hours = Int(timeInterval / 3600)
-        let minutes = Int(
-            (timeInterval.truncatingRemainder(dividingBy: 3600)) / 60
-        )
-
-        if hours > 0 {
-            return "\(hours)시간 \(minutes)분"
-        } else {
-            return "\(minutes)분"
-        }
     }
 }

@@ -68,10 +68,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 }
 
+// MARK: - MessagingDelegate
+
 extension AppDelegate: MessagingDelegate {
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
         guard let token = fcmToken else { return }
         
         // 서버 DB에 토큰 저장 시도
@@ -94,12 +95,12 @@ extension AppDelegate: MessagingDelegate {
         ]) { error in
             if let error = error {
                 print("FCM 토큰 업데이트 실패: \(error.localizedDescription)")
-            } else {
-                print("FCM 토큰이 성공적으로 Firestore에 저장되었습니다.")
             }
         }
     }
 }
+
+// MARK: - UNUserNotificationCenterDelegate
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     /// 앱이 포그라운드 상태일 때 알림이 오면 호출

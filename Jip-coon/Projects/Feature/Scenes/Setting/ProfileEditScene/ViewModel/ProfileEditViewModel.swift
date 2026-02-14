@@ -9,7 +9,7 @@ import Combine
 import Core
 import Foundation
 
-final class ProfileEditViewModel: ObservableObject {
+final class ProfileEditViewModel {
     @Published var familyName: String = "우리 가족"
     @Published var user: User?
     @Published var enteredName: String = ""

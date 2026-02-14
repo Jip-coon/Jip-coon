@@ -185,18 +185,8 @@ final class ProfileEditViewController: UIViewController {
     // MARK: - Actions
     
     private func setupAddTarget() {
-        profileInfoEditButton
-            .addTarget(
-                self,
-                action: #selector(profileInfoEditButtonTapped),
-                for: .touchUpInside
-            )
-        nameTextField
-            .addTarget(
-                self,
-                action: #selector(nameTextFieldDidChange(_:)),
-                for: .editingChanged
-            )
+        profileInfoEditButton.addTarget(self, action: #selector(profileInfoEditButtonTapped), for: .touchUpInside)
+        nameTextField.addTarget(self, action: #selector(nameTextFieldDidChange(_:)), for: .editingChanged)
     }
     
     @objc private func profileInfoEditButtonTapped() {

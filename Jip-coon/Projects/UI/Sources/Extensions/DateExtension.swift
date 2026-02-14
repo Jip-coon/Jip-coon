@@ -42,16 +42,16 @@ public extension Date {
         formatter.dateFormat = "MM/dd"
         return formatter.string(from: self)
     }
-
+    
     /// 경과 시간을 표시하는 문자열
     var timeAgoString: String {
         let now = Date()
         let timeInterval = now.timeIntervalSince(self)
-
+        
         let minutes = Int(timeInterval / 60)
         let hours = Int(timeInterval / 3600)
         let days = Int(timeInterval / 86400)
-
+        
         if days > 0 {
             return "\(days)일 전"
         } else if hours > 0 {

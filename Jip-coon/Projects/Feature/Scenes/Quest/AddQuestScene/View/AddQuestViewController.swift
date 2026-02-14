@@ -15,6 +15,8 @@ final class AddQuestViewController: UIViewController {
     private let viewModel: AddQuestViewModel
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - init
+    
     init(
         userService: UserServiceProtocol,
         familyService: FamilyServiceProtocol,
@@ -95,9 +97,7 @@ final class AddQuestViewController: UIViewController {
     
     // 별
     private let starInfoRowView: InfoRowView = {
-        let imageView = UIImageView(
-            image: UIImage(named: "Star", in: uiBundle, compatibleWith: nil)
-        )
+        let imageView = UIImageView(image: UIImage(named: "Star", in: uiBundle, compatibleWith: nil))
         imageView.contentMode = .scaleAspectFit
         return InfoRowView(
             leading: imageView,
@@ -171,188 +171,135 @@ final class AddQuestViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(containerView)
         
-        [
-            categoryCarouselView,
-            titleTextField,
-            memoTextField,
-            dateInfoRowView,
-            timeInfoRowView,
-            workerInfoRowView,
-            starInfoRowView,
-            scheduleRepeatView,
-            scheduleEndDateView,
-            missionAddButton
-            
+        [categoryCarouselView,
+         titleTextField,
+         memoTextField,
+         dateInfoRowView,
+         timeInfoRowView,
+         workerInfoRowView,
+         starInfoRowView,
+         scheduleRepeatView,
+         scheduleEndDateView,
+         missionAddButton
         ].forEach(containerView.addSubview)
         
-        [
-            scrollView,
-            containerView,
-            categoryCarouselView,
-            titleTextField,
-            memoTextField,
-            dateInfoRowView,
-            timeInfoRowView,
-            workerInfoRowView,
-            starInfoRowView,
-            scheduleRepeatView,
-            scheduleEndDateView,
-            missionAddButton
-            
+        [scrollView,
+         containerView,
+         categoryCarouselView,
+         titleTextField,
+         memoTextField,
+         dateInfoRowView,
+         timeInfoRowView,
+         workerInfoRowView,
+         starInfoRowView,
+         scheduleRepeatView,
+         scheduleEndDateView,
+         missionAddButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
     }
     
     private func setupConstraints() {
-        NSLayoutConstraint.activate(
-            [
-                scrollView.topAnchor
-                    .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-                scrollView.leadingAnchor
-                    .constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-                scrollView.trailingAnchor
-                    .constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-                scrollView.bottomAnchor
-                    .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-                
-                containerView.topAnchor
-                    .constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-                containerView.leadingAnchor
-                    .constraint(
-                        equalTo: scrollView.contentLayoutGuide.leadingAnchor
-                    ),
-                containerView.trailingAnchor
-                    .constraint(
-                        equalTo: scrollView.contentLayoutGuide.trailingAnchor
-                    ),
-                containerView.bottomAnchor
-                    .constraint(
-                        equalTo: scrollView.contentLayoutGuide.bottomAnchor
-                    ),
-                containerView.widthAnchor
-                    .constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-                
-                categoryCarouselView.topAnchor
-                    .constraint(equalTo: containerView.topAnchor, constant: 26),
-                categoryCarouselView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor),
-                categoryCarouselView.trailingAnchor
-                    .constraint(equalTo: containerView.trailingAnchor),
-                categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
-                
-                titleTextField.topAnchor
-                    .constraint(
-                        equalTo: categoryCarouselView.bottomAnchor,
-                        constant: 36
-                    ),
-                titleTextField.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                titleTextField.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                titleTextField.heightAnchor.constraint(equalToConstant: 35),
-                
-                memoTextField.topAnchor
-                    .constraint(equalTo: titleTextField.bottomAnchor, constant: 11),
-                memoTextField.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                memoTextField.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                memoTextField.heightAnchor.constraint(equalToConstant: 35),
-                
-                dateInfoRowView.topAnchor
-                    .constraint(equalTo: memoTextField.bottomAnchor, constant: 40),
-                dateInfoRowView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                dateInfoRowView.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                
-                timeInfoRowView.topAnchor
-                    .constraint(
-                        equalTo: dateInfoRowView.bottomAnchor,
-                        constant: 31
-                    ),
-                timeInfoRowView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                timeInfoRowView.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                
-                workerInfoRowView.topAnchor
-                    .constraint(
-                        equalTo: timeInfoRowView.bottomAnchor,
-                        constant: 31
-                    ),
-                workerInfoRowView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                workerInfoRowView.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                
-                starInfoRowView.topAnchor
-                    .constraint(
-                        equalTo: workerInfoRowView.bottomAnchor,
-                        constant: 31
-                    ),
-                starInfoRowView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                starInfoRowView.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                
-                scheduleRepeatView.topAnchor
-                    .constraint(
-                        equalTo: starInfoRowView.bottomAnchor,
-                        constant: 42
-                    ),
-                scheduleRepeatView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                scheduleRepeatView.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
-                
-                scheduleEndDateView.topAnchor
-                    .constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 30),
-                scheduleEndDateView.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                scheduleEndDateView.trailingAnchor
-                    .constraint(equalTo: containerView.trailingAnchor, constant: -20),
-                
-                missionAddButton.topAnchor
-                    .constraint(
-                        equalTo: scheduleEndDateView.bottomAnchor,
-                        constant: 30
-                    ),
-                missionAddButton.leadingAnchor
-                    .constraint(equalTo: containerView.leadingAnchor, constant: 20),
-                missionAddButton.trailingAnchor
-                    .constraint(
-                        equalTo: containerView.trailingAnchor,
-                        constant: -20
-                    ),
-                missionAddButton.bottomAnchor
-                    .constraint(equalTo: containerView.bottomAnchor, constant: -34),
-                missionAddButton.heightAnchor.constraint(equalToConstant: 47)
-            ]
-        )
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            containerView.topAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            containerView.leadingAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            containerView.trailingAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            containerView.bottomAnchor
+                .constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            containerView.widthAnchor
+                .constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            
+            categoryCarouselView.topAnchor
+                .constraint(equalTo: containerView.topAnchor, constant: 26),
+            categoryCarouselView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor),
+            categoryCarouselView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor),
+            categoryCarouselView.heightAnchor.constraint(equalToConstant: 110),
+            
+            titleTextField.topAnchor
+                .constraint(equalTo: categoryCarouselView.bottomAnchor, constant: 36),
+            titleTextField.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            titleTextField.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            titleTextField.heightAnchor.constraint(equalToConstant: 35),
+            
+            memoTextField.topAnchor
+                .constraint(equalTo: titleTextField.bottomAnchor, constant: 11),
+            memoTextField.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            memoTextField.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            memoTextField.heightAnchor.constraint(equalToConstant: 35),
+            
+            dateInfoRowView.topAnchor
+                .constraint(equalTo: memoTextField.bottomAnchor, constant: 40),
+            dateInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            dateInfoRowView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            timeInfoRowView.topAnchor
+                .constraint(equalTo: dateInfoRowView.bottomAnchor, constant: 31),
+            timeInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            timeInfoRowView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor,constant: -20),
+            
+            workerInfoRowView.topAnchor
+                .constraint(equalTo: timeInfoRowView.bottomAnchor, constant: 31),
+            workerInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            workerInfoRowView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            starInfoRowView.topAnchor
+                .constraint(equalTo: workerInfoRowView.bottomAnchor, constant: 31),
+            starInfoRowView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            starInfoRowView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            scheduleRepeatView.topAnchor
+                .constraint(equalTo: starInfoRowView.bottomAnchor,constant: 42),
+            scheduleRepeatView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            scheduleRepeatView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor,constant: -20),
+            scheduleRepeatView.heightAnchor.constraint(equalToConstant: 75),
+            
+            scheduleEndDateView.topAnchor
+                .constraint(equalTo: scheduleRepeatView.bottomAnchor, constant: 30),
+            scheduleEndDateView.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            scheduleEndDateView.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            missionAddButton.topAnchor
+                .constraint(equalTo: scheduleEndDateView.bottomAnchor,constant: 30),
+            missionAddButton.leadingAnchor
+                .constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            missionAddButton.trailingAnchor
+                .constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            missionAddButton.bottomAnchor
+                .constraint(equalTo: containerView.bottomAnchor, constant: -34),
+            missionAddButton.heightAnchor
+                .constraint(equalToConstant: 47)
+        ])
     }
     
     // MARK: - ViewModel Binding
@@ -420,19 +367,12 @@ final class AddQuestViewController: UIViewController {
             self?.presentScheduleEndDatePicker()
         }
         
-        missionAddButton
-            .addTarget(
-                self,
-                action: #selector(missionAddButtonTapped),
-                for: .touchUpInside
-            )
+        missionAddButton.addTarget(self, action: #selector(missionAddButtonTapped), for: .touchUpInside)
     }
     
     /// 날짜 버튼 -> DatePicker
     private func presentDatePicker() {
-        let datePickerViewController = DatePickerViewController(
-            datePickerMode: .date
-        )
+        let datePickerViewController = DatePickerViewController(datePickerMode: .date)
         
         datePickerViewController.onDidTapDone = { [weak self] date in
             self?.dateInfoRowView.setValueText(date.yyyyMMdEE)
@@ -454,9 +394,7 @@ final class AddQuestViewController: UIViewController {
     
     /// 시간 버튼 -> TimePicker
     private func presentTimePicker() {
-        let timePickerViewController = DatePickerViewController(
-            datePickerMode: .time
-        )
+        let timePickerViewController = DatePickerViewController(datePickerMode: .time)
         
         timePickerViewController.onDidTapDone = { [weak self] date in
             self?.timeInfoRowView.setValueText(date.aHmm)
@@ -464,9 +402,7 @@ final class AddQuestViewController: UIViewController {
             self?.viewModel.combineDateAndTime()
         }
         
-        let navigationController = UINavigationController(
-            rootViewController: timePickerViewController
-        )
+        let navigationController = UINavigationController(rootViewController: timePickerViewController)
         
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium()]
@@ -480,9 +416,8 @@ final class AddQuestViewController: UIViewController {
     private func setupWorkerSelectionMenu() {
         let menuActions = viewModel.familyMembers.map { member in
             UIAction(title: member.name) { [weak self] _ in
-                self?.viewModel
-                    .selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
-                self?.viewModel.selectedWorkerID = member.id 
+                self?.viewModel.selectWorker(with: member.name) // 선택된 이름으로 뷰모델의 상태 변경
+                self?.viewModel.selectedWorkerID = member.id
             }
         }
         
@@ -512,18 +447,14 @@ final class AddQuestViewController: UIViewController {
     
     /// 종료 날짜 버튼 -> DatePicker
     private func presentScheduleEndDatePicker() {
-        let datePickerViewController = DatePickerViewController(
-            datePickerMode: .date
-        )
+        let datePickerViewController = DatePickerViewController(datePickerMode: .date)
         
         datePickerViewController.onDidTapDone = { [weak self] date in
             self?.scheduleEndDateView.setValueText(date.yyyyMMdEE)
             self?.viewModel.recurringEndDate = date
         }
         
-        let navigationController = UINavigationController(
-            rootViewController: datePickerViewController
-        )
+        let navigationController = UINavigationController(rootViewController: datePickerViewController)
         
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium()]

@@ -9,7 +9,7 @@ import Combine
 import UI
 import UIKit
 
-public class LoginViewController: UIViewController {
+public final class LoginViewController: UIViewController {
     private let loginView = LoginView()
     
     private var activeField: UIView?
@@ -20,6 +20,8 @@ public class LoginViewController: UIViewController {
     private let googleLoginViewModel: GoogleLoginViewModel
     
     private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - init
     
     public init(
         viewModel: LoginViewModel,
@@ -69,36 +71,11 @@ public class LoginViewController: UIViewController {
     }
     
     private func setUpButtonAction() {
-        loginView.findPasswordButton
-            .addTarget(
-                self,
-                action: #selector(findPasswordButtonTapped),
-                for: .touchUpInside
-            )
-        loginView.loginButton
-            .addTarget(
-                self,
-                action: #selector(loginButtonTapped),
-                for: .touchUpInside
-            )
-        loginView.signUpButton
-            .addTarget(
-                self,
-                action: #selector(signUpButtonTapped),
-                for: .touchUpInside
-            )
-        loginView.googleLoginButton
-            .addTarget(
-                self,
-                action: #selector(googleLoginTapped),
-                for: .touchUpInside
-            )
-        loginView.appleLoginButton
-            .addTarget(
-                self,
-                action: #selector(appleLoginTapped),
-                for: .touchUpInside
-            )
+        loginView.findPasswordButton.addTarget(self, action: #selector(findPasswordButtonTapped), for: .touchUpInside)
+        loginView.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        loginView.signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        loginView.googleLoginButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
+        loginView.appleLoginButton.addTarget(self, action: #selector(appleLoginTapped), for: .touchUpInside)
     }
     // MARK: - Button Action
     
@@ -136,19 +113,17 @@ public class LoginViewController: UIViewController {
     
     @objc private func signUpButtonTapped() {
         let signUpViewController = SignUpViewController()
-        navigationController?
-            .pushViewController(signUpViewController, animated: true)
+        navigationController?.pushViewController(signUpViewController, animated: true)
     }
     
     @objc private func googleLoginTapped() {
-        print("google login button tapped")
         googleLoginViewModel.signIn(presentingVC: self)
     }
     
     @objc private func appleLoginTapped() {
-        print("apple login button tapped")
-        appleLoginViewModel.startSignInWithAppleFlow()
+        appleLoginViewModel.login()
     }
+    
     // MARK: - Keyboard
     
     // 키보드 숨기기
@@ -238,12 +213,11 @@ public class LoginViewController: UIViewController {
             .store(in: &cancellables)
         
         // 에러 메시지 표시
-        viewModel.$errorMessage
+        viewModel.$error
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] errorMessage in
-                if let error = errorMessage {
-                    self?.showErrorAlert(message: error)
-                }
+            .sink { [weak self] error in
+                guard let error else { return }
+                self?.showErrorAlert(message: error.localizedDescription)
             }
             .store(in: &cancellables)
         
@@ -272,8 +246,10 @@ public class LoginViewController: UIViewController {
     
     private func navigateToMainScreen() {
         // 로그인 성공 알림 전송
-        NotificationCenter.default
-            .post(name: NSNotification.Name("LoginSuccess"), object: nil)
+        NotificationCenter.default.post(
+            name: NSNotification.Name("LoginSuccess"),
+            object: nil
+        )
     }
     
     private func showErrorAlert(message: String) {
@@ -288,8 +264,7 @@ public class LoginViewController: UIViewController {
     
     private func updateLoadingState(_ isLoading: Bool) {
         loginView.loginButton.isEnabled = !isLoading
-        loginView.loginButton
-            .setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
+        loginView.loginButton.setTitle(isLoading ? "로그인 중..." : "로그인", for: .normal)
     }
 }
 

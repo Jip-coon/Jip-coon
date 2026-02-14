@@ -17,8 +17,9 @@ public final class RankingViewController: UIViewController {
     private let viewModel: RankingViewModel
     private let userService: UserServiceProtocol
     private let familyService: FamilyServiceProtocol
-
+    
     // MARK: - UI Components
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 34, weight: .bold)
@@ -39,14 +40,13 @@ public final class RankingViewController: UIViewController {
         tableView.backgroundColor = .systemGroupedBackground
         return tableView
     }()
-
+    
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl
-            .addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         return refreshControl
     }()
-
+    
     private lazy var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.hidesWhenStopped = true
@@ -74,9 +74,9 @@ public final class RankingViewController: UIViewController {
         
         return view
     }()
-
+    
     // MARK: - Initialization
-
+    
     /// 의존성 주입을 통한 초기화
     /// - Parameters:
     ///   - userService: 사용자 데이터 관리를 위한 서비스
@@ -95,53 +95,60 @@ public final class RankingViewController: UIViewController {
         self.familyService = familyService
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Lifecycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupBindings()
         loadData()
     }
-
+    
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // 화면이 나타날 때마다 데이터 새로고침
         refreshData()
     }
-
+    
     // MARK: - Setup
+    
     private func setupUI() {
         view.backgroundColor = .systemGroupedBackground
         view.addSubview(titleLabel)
-
+        
         // TableView 설정
         view.addSubview(tableView)
         tableView.refreshControl = refreshControl
-
+        
         // Loading Indicator 설정
         view.addSubview(loadingIndicator)
         loadingIndicator.center = view.center
-
+        
         // 제약조건 설정
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            titleLabel.topAnchor
+                .constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43),
+            titleLabel.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor, constant: 15),
             
             tableView.topAnchor
                 .constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
+            tableView.leadingAnchor
+                .constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor
+                .constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor
+                .constraint(equalTo: view.bottomAnchor),
+            
             loadingIndicator.centerXAnchor
                 .constraint(equalTo: view.centerXAnchor),
             loadingIndicator.centerYAnchor
@@ -150,6 +157,7 @@ public final class RankingViewController: UIViewController {
         
         view.addSubview(emptyStateView)
         emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             emptyStateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -157,7 +165,7 @@ public final class RankingViewController: UIViewController {
             emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     /// ViewModel의 상태 변경을 UI에 바인딩하는 메소드
     /// - 가족 구성원 데이터 변경 시 테이블뷰 리로드
     /// - 로딩 상태 변경 시 인디케이터 표시/숨김 처리
@@ -175,7 +183,7 @@ public final class RankingViewController: UIViewController {
                 self?.emptyStateView.isHidden = !isEmpty
             }
             .store(in: &cancellables)
-
+        
         // 로딩 상태에 따라 인디케이터 표시/숨김 및 리프레시 컨트롤 종료 처리
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
@@ -188,7 +196,7 @@ public final class RankingViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
-
+        
         // 에러 메시지가 발생하면 사용자에게 알림 표시
         viewModel.$errorMessage
             .receive(on: DispatchQueue.main)
@@ -199,9 +207,9 @@ public final class RankingViewController: UIViewController {
             }
             .store(in: &cancellables)
     }
-
+    
     // MARK: - Data Loading
-
+    
     /// 초기 데이터 로딩을 수행하는 메소드
     /// - ViewModel의 loadRankingData()를 비동기로 호출하여 가족 랭킹 데이터 조회
     /// - Task를 사용하여 Swift Concurrency 기반 비동기 처리
@@ -210,15 +218,16 @@ public final class RankingViewController: UIViewController {
             await viewModel.loadRankingData()
         }
     }
-
+    
     /// 사용자 풀다운 제스처나 viewWillAppear 시 데이터 새로고침을 위한 메소드
     /// - ViewModel의 refreshData()를 호출하여 캐시 무효화 및 최신 데이터 재조회
     /// - UIRefreshControl의 타겟 액션으로 연결되어 있음
     @objc private func refreshData() {
         viewModel.refreshData()
     }
-
+    
     // MARK: - Helpers
+    
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(
             title: "오류",
@@ -228,38 +237,38 @@ public final class RankingViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
-
+    
     // MARK: - Cancellables for Combine subscriptions
+    
     private var cancellables = Set<AnyCancellable>()
 }
 
 // MARK: - UITableViewDataSource
+
 extension RankingViewController: UITableViewDataSource {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.familyMembers.count
     }
-
+    
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: RankingTableViewCell.identifier, for: indexPath) as? RankingTableViewCell else {
             return UITableViewCell()
         }
-
+        
         let member = viewModel.familyMembers[indexPath.row]
         let rank = indexPath.row + 1
         let isCurrentUser = member.id == viewModel.currentUser?.id
-
+        
         cell.configure(with: member, rank: rank, isCurrentUser: isCurrentUser)
-
+        
         return cell
     }
 }
 
 // MARK: - UITableViewDelegate
+
 extension RankingViewController: UITableViewDelegate {
-    public func tableView(
-        _ tableView: UITableView,
-        didSelectRowAt indexPath: IndexPath
-    ) {
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         // 랭킹 항목 선택 시 추가 동작 (필요시 구현)
     }
@@ -272,7 +281,7 @@ extension RankingViewController: UITableViewDelegate {
 /// - 현재 사용자인 경우 배경색과 텍스트 색상을 변경하여 강조 표시
 private class RankingTableViewCell: UITableViewCell {
     static let identifier = "RankingTableViewCell"
-
+    
     private let rankLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 24, weight: .bold)
@@ -280,14 +289,14 @@ private class RankingTableViewCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private let pointsLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 18, weight: .bold)
@@ -296,7 +305,7 @@ private class RankingTableViewCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private let roleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .regular)
@@ -304,39 +313,43 @@ private class RankingTableViewCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
+    // MARK: - init
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    // MARK: - setup UI
+    
     private func setupUI() {
         contentView.addSubview(rankLabel)
         contentView.addSubview(nameLabel)
         contentView.addSubview(pointsLabel)
         contentView.addSubview(roleLabel)
-
+        
         NSLayoutConstraint.activate([
             rankLabel.leadingAnchor
                 .constraint(equalTo: contentView.leadingAnchor, constant: 16),
             rankLabel.centerYAnchor
                 .constraint(equalTo: contentView.centerYAnchor),
             rankLabel.widthAnchor.constraint(equalToConstant: 40),
-
+            
             nameLabel.leadingAnchor
                 .constraint(equalTo: rankLabel.trailingAnchor, constant: 16),
             nameLabel.topAnchor
                 .constraint(equalTo: contentView.topAnchor, constant: 12),
-
+            
             roleLabel.leadingAnchor
                 .constraint(equalTo: nameLabel.leadingAnchor),
             roleLabel.topAnchor
                 .constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-
+            
             pointsLabel.trailingAnchor
                 .constraint(equalTo: contentView.trailingAnchor, constant: -16),
             pointsLabel.centerYAnchor
@@ -344,7 +357,7 @@ private class RankingTableViewCell: UITableViewCell {
             pointsLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 60)
         ])
     }
-
+    
     /// 셀을 사용자 데이터로 설정하는 메소드
     /// - Parameters:
     ///   - user: 표시할 사용자 정보
@@ -361,7 +374,7 @@ private class RankingTableViewCell: UITableViewCell {
         pointsLabel.text = user.formattedPoints
         // 사용자 역할 표시 (부모/자녀)
         roleLabel.text = user.role.displayName
-
+        
         // 현재 로그인한 사용자를 시각적으로 강조 표시
         if isCurrentUser {
             contentView.backgroundColor = .systemBlue.withAlphaComponent(0.1)

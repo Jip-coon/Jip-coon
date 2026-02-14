@@ -34,16 +34,16 @@ public final class GoogleLoginViewModel {
                 guard error == nil else {
                     return
                 }
-            
+                
                 guard let user = result?.user,
                       let idToken = user.idToken?.tokenString
                 else {
                     return
                 }
-            
+                
                 let credential = GoogleAuthProvider.credential(withIDToken: idToken,
                                                                accessToken: user.accessToken.tokenString)
-            
+                
                 Auth.auth().signIn(with: credential) { authResult, error in
                     if let _ = error {
                         return

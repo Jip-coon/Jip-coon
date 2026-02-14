@@ -10,7 +10,7 @@ import Core
 import UIKit
 
 /// 메인 화면
-public class MainViewController: UIViewController {
+public final class MainViewController: UIViewController {
     
     // MARK: - Properties
     
