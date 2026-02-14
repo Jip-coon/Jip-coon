@@ -53,7 +53,9 @@ let project = Project(
             settings: .settings(
                 base: [
                     "OTHER_LDFLAGS": "$(inherited) -ObjC",
-                    "ENABLE_USER_SCRIPT_SANDBOXING": "NO"
+                    "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+                    "DEVELOPMENT_LANGUAGE": "ko",
+                    "KNOWN_REGIONS": ["ko"]
                 ]
             )
         ),
