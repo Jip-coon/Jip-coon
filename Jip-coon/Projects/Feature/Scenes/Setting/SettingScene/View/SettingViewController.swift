@@ -390,6 +390,16 @@ final class SettingViewController: UIViewController {
         navigationController?.pushViewController(notificationSettingViewController, animated: true)
     }
     
+    private func handlePolicy() {
+        guard let url = URL(string: "https://www.notion.so/306522a83d3b80e784d0df87332e6675") else { return }
+        UIApplication.shared.open(url)
+    }
+    
+    private func handleTermsOfService() {
+        guard let url = URL(string: "https://www.notion.so/306522a83d3b80ee8306e122f48a7a79") else { return }
+        UIApplication.shared.open(url)
+    }
+    
     @objc private func dismissModal() {
         dismiss(animated: true)
     }
@@ -493,6 +503,10 @@ extension SettingViewController: UITableViewDataSource, UITableViewDelegate {
                 handleDeleteAccount()
             case .notifications:
                 handleNotificationSetting()
+            case .privacyPolicy:
+                handlePolicy()
+            case .termsOfService:
+                handleTermsOfService()
             default:
                 break
         }
