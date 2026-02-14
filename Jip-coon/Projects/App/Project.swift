@@ -37,7 +37,8 @@ let project = Project(
                         ]
                     ],
                     "UIBackgroundModes": ["remote-notification"],
-                    "NSUserNotificationsUsageDescription": "퀘스트 알림을 위해 알림 권한이 필요합니다."
+                    "NSUserNotificationsUsageDescription": "퀘스트 알림을 위해 알림 권한이 필요합니다.",
+                    "UIUserInterfaceStyle": "Light"
                 ]
             ),
             sources: ["Sources/**"],
