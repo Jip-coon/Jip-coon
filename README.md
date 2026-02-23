@@ -14,8 +14,8 @@
 - **개발 기간**: 2025.08 ~ 2026.02
 - **개발 인원**: iOS 2명
 - **역할**:
-    - **심관혁**: 추후 작성 예정
-    - **김예슬**: 추후 작성 예정
+    - **심관혁**: Tuist 모듈화, 메인 화면 구성, 퀘스트 데이터 구조 설계, 설정 구현, 퀘스트 서비스 구현, 가족 초대 기능 구현 등
+    - **김예슬**: Tuist 모듈화, Firebase를 통한 소셜 로그인 로직 구현, 알림 기능 구현, 전체 할 일 구성, 퀘스트 수정 기능 구현 등
 
 ## ✨ 핵심 기능
 
@@ -111,8 +111,7 @@ MVVM 패턴과 Combine을 기반으로 구조를 설계했습니다.
 
 | 로그인 | 홈 (퀘스트 목록) | 퀘스트 상세 | 가족 관리 |
 | :---: | :---: | :---: | :---: |
-||||
-추가예정
+|<img width="300" src="https://github.com/user-attachments/assets/48207a80-7f96-4bfe-8183-ed1b7e22e9fe" />|<img width="300" src="https://github.com/user-attachments/assets/210775c4-b025-480f-931d-bedb71a0e0aa" />|<img width="300" src="https://github.com/user-attachments/assets/1fba85c2-85e9-4433-bd84-742a4d73d407" />|<img width="300" src="https://github.com/user-attachments/assets/88d3ac61-c5dc-443a-9864-cf399957d31c" />|
 
 ## 📂 Project Structure
 
