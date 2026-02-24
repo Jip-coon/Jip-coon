@@ -22,11 +22,11 @@
       - 설정 화면 및 가족 관리 기능 및 화면 구현
 
     - **김예슬**
-      - Tuist 기반 레이어 분리 및 모듈 구조 설계 (Feature / Core / UI 분리 및 단방향 의존성 구조 구성)
+      - Tuist 기반 레이어 분리 및 모듈 구조 설계 (Feature/Core/UI 분리 및 단방향 의존성 구조 구성)
       - Firebase Auth(Apple · Google · Email) 기반 인증 시스템 구현 및 세션 흐름 설계
-      - Firestore 기반 Service Layer(User / Family / Notification) 구현
-      - 반복 퀘스트 구조 개선 (QuestTemplate / Virtual Instance 도입)
-      - Cloud Functions 기반 FCM 알림 시스템 구축 (이벤트 · 스케줄 트리거)
+      - Firestore 기반 Service Layer(User/Family/Notification) 구현
+      - 반복 퀘스트 구조 개선 (QuestTemplate/Virtual Instance 도입)
+      - Cloud Functions 기반 FCM 알림 시스템 구축
       - 알림 메시지/설정, 전체 퀘스트 목록, 퀘스트 상세·추가, 프로필 설정, 스플래시 화면 구현
 
 ## ✨ 핵심 기능
