@@ -14,8 +14,20 @@
 - **개발 기간**: 2025.08 ~ 2026.02
 - **개발 인원**: iOS 2명
 - **역할**:
-    - **심관혁**: Tuist 모듈화, 메인 화면 구성, 퀘스트 데이터 구조 설계, 설정 구현, 퀘스트 서비스 구현, 가족 초대 기능 구현 등
-    - **김예슬**: Tuist 모듈화, Firebase를 통한 소셜 로그인 로직 구현, 알림 기능 구현, 전체 할 일 구성, 퀘스트 수정 기능 구현 등
+    - **심관혁**
+      - Tuist 초기 설정 및 프로젝트 기본 구조 생성
+      - 메인 화면 및 탭바 기반 네비게이션 구조 설계
+      - 퀘스트 데이터 모델 설계 및 QuestService 핵심 비즈니스 로직 구현
+      - 가족 그룹 생성 및 초대 코드 기반 참여 기능 구현
+      - 설정 화면 및 가족 관리 기능 및 화면 구현
+
+    - **김예슬**
+      - Tuist 기반 레이어 분리 및 모듈 구조 설계 (Feature / Core / UI 분리 및 단방향 의존성 구조 구성)
+      - Firebase Auth(Apple · Google · Email) 기반 인증 시스템 구현 및 세션 흐름 설계
+      - Firestore 기반 Service Layer(User / Family / Notification) 구현
+      - 반복 퀘스트 구조 개선 (QuestTemplate / Virtual Instance 도입)
+      - Cloud Functions 기반 FCM 알림 시스템 구축 (이벤트 · 스케줄 트리거)
+      - 알림 메시지/설정, 전체 퀘스트 목록, 퀘스트 상세·추가, 프로필 설정, 스플래시 화면 구현
 
 ## ✨ 핵심 기능
 
@@ -60,6 +72,7 @@
 ```mermaid
 graph TD
     App[App Module] --> Feature[Feature Module]
+    App --> Core[Core Module]
     Feature --> Core[Core Module]
     Feature --> UI[UI Module]
     Core --> External[External Dependencies - Firebase]
